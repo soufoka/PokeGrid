@@ -4,105 +4,113 @@
 
 # PokeGrid
 
-**4 contas de Poke Idle World ao mesmo tempo, numa janela só.**
-**4 Poke Idle World accounts at once, in a single window.**
+**Quatro contas de Poke Idle World em uma janela só.**
 
-Feito com Electron · Windows · [Poke Idle World](https://poke.idleworld.online/)
+[![Release](https://img.shields.io/github/v/release/soufoka/PokeGrid?color=e3350d)](https://github.com/soufoka/PokeGrid/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/soufoka/PokeGrid/total?color=3fb950)](https://github.com/soufoka/PokeGrid/releases/latest)
+![Plataforma](https://img.shields.io/badge/plataforma-Windows-0078D6)
+![Electron](https://img.shields.io/badge/Electron-43-47848F)
+[![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
 
-[**⬇️ Baixar / Download**](https://github.com/soufoka/PokeGrid/releases/latest)
+[**Baixar**](https://github.com/soufoka/PokeGrid/releases/latest) · [English](README.en.md)
 
-<img src="docs/screenshot.png" width="900" alt="PokeGrid rodando 4 contas ao mesmo tempo">
-
-</div>
-
----
-
-## 🇧🇷 Português
-
-Jogar idle com várias contas normalmente significa abrir várias janelas do navegador, entrar em cada uma na mão e ficar caçando qual aba é qual. O PokeGrid resolve isso: **uma janela, quatro painéis, quatro contas independentes**, cada uma com sua própria sessão isolada.
-
-### Recursos
-
-| | |
-|---|---|
-| 🔐 **Sessões isoladas** | Cada painel tem cookies e login próprios. As contas nunca se misturam. |
-| ⚡ **Login automático** | Salve e-mail e senha uma vez e ele entra sozinho, inclusive se a sessão cair no meio do farm. |
-| 🔋 **Modo Eco** | Limita os jogos a 15 fps. Corta muito CPU/GPU sem afetar o farm. |
-| ⏻ **Liga/desliga por painel** | Descarrega a conta que você não está usando e devolve a memória. |
-| 🎛 **Menu do jogo** | Esconde a barra de ícones do jogo, que come espaço em painel pequeno. **F2** alterna. |
-| 💬 **Chat oculto** | O chat do jogo começa fechado, com toggle para reabrir. |
-| 🚫 **Sem popup de promoção** | O anúncio que aparece a cada login é fechado sozinho. |
-| ☕ **Anti-sono** | Impede o Windows de dormir enquanto farma de madrugada. |
-| 🔴 **Bandeja** | Minimiza para o relógio e pode iniciar junto com o Windows, já farmando. |
-| 🌐 **PT / EN** | Um clique troca o idioma do app **e** do jogo. |
-
-### Como usar
-
-1. Baixe o `.zip` da versão portátil, extraia e abra o `PokeGrid.exe`.
-2. Entre ou crie uma conta em cada painel.
-3. Em **Treinadores**, salve o e-mail e a senha de cada conta.
-
-Pronto. Nas próximas vezes ele entra sozinho.
-
-> **Rodando pelo código:** `npm install` e depois `npm start`.
-
-### Segurança
-
-- As senhas ficam **criptografadas no seu PC** com a API do próprio sistema operacional (DPAPI no Windows), via `safeStorage` do Electron. Nunca saem da máquina e nunca vão para o repositório.
-- Os painéis ficam **presos ao domínio do jogo**: qualquer link externo abre no seu navegador, e as credenciais só são digitadas na URL de login oficial.
-- Microfone, câmera, localização e notificações ficam **negados** para os painéis.
-- **O captcha é sempre resolvido por você.** O app preenche os dados e aperta "Entrar" assim que você marca a caixinha, mas não toca no "Confirme que é humano". Contornar detecção de bot não é o objetivo do projeto.
-
-### Como funciona
-
-Cada painel é um `<webview>` do Electron com uma partição persistente própria (`persist:conta1..4`), que é o que garante o isolamento das sessões. O modo Eco intercepta o `requestAnimationFrame` da página para limitar o frame rate. O login automático preenche o formulário usando o setter nativo do `HTMLInputElement`, necessário para que o React do jogo registre a mudança.
-
----
-
-## 🇺🇸 English
-
-Playing an idle game with several accounts usually means juggling browser windows, logging into each one by hand, and guessing which tab is which. PokeGrid fixes that: **one window, four panels, four independent accounts**, each with its own isolated session.
-
-### Features
-
-| | |
-|---|---|
-| 🔐 **Isolated sessions** | Every panel has its own cookies and login. Accounts never mix. |
-| ⚡ **Auto login** | Save e-mail and password once and it signs in by itself, even if the session drops mid-farm. |
-| 🔋 **Eco mode** | Caps the games at 15 fps. Big CPU/GPU savings with no effect on farming. |
-| ⏻ **Per-panel power** | Unload an account you are not using and get the memory back. |
-| 🎛 **Game menu** | Hides the game icon bar that eats space in a small panel. **F2** toggles it. |
-| 💬 **Chat hidden** | The game chat starts closed, with a toggle to bring it back. |
-| 🚫 **No promo popup** | The ad shown on every login is dismissed automatically. |
-| ☕ **Keep awake** | Stops Windows from sleeping while you farm overnight. |
-| 🔴 **Tray** | Minimizes to the clock and can start with Windows, already farming. |
-| 🌐 **PT / EN** | One click switches the language of the app **and** the game. |
-
-### Getting started
-
-1. Download the portable `.zip`, extract it and open `PokeGrid.exe`.
-2. Log in or create an account in each panel.
-3. Under **Treinadores** (Accounts), save each account's e-mail and password.
-
-That's it. From then on it logs in on its own.
-
-> **From source:** `npm install`, then `npm start`.
-
-### Security
-
-- Passwords are **encrypted on your machine** using the OS keychain (DPAPI on Windows) through Electron's `safeStorage`. They never leave the computer and never reach this repository.
-- Panels are **locked to the game's domain**: any external link opens in your real browser, and credentials are only typed into the official login URL.
-- Microphone, camera, geolocation and notifications are **denied** for the panels.
-- **You always solve the captcha.** The app fills the fields and presses "Enter" the moment you tick the box, but it never touches the "Confirm you are human" widget. Defeating bot detection is not what this project is for.
-
-### How it works
-
-Each panel is an Electron `<webview>` with its own persistent partition (`persist:conta1..4`), which is what keeps sessions isolated. Eco mode patches the page's `requestAnimationFrame` to throttle the frame rate. Auto login fills the form through the native `HTMLInputElement` value setter, which is required for the game's React state to register the change.
-
----
-
-<div align="center">
-
-MIT · não é afiliado ao Poke Idle World / not affiliated with Poke Idle World
+<img src="docs/screenshot.png" width="880" alt="PokeGrid rodando quatro contas ao mesmo tempo">
 
 </div>
+
+> Jogar um idle com várias contas normalmente vira malabarismo de janelas: abrir quatro navegadores, logar em cada um na mão e depois adivinhar qual aba é qual. O PokeGrid junta tudo em uma tela só, com as sessões devidamente separadas.
+
+## Por que isso existe
+
+Poke Idle World é um jogo de progressão contínua, então faz sentido manter mais de uma conta rodando. O problema não é o jogo, é a logística em volta dele.
+
+Abas comuns do navegador não resolvem, porque todas compartilham os mesmos cookies: entrar na segunda conta derruba a primeira. Janelas anônimas separadas resolvem o isolamento, mas aí você perde o login toda vez que fecha, gasta memória à toa e fica caçando qual janela pertence a quem.
+
+O PokeGrid resolve os três de uma vez: isolamento real por conta, sessão que sobrevive ao fechamento do app, e tudo visível de uma vez em uma grade.
+
+## Como funciona, em português claro
+
+Cada painel é um navegador independente dentro da mesma janela. Eles não conversam entre si: têm cookies, armazenamento e login próprios, então as quatro contas convivem sem se atrapalhar.
+
+Você salva o e-mail e a senha de cada conta uma vez. Nas próximas aberturas o app preenche o formulário sozinho e entra. Se a sessão cair no meio do farm, ele percebe e loga de novo sem você estar por perto.
+
+Como quatro jogos rodando ao mesmo tempo pesam, o modo Eco limita cada painel a 15 quadros por segundo. Para um jogo idle isso não muda nada no progresso e derruba bastante o uso de processador.
+
+## Recursos
+
+- **Sessões isoladas.** Cada painel tem seus próprios cookies e login. As contas nunca se misturam.
+- **Login automático.** Salve os dados uma vez. Ele entra sozinho, inclusive quando a sessão expira durante o farm.
+- **Modo Eco.** Limita os jogos a 15 fps e corta o consumo de CPU e GPU sem afetar o progresso.
+- **Liga e desliga por painel.** Descarrega a conta que não está em uso e devolve a memória na hora.
+- **Menu do jogo ocultável.** A barra de ícones come espaço em painel pequeno. A tecla `F2` alterna.
+- **Chat fechado por padrão.** Com um toggle para reabrir quando quiser.
+- **Sem popup de promoção.** O anúncio que aparece a cada login é dispensado sozinho.
+- **Anti-sono.** Impede o Windows de dormir enquanto você farma de madrugada.
+- **Bandeja do sistema.** Minimiza para perto do relógio e pode iniciar junto com o Windows, já farmando.
+- **Português e inglês.** Um clique troca o idioma da interface e também o do jogo.
+- **Zoom por painel**, expandir para tela cheia e atalhos `Ctrl+1` a `Ctrl+4`.
+
+## Começando
+
+Baixe o `.zip` da [última versão](https://github.com/soufoka/PokeGrid/releases/latest), extraia a pasta inteira e abra o `PokeGrid.exe`. Não precisa instalar Node nem nada.
+
+1. Entre ou crie uma conta em cada painel.
+2. Abra **Treinadores** e salve o e-mail e a senha de cada uma.
+
+Pronto. Da próxima vez ele entra sozinho.
+
+Rodando a partir do código:
+
+```bash
+git clone https://github.com/soufoka/PokeGrid.git
+cd PokeGrid
+npm install
+npm start
+```
+
+## Arquitetura
+
+Cada painel é uma tag `<webview>` do Electron com uma partição persistente própria (`persist:conta1` até `persist:conta4`). A partição é o que garante o isolamento: cookies, `localStorage` e sessão vivem em pastas separadas no disco, e é por isso que as contas não derrubam umas às outras e continuam logadas entre aberturas.
+
+Os ajustes que o jogo não oferece são feitos por scripts injetados em cada painel:
+
+| Recurso | Como é feito |
+|---|---|
+| Modo Eco | Substitui o `requestAnimationFrame` da página por uma versão com intervalo, limitando o frame rate |
+| Login automático | Preenche os campos pelo setter nativo do `HTMLInputElement`, necessário para o React do jogo registrar a mudança |
+| Menu do jogo e chat | Alternam a visibilidade dos elementos, com `MutationObserver` para reaplicar quando o jogo redesenha a interface |
+| Popup de promoção | Aciona o próprio botão de fechar do jogo assim que ele aparece |
+
+O `F2` é registrado dentro da página do jogo, e não como atalho de menu do Electron. Atalhos de menu não disparam enquanto o `webview` está com o foco do teclado, então essa é a única forma de a tecla responder enquanto você joga.
+
+## Segurança
+
+- **Senhas criptografadas no seu PC.** O `safeStorage` do Electron usa a API do próprio sistema operacional (DPAPI no Windows). As senhas nunca saem da máquina e nunca entram neste repositório.
+- **Gravação atômica com backup.** O arquivo de contas é escrito em um temporário e trocado de uma vez, e um arquivo ilegível é preservado antes de qualquer sobrescrita.
+- **Painéis presos ao domínio do jogo.** Qualquer link externo abre no seu navegador de verdade, e as credenciais só são digitadas na URL de login oficial.
+- **Permissões negadas.** Microfone, câmera, localização e notificações ficam bloqueados para os painéis.
+- **O captcha é sempre resolvido por você.** O app preenche os campos e aperta Entrar no momento em que você marca a caixinha, mas nunca toca no "Confirme que é humano". Contornar detecção de bot não é o objetivo deste projeto.
+
+## Estrutura
+
+```
+PokeGrid/
+├── main.js       processo principal: janela, bandeja, atalhos, IPC e cripto das contas
+├── preload.js    ponte isolada entre a interface e o processo principal
+├── index.html    interface, estado e os scripts injetados nos painéis
+├── tray.png      ícone da bandeja
+└── docs/         imagens do README
+```
+
+## Roadmap
+
+Ideias que ainda não entraram, em ordem de utilidade:
+
+- Vigia de queda: recarregar sozinho o painel que travar ou perder conexão, e avisar na bandeja
+- Escolher quais painéis abrem ao iniciar, para farmar com menos de quatro contas
+- Contador de tempo de farm por painel
+- Lembrar o layout e o painel expandido entre aberturas
+
+## Licença
+
+[MIT](LICENSE). Projeto independente, sem afiliação com o Poke Idle World.
