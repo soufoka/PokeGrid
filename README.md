@@ -9,6 +9,10 @@
 
 Feito com Electron · Windows · [Poke Idle World](https://poke.idleworld.online/)
 
+[**⬇️ Baixar / Download**](https://github.com/soufoka/PokeGrid/releases/latest)
+
+<img src="docs/screenshot.png" width="900" alt="PokeGrid rodando 4 contas ao mesmo tempo">
+
 </div>
 
 ---
