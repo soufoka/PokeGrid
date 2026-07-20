@@ -461,7 +461,10 @@
     set();
   })()`;
   const dockBtn = document.getElementById('dock');
-  let dockHidden = localStorage.getItem('dockHidden') !== '0'; // oculta por padrao
+  // Migracao: a 1a versao escondia o menu do jogo por padrao e alguns usuarios estranharam.
+  // Agora ele vem VISIVEL; limpamos a preferencia antiga uma unica vez pra valer pra quem ja usou.
+  if (localStorage.getItem('dockMigrado') !== '1') { localStorage.removeItem('dockHidden'); localStorage.setItem('dockMigrado', '1'); }
+  let dockHidden = localStorage.getItem('dockHidden') === '1'; // visivel por padrao; usuario esconde se quiser
   function applyDock() {
     dockBtn.textContent = t('dockLabel'); // estado vai pela cor (.on = visível), igual o Eco
     dockBtn.classList.toggle('on', !dockHidden);
