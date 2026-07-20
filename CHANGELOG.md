@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1
+
+- Menu do jogo agora vem **visível** por padrão (o usuário esconde se quiser)
+  *Game menu now starts **visible** by default (hide it if you want)*
+- Aviso de atualização: o app checa o GitHub ao abrir e avisa quando há versão nova
+  *Update notice: the app checks GitHub on launch and tells you when a new version is out*
+
 ## 1.0.0
 
 ### Novidades / Added

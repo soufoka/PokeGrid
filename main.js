@@ -1,6 +1,36 @@
-const { app, BrowserWindow, ipcMain, safeStorage, Tray, Menu, powerSaveBlocker, shell, session } = require('electron');
+const { app, BrowserWindow, ipcMain, safeStorage, Tray, Menu, powerSaveBlocker, shell, session, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+
+// Aviso de atualizacao: compara a versao local com a ultima release do GitHub.
+const REPO = 'soufoka/PokeGrid';
+function versaoMaior(a, b) {
+  const x = a.split('.').map(Number), y = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) { if ((x[i] || 0) > (y[i] || 0)) return true; if ((x[i] || 0) < (y[i] || 0)) return false; }
+  return false;
+}
+function checarAtualizacao(win) {
+  https.get(`https://api.github.com/repos/${REPO}/releases/latest`,
+    { headers: { 'User-Agent': 'PokeGrid-Updater' }, timeout: 8000 }, (res) => {
+      if (res.statusCode !== 200) { res.resume(); return; }
+      let body = '';
+      res.on('data', (d) => body += d);
+      res.on('end', () => {
+        try {
+          const tag = (JSON.parse(body).tag_name || '').replace(/^v/, '');
+          if (!tag || !versaoMaior(tag, app.getVersion())) return;
+          dialog.showMessageBox(win, {
+            type: 'info', noLink: true,
+            title: 'Atualização disponível / Update available',
+            message: `Nova versão do PokeGrid: ${tag}\nVocê tem a ${app.getVersion()}.`,
+            detail: 'A new version is available.',
+            buttons: ['Baixar / Download', 'Depois / Later'], defaultId: 0, cancelId: 1
+          }).then((r) => { if (r.response === 0) shell.openExternal(`https://github.com/${REPO}/releases/latest`); });
+        } catch {}
+      });
+    }).on('error', () => {}); // falha de rede: ignora em silencio
+}
 
 // Instancia unica: abrir o app de novo so foca a janela ja aberta.
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -110,6 +140,9 @@ app.whenReady().then(() => {
   tray.on('click', () => win.isVisible() ? win.hide() : win.show());
   win.on('minimize', () => win.hide());
   app.on('second-instance', () => win.show());
+
+  // checa atualizacao (nao incomoda quem abriu escondido na bandeja pra farmar)
+  if (!process.argv.includes('--hidden')) checarAtualizacao(win);
 });
 
 app.on('window-all-closed', () => app.quit());
