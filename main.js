@@ -47,6 +47,10 @@ app.on('web-contents-created', (_e, contents) => {
   };
   contents.on('will-navigate', guarda);
   contents.on('will-redirect', guarda);
+  // watchdog: se o processo do painel morrer (crash/OOM), recarrega sozinho
+  contents.on('render-process-gone', (_ev, d) => {
+    if (d.reason !== 'clean-exit') setTimeout(() => { try { contents.reload(); } catch {} }, 1500);
+  });
 });
 
 const credFile = () => path.join(app.getPath('userData'), 'accounts.enc');

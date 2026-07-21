@@ -71,7 +71,9 @@
   #modal { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 18px 20px; width: 460px; max-width: 92vw; }
   #modal h2 { font-size: 15px; margin-bottom: 4px; }
   #modal p.hint { font-size: 11px; color: #8b949e; margin-bottom: 14px; }
-  .acc-row { display: grid; grid-template-columns: 84px 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+  .acc-row { display: grid; grid-template-columns: 74px 1fr 1fr 30px; gap: 6px; margin-bottom: 8px; align-items: center; }
+  .acc-row .acc-del { padding: 5px 0; background: #21262d; }
+  .acc-row .acc-del:hover { background: #6e2634; border-color: #f85149; }
   .acc-row input { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; padding: 6px 8px; font-size: 12px; width: 100%; }
   .acc-row input:focus { outline: none; border-color: #e3350d; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
@@ -98,6 +100,7 @@
     <div id="menuWrap">
       <button id="menuBtn">☰ Opções</button>
       <div id="menu">
+        <button id="autohelper" title="Abre o Auto-Helper em todos os painéis">🎯 Auto-Helper</button>
         <button id="chat" title="Mostra ou esconde o chat do jogo em todos os painéis">💬 Chat</button>
         <button id="muteAll">🔊 Som</button>
         <button id="eco">⚡ Eco</button>
@@ -142,6 +145,7 @@
       chatHidden:'💬 Chat oculto', chatShown:'💬 Chat visível', langBtn:'🌐 EN',
       optionsBtn:'☰ Opções',
       dockLabel:'🎛 Menu do jogo', dockTitle:'Mostra ou esconde o menu de ícones do jogo (verde = visível). F2 alterna no painel em foco.',
+      autohelper:'🎯 Auto-Helper', autohelperTitle:'Abre o Auto-Helper (hunt analyzer) em todos os painéis', accClear:'Limpar esta conta',
       donateTitle:'Doe para o criador do app :)', refTitle:'Referral do criador, copie se quiser ajudar :)', refCopied:'✓ Copiado!',
       stLoading:'carregando…', stOnline:'online', stError:'erro', stOff:'desligada', trainer:'Treinador',
       tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tPower:'Desligar / ligar', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
@@ -155,6 +159,7 @@
       chatHidden:'💬 Chat hidden', chatShown:'💬 Chat shown', langBtn:'🌐 PT',
       optionsBtn:'☰ Options',
       dockLabel:'🎛 Game menu', dockTitle:'Shows or hides the game icon menu (green = shown). F2 toggles it in the focused panel.',
+      autohelper:'🎯 Auto-Helper', autohelperTitle:'Opens the Auto-Helper (hunt analyzer) in all panels', accClear:'Clear this account',
       donateTitle:"Donate to the app's creator :)", refTitle:"Creator's referral, copy it if you want to help :)", refCopied:'✓ Copied!',
       stLoading:'loading…', stOnline:'online', stError:'error', stOff:'off', trainer:'Trainer',
       tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tPower:'Turn off / on', tRename:'Double-click to rename', promptRename:'Trainer name:',
@@ -202,6 +207,7 @@
       nameEl.textContent = accounts[i].name || defName(i);
 
       wv.addEventListener('did-start-loading', () => { if (!off[i]) { dot.className = 'dot'; status.textContent = t('stLoading'); } });
+      let fails = 0; // watchdog: contador de falhas de carga do painel
       let zoom = +(localStorage.getItem('zoom' + i) || 1);
       const setZoom = (z) => {
         zoom = Math.min(2, Math.max(0.5, Math.round(z * 10) / 10));
@@ -212,7 +218,7 @@
       panel.querySelector('.zo').onclick = () => setZoom(zoom - 0.1);
 
       wv.addEventListener('dom-ready', () => {
-        if (!off[i]) { dot.className = 'dot ok'; status.textContent = t('stOnline'); }
+        if (!off[i]) { dot.className = 'dot ok'; status.textContent = t('stOnline'); fails = 0; } // carregou: zera o watchdog
         try {
           wv.setAudioMuted(muted); wv.setZoomFactor(zoom);
           wv.executeJavaScript(ecoScript(eco ? 15 : 0)).catch(() => {});
@@ -224,7 +230,11 @@
           wv.executeJavaScript(`localStorage.setItem('poke_lang', ${JSON.stringify(lang === 'en' ? 'en' : 'pt')})`).catch(() => {}); // mantem o jogo no idioma escolhido nas proximas cargas
         } catch {}
       });
-      wv.addEventListener('did-fail-load', (e) => { if (e.errorCode === -3 || off[i]) return; dot.className = 'dot err'; status.textContent = t('stError'); });
+      wv.addEventListener('did-fail-load', (e) => {
+        if (e.errorCode === -3 || off[i]) return;
+        dot.className = 'dot err'; status.textContent = t('stError');
+        if (++fails <= 5) setTimeout(() => { if (!off[i]) wv.reload(); }, 6000); // watchdog: tenta reconectar
+      });
       // sessao caiu e voltou pra tela de login -> loga sozinho se tiver credencial salva
       // (so na URL de login do proprio jogo; credencial nunca vai para outra pagina)
       wv.addEventListener('did-navigate', (e) => {
@@ -326,9 +336,11 @@
       row.innerHTML = `
         <input data-i="${i}" data-f="name"  placeholder="${t('mName')}">
         <input data-i="${i}" data-f="email" placeholder="${t('mEmail')}">
-        <input data-i="${i}" data-f="senha" type="password" placeholder="${t('mPass')}">`;
+        <input data-i="${i}" data-f="senha" type="password" placeholder="${t('mPass')}">
+        <button class="acc-del" title="${t('accClear')}">🗑</button>`;
       const [vn, ve, vs] = row.querySelectorAll('input'); // valores por propriedade: nunca viram HTML
       vn.value = c.name || ''; ve.value = c.email || ''; vs.value = c.senha || '';
+      row.querySelector('.acc-del').onclick = () => { vn.value = ''; ve.value = ''; vs.value = ''; vn.focus(); };
       rows.appendChild(row);
     });
     overlay.classList.add('show');
@@ -478,6 +490,20 @@
     if (e.key === 'F2') { e.preventDefault(); dockBtn.click(); }
   });
 
+  // ----- Auto-Helper (hunt analyzer): abre em todos os paineis de uma vez -----
+  // Acha o botao pelo texto "Auto-Helper" (idioma-independente) e clica.
+  const autoHelperScript = `(() => {
+    const el = [...document.querySelectorAll('button, [role=button], a, div')]
+      .find(x => /auto-?helper/i.test((x.textContent || '').trim()) && x.getBoundingClientRect().width > 0 && x.children.length < 3);
+    if (el) { el.click(); return true; }
+    return false;
+  })()`;
+  const ahBtn = document.getElementById('autohelper');
+  ahBtn.onclick = () => {
+    menu.classList.remove('show');
+    webviews.forEach((w, i) => { if (off[i]) return; try { w.executeJavaScript(autoHelperScript).catch(() => {}); } catch {} });
+  };
+
   // ----- Anti-sono: impede o PC de dormir enquanto farma -----
   const awakeBtn = document.getElementById('awake');
   let awake = localStorage.getItem('awake') === '1';
@@ -504,6 +530,7 @@
     awakeBtn.title = t('awakeTitle');
     chatBtn.title = t('chatTitle');
     dockBtn.title = t('dockTitle');
+    ahBtn.textContent = t('autohelper'); ahBtn.title = t('autohelperTitle');
     document.querySelector('#modal h2').textContent = t('mH2');
     document.querySelector('#modal .hint').textContent = t('mHint');
     document.getElementById('accCancel').textContent = t('mCancel');

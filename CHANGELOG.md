@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0
+
+- **Multiplataforma**: agora com builds para Windows, macOS e Linux (instalador, .dmg e .AppImage), via GitHub Actions
+  *Cross-platform: builds for Windows, macOS and Linux (installer, .dmg and .AppImage), via GitHub Actions*
+- **Auto-Helper em todos**: opção no menu abre o Auto-Helper (hunt analyzer) nos 4 painéis de uma vez
+  *Auto-Helper for all: a menu option opens the Auto-Helper (hunt analyzer) in all 4 panels at once*
+- **Limpar conta por slot**: botão de lixeira em cada linha no gerenciador de contas
+  *Clear account per slot: a trash button on each row in the account manager*
+- **Watchdog**: painel que cai ou crasha tenta reconectar sozinho (com limite pra não entrar em loop)
+  *Watchdog: a panel that drops or crashes reconnects on its own (capped to avoid loops)*
+
 ## 1.0.1
 
 - Menu do jogo agora vem **visível** por padrão (o usuário esconde se quiser)
