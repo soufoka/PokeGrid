@@ -493,11 +493,14 @@
   // ----- Hunt Analyzer: abre em todos os paineis de uma vez -----
   // O botao fica no menu de icones do jogo (game-dock); acha pelo title/alt/src que contem "hunt".
   const huntScript = `(() => {
-    const cand = [...document.querySelectorAll('button, [role=button], a')].find(x => {
+    // mira SO no icone do menu do jogo (game-dock): clicar de novo fecha (toggle),
+    // sem pegar o texto "Hunt" que aparece dentro do proprio analyzer quando ele abre.
+    const btns = [...document.querySelectorAll('nav.game-dock button, .dock-btn')];
+    const cand = btns.find(x => {
       const img = x.querySelector ? x.querySelector('img') : null;
       const txt = (x.title || '') + ' ' + (x.getAttribute ? (x.getAttribute('aria-label') || '') : '')
         + ' ' + (img ? (img.getAttribute('alt') || '') + ' ' + (img.getAttribute('src') || '') : '');
-      return /hunt/i.test(txt) && x.getBoundingClientRect().width > 0;
+      return /hunt/i.test(txt);
     });
     if (cand) { cand.click(); return true; }
     return false;
