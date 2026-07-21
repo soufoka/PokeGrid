@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, safeStorage, Tray, Menu, powerSaveBlocker, shell, session, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, safeStorage, Tray, Menu, powerSaveBlocker, shell, session, dialog, Notification } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
@@ -91,6 +91,11 @@ app.userAgentFallback = app.userAgentFallback
 // Doacao: abre no navegador padrao, fora do app.
 ipcMain.handle('donate', () => shell.openExternal('https://www.buymeacoffee.com/foka'));
 
+// Notificacao do SO (alertas de queda e de sem pokebola).
+ipcMain.handle('notify', (_e, title, body) => {
+  try { if (Notification.isSupported()) new Notification({ title, body }).show(); } catch {}
+});
+
 // Anti-sono: impede o PC de dormir enquanto farma (a tela ainda pode desligar).
 let awakeId = null;
 ipcMain.handle('awake:set', (_e, on) => {
@@ -102,6 +107,8 @@ ipcMain.handle('awake:set', (_e, on) => {
 let tray; // referencia viva para o icone nao sumir (GC)
 
 app.whenReady().then(() => {
+  app.setAppUserModelId('online.idleworld.pokegrid'); // notificacoes do Windows aparecem com o nome certo
+
   // Nega pedidos de permissao dos jogos (mic, camera, localizacao, notificacao...).
   for (let i = 1; i <= 4; i++)
     session.fromPartition('persist:conta' + i).setPermissionRequestHandler((_wc, _p, cb) => cb(false));

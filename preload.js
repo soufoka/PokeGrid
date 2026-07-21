@@ -5,5 +5,6 @@ contextBridge.exposeInMainWorld('pokeAPI', {
   saveCreds: (accounts) => ipcRenderer.invoke('creds:save', accounts),
   setAwake: (on) => ipcRenderer.invoke('awake:set', on),
   onHotkey: (cb) => ipcRenderer.on('hotkey', (_e, k) => cb(k)),
-  donate: () => ipcRenderer.invoke('donate')
+  donate: () => ipcRenderer.invoke('donate'),
+  notify: (title, body) => ipcRenderer.invoke('notify', title, body)
 });

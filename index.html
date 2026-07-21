@@ -101,6 +101,7 @@
     <div id="menuWrap">
       <button id="menuBtn">☰ Opções</button>
       <div id="menu">
+        <button id="alerts" title="Avisa quando uma conta cai ou fica sem pokébola">🔔 Alertas</button>
         <button id="chat" title="Mostra ou esconde o chat do jogo em todos os painéis">💬 Chat</button>
         <button id="muteAll">🔊 Som</button>
         <button id="eco">⚡ Eco</button>
@@ -135,6 +136,7 @@
   const webviews = [];
   const off = [false, false, false, false];
   const lastLogin = [0, 0, 0, 0]; // cooldown do auto-login por painel (evita ressubmeter em loop)
+  const alertedBalls = [false, false, false, false]; // ja avisou "sem pokebola" nesta falta?
   let muted = localStorage.getItem('muted') === '1';
 
   // ----- Idioma (interface + jogo) -----
@@ -146,6 +148,7 @@
       optionsBtn:'☰ Opções',
       dockLabel:'🎛 Menu do jogo', dockTitle:'Mostra ou esconde o menu de ícones do jogo (verde = visível). F2 alterna no painel em foco.',
       hunt:'🎯 Hunt', huntTitle:'Abre o Hunt Analyzer em todos os painéis', accClear:'Limpar esta conta',
+      alerts:'🔔 Alertas', alertsTitle:'Avisa por notificação quando uma conta cai ou fica sem pokébola', msgDown:'caiu', msgBalls:'está sem pokébolas',
       donateTitle:'Doe para o criador do app :)', refTitle:'Referral do criador, copie se quiser ajudar :)', refCopied:'✓ Copiado!',
       stLoading:'carregando…', stOnline:'online', stError:'erro', stOff:'desligada', trainer:'Treinador',
       tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tPower:'Desligar / ligar', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
@@ -160,6 +163,7 @@
       optionsBtn:'☰ Options',
       dockLabel:'🎛 Game menu', dockTitle:'Shows or hides the game icon menu (green = shown). F2 toggles it in the focused panel.',
       hunt:'🎯 Hunt', huntTitle:'Opens the Hunt Analyzer in all panels', accClear:'Clear this account',
+      alerts:'🔔 Alerts', alertsTitle:'Notifies you when an account drops or runs out of Pokéballs', msgDown:'disconnected', msgBalls:'is out of Pokéballs',
       donateTitle:"Donate to the app's creator :)", refTitle:"Creator's referral, copy it if you want to help :)", refCopied:'✓ Copied!',
       stLoading:'loading…', stOnline:'online', stError:'error', stOff:'off', trainer:'Trainer',
       tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tPower:'Turn off / on', tRename:'Double-click to rename', promptRename:'Trainer name:',
@@ -207,7 +211,7 @@
       nameEl.textContent = accounts[i].name || defName(i);
 
       wv.addEventListener('did-start-loading', () => { if (!off[i]) { dot.className = 'dot'; status.textContent = t('stLoading'); } });
-      let fails = 0; // watchdog: contador de falhas de carga do painel
+      let fails = 0, alertedDown = false; // watchdog: falhas de carga do painel e se ja avisou a queda
       let zoom = +(localStorage.getItem('zoom' + i) || 1);
       const setZoom = (z) => {
         zoom = Math.min(2, Math.max(0.5, Math.round(z * 10) / 10));
@@ -218,7 +222,7 @@
       panel.querySelector('.zo').onclick = () => setZoom(zoom - 0.1);
 
       wv.addEventListener('dom-ready', () => {
-        if (!off[i]) { dot.className = 'dot ok'; status.textContent = t('stOnline'); fails = 0; } // carregou: zera o watchdog
+        if (!off[i]) { dot.className = 'dot ok'; status.textContent = t('stOnline'); fails = 0; alertedDown = false; } // carregou: zera o watchdog
         try {
           wv.setAudioMuted(muted); wv.setZoomFactor(zoom);
           wv.executeJavaScript(ecoScript(eco ? 15 : 0)).catch(() => {});
@@ -233,7 +237,8 @@
       wv.addEventListener('did-fail-load', (e) => {
         if (e.errorCode === -3 || off[i]) return;
         dot.className = 'dot err'; status.textContent = t('stError');
-        if (++fails <= 5) setTimeout(() => { if (!off[i]) wv.reload(); }, 6000); // watchdog: tenta reconectar
+        if (++fails === 3 && !alertedDown) { alertedDown = true; alerta(i, 'msgDown'); } // queda sustentada: avisa
+        if (fails <= 5) setTimeout(() => { if (!off[i]) wv.reload(); }, 6000); // watchdog: tenta reconectar
       });
       // sessao caiu e voltou pra tela de login -> loga sozinho se tiver credencial salva
       // (so na URL de login do proprio jogo; credencial nunca vai para outra pagina)
@@ -531,6 +536,34 @@
   }
   awakeBtn.onclick = () => { awake = !awake; applyAwake(); };
 
+  // ----- Alertas: notifica quando uma conta cai (watchdog) ou fica sem pokebola -----
+  const alertBtn = document.getElementById('alerts');
+  let alertsOn = localStorage.getItem('alerts') !== '0'; // ligado por padrao
+  function applyAlerts() {
+    alertBtn.textContent = t('alerts');
+    alertBtn.title = t('alertsTitle');
+    alertBtn.classList.toggle('on', alertsOn);
+    localStorage.setItem('alerts', alertsOn ? '1' : '0');
+  }
+  alertBtn.onclick = () => { alertsOn = !alertsOn; applyAlerts(); };
+  function alerta(i, chave) {
+    if (!alertsOn) return;
+    const nome = (accounts[i] && accounts[i].name) || defName(i);
+    try { window.pokeAPI.notify('PokeGrid', nome + ' ' + t(chave)); } catch {}
+  }
+  // varre o texto do jogo a cada 15s procurando o estado "sem pokebola" (pt e tentativa em en)
+  setInterval(() => {
+    if (!alertsOn) return;
+    webviews.forEach((w, i) => {
+      if (off[i]) return;
+      w.executeJavaScript(`/sem pok[eé]bola|no pok[eé]ball|out of pok[eé]ball/i.test(document.body ? document.body.innerText : '')`)
+        .then(sem => {
+          if (sem && !alertedBalls[i]) { alertedBalls[i] = true; alerta(i, 'msgBalls'); }
+          else if (!sem) alertedBalls[i] = false; // reencheu: pode avisar de novo na proxima falta
+        }).catch(() => {});
+    });
+  }, 15000);
+
   // ----- Idioma: aplica na interface e (ao trocar) no jogo -----
   const langBtn = document.getElementById('langBtn');
   function applyLang() {
@@ -561,7 +594,7 @@
       p.querySelector('.expand').title = t('tExpand');
       p.querySelector('.power').title = t('tPower');
     });
-    applyMute(); applyEco(); applyChat(); applyDock(); applyAwake();
+    applyMute(); applyEco(); applyChat(); applyDock(); applyAwake(); applyAlerts();
     localStorage.setItem('lang', lang);
   }
   function applyGameLang() {
