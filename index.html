@@ -97,10 +97,10 @@
     <button id="accounts">👤 Treinadores</button>
     <button id="reloadAll">⟳ Atualizar tudo</button>
     <button id="dock" title="Mostra ou esconde o menu de ícones do jogo. F2 alterna no painel em foco.">🎛 Menu do jogo</button>
+    <button id="hunt" title="Abre o Hunt Analyzer em todos os painéis">🎯 Hunt</button>
     <div id="menuWrap">
       <button id="menuBtn">☰ Opções</button>
       <div id="menu">
-        <button id="autohelper" title="Abre o Auto-Helper em todos os painéis">🎯 Auto-Helper</button>
         <button id="chat" title="Mostra ou esconde o chat do jogo em todos os painéis">💬 Chat</button>
         <button id="muteAll">🔊 Som</button>
         <button id="eco">⚡ Eco</button>
@@ -145,7 +145,7 @@
       chatHidden:'💬 Chat oculto', chatShown:'💬 Chat visível', langBtn:'🌐 EN',
       optionsBtn:'☰ Opções',
       dockLabel:'🎛 Menu do jogo', dockTitle:'Mostra ou esconde o menu de ícones do jogo (verde = visível). F2 alterna no painel em foco.',
-      autohelper:'🎯 Auto-Helper', autohelperTitle:'Abre o Auto-Helper (hunt analyzer) em todos os painéis', accClear:'Limpar esta conta',
+      hunt:'🎯 Hunt', huntTitle:'Abre o Hunt Analyzer em todos os painéis', accClear:'Limpar esta conta',
       donateTitle:'Doe para o criador do app :)', refTitle:'Referral do criador, copie se quiser ajudar :)', refCopied:'✓ Copiado!',
       stLoading:'carregando…', stOnline:'online', stError:'erro', stOff:'desligada', trainer:'Treinador',
       tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tPower:'Desligar / ligar', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
@@ -159,7 +159,7 @@
       chatHidden:'💬 Chat hidden', chatShown:'💬 Chat shown', langBtn:'🌐 PT',
       optionsBtn:'☰ Options',
       dockLabel:'🎛 Game menu', dockTitle:'Shows or hides the game icon menu (green = shown). F2 toggles it in the focused panel.',
-      autohelper:'🎯 Auto-Helper', autohelperTitle:'Opens the Auto-Helper (hunt analyzer) in all panels', accClear:'Clear this account',
+      hunt:'🎯 Hunt', huntTitle:'Opens the Hunt Analyzer in all panels', accClear:'Clear this account',
       donateTitle:"Donate to the app's creator :)", refTitle:"Creator's referral, copy it if you want to help :)", refCopied:'✓ Copied!',
       stLoading:'loading…', stOnline:'online', stError:'error', stOff:'off', trainer:'Trainer',
       tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tPower:'Turn off / on', tRename:'Double-click to rename', promptRename:'Trainer name:',
@@ -490,18 +490,21 @@
     if (e.key === 'F2') { e.preventDefault(); dockBtn.click(); }
   });
 
-  // ----- Auto-Helper (hunt analyzer): abre em todos os paineis de uma vez -----
-  // Acha o botao pelo texto "Auto-Helper" (idioma-independente) e clica.
-  const autoHelperScript = `(() => {
-    const el = [...document.querySelectorAll('button, [role=button], a, div')]
-      .find(x => /auto-?helper/i.test((x.textContent || '').trim()) && x.getBoundingClientRect().width > 0 && x.children.length < 3);
-    if (el) { el.click(); return true; }
+  // ----- Hunt Analyzer: abre em todos os paineis de uma vez -----
+  // O botao fica no menu de icones do jogo (game-dock); acha pelo title/alt/src que contem "hunt".
+  const huntScript = `(() => {
+    const cand = [...document.querySelectorAll('button, [role=button], a')].find(x => {
+      const img = x.querySelector ? x.querySelector('img') : null;
+      const txt = (x.title || '') + ' ' + (x.getAttribute ? (x.getAttribute('aria-label') || '') : '')
+        + ' ' + (img ? (img.getAttribute('alt') || '') + ' ' + (img.getAttribute('src') || '') : '');
+      return /hunt/i.test(txt) && x.getBoundingClientRect().width > 0;
+    });
+    if (cand) { cand.click(); return true; }
     return false;
   })()`;
-  const ahBtn = document.getElementById('autohelper');
-  ahBtn.onclick = () => {
-    menu.classList.remove('show');
-    webviews.forEach((w, i) => { if (off[i]) return; try { w.executeJavaScript(autoHelperScript).catch(() => {}); } catch {} });
+  const huntBtn = document.getElementById('hunt');
+  huntBtn.onclick = () => {
+    webviews.forEach((w, i) => { if (off[i]) return; try { w.executeJavaScript(huntScript).catch(() => {}); } catch {} });
   };
 
   // ----- Anti-sono: impede o PC de dormir enquanto farma -----
@@ -530,7 +533,7 @@
     awakeBtn.title = t('awakeTitle');
     chatBtn.title = t('chatTitle');
     dockBtn.title = t('dockTitle');
-    ahBtn.textContent = t('autohelper'); ahBtn.title = t('autohelperTitle');
+    huntBtn.textContent = t('hunt'); huntBtn.title = t('huntTitle');
     document.querySelector('#modal h2').textContent = t('mH2');
     document.querySelector('#modal .hint').textContent = t('mHint');
     document.getElementById('accCancel').textContent = t('mCancel');
