@@ -8,7 +8,7 @@
 
 [![Release](https://img.shields.io/github/v/release/soufoka/PokeGrid?color=e3350d)](https://github.com/soufoka/PokeGrid/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/soufoka/PokeGrid/total?color=3fb950)](https://github.com/soufoka/PokeGrid/releases/latest)
-![Platform](https://img.shields.io/badge/platform-Windows-0078D6)
+![Platform](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-0078D6)
 ![Electron](https://img.shields.io/badge/Electron-43-47848F)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -52,7 +52,11 @@ Because four games running at once are heavy, Eco mode caps each panel at 15 fra
 
 ## Getting started
 
-Download the `.zip` from the [latest release](https://github.com/soufoka/PokeGrid/releases/latest), extract the whole folder and run `PokeGrid.exe`. No Node, no install.
+Download the file for your system from the [latest release](https://github.com/soufoka/PokeGrid/releases/latest):
+
+- **Windows** — `PokeGrid-Setup.exe` (installer) or `-portable.exe` (just run it, no install)
+- **macOS** — `-arm64.dmg` (Apple Silicon) or `.dmg` (Intel)
+- **Linux** — `.AppImage`
 
 1. Log in or create an account in each panel.
 2. Open **Treinadores** (Accounts) and save each account's e-mail and password.
