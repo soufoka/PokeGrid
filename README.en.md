@@ -20,6 +20,9 @@
 
 > Playing an idle game with several accounts usually turns into window juggling: four browsers open, each one logged in by hand, and then guessing which tab belongs to whom. PokeGrid puts them all on one screen, with sessions properly kept apart.
 
+> ### 🔒 Your login data stays **only on your computer**
+> E-mail and password are encrypted on your own PC (by the operating system's API) and **never leave the machine**: not to any server, not to this repository, not to the author. The app is open source precisely so you can verify it.
+
 ## Why this exists
 
 Poke Idle World rewards continuous progress, so running more than one account makes sense. The problem is not the game, it is the logistics around it.
@@ -54,7 +57,7 @@ Because four games running at once are heavy, Eco mode caps each panel at 15 fra
 
 Download the file for your system from the [latest release](https://github.com/soufoka/PokeGrid/releases/latest):
 
-- **Windows** — `PokeGrid-Setup.exe` (installer) or `-portable.exe` (just run it, no install)
+- **Windows** — pick whichever you prefer: `PokeGrid-Setup.exe` (installer), `-portable.exe` (just run it) or `-win.zip` (extract and run)
 - **macOS** — `-arm64.dmg` (Apple Silicon) or `.dmg` (Intel)
 - **Linux** — `.AppImage`
 

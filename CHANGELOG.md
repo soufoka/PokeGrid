@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2
+
+- **Windows em .zip** também: além do instalador e do portátil.exe, agora tem a versão para extrair e abrir. A pessoa escolhe.
+  *Windows .zip too: alongside the installer and portable.exe, there is now an extract-and-run version. Your choice.*
+- README destacando que os dados de login ficam só no computador do usuário.
+  *README highlights that login data stays only on the user's computer.*
+
 ## 1.1.1
 
 - **Login mais confiável**: reenche o campo se o jogo o limpar e só envia quando e-mail e senha estão corretos
