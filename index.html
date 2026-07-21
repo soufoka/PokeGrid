@@ -291,18 +291,28 @@
         const p = inputs.find(i => i.autocomplete === 'current-password');
         const b = findBtn();
         if (u && p && b) {
-          setVal(u, ${JSON.stringify(cred.email)});
-          setVal(p, ${JSON.stringify(cred.senha)});
-          // O captcha e resolvido POR VOCE (nao tocamos nele). Assim que o Turnstile
-          // liberar o botao, o envio acontece sozinho, sem prazo pra voce clicar.
+          const EMAIL = ${JSON.stringify(cred.email)}, SENHA = ${JSON.stringify(cred.senha)};
+          // reenche so o que estiver diferente e devolve true quando os DOIS estao certos.
+          const preenche = () => {
+            const ii = [...document.querySelectorAll('input')];
+            const uu = ii.find(i => i.autocomplete === 'username');
+            const pp = ii.find(i => i.autocomplete === 'current-password');
+            if (uu && uu.value !== EMAIL) setVal(uu, EMAIL);
+            if (pp && pp.value !== SENHA) setVal(pp, SENHA);
+            return !!(uu && pp && uu.value === EMAIL && pp.value === SENHA);
+          };
+          preenche();
+          // O captcha e resolvido POR VOCE (nao tocamos nele). A cada ciclo reforcamos os
+          // campos (caso o jogo os limpe) e so enviamos quando os dois estao corretos.
           if (!window.__loginWatch) {
             window.__loginWatch = true;
             let ciclos = 0;
             const w = setInterval(() => {
               const bb = findBtn();
               if (!bb || ++ciclos > 1200) { clearInterval(w); window.__loginWatch = false; return; } // desiste em ~10min
+              const ok = preenche();
               const tk = document.querySelector('input[name=cf-turnstile-response]');
-              if ((!tk || tk.value) && !bb.disabled) { clearInterval(w); window.__loginWatch = false; bb.click(); }
+              if (ok && (!tk || tk.value) && !bb.disabled) { clearInterval(w); window.__loginWatch = false; bb.click(); }
             }, 500);
           }
           return 'preenchido';
@@ -493,17 +503,17 @@
   // ----- Hunt Analyzer: abre em todos os paineis de uma vez -----
   // O botao fica no menu de icones do jogo (game-dock); acha pelo title/alt/src que contem "hunt".
   const huntScript = `(() => {
-    // mira SO no icone do menu do jogo (game-dock): clicar de novo fecha (toggle),
-    // sem pegar o texto "Hunt" que aparece dentro do proprio analyzer quando ele abre.
-    const btns = [...document.querySelectorAll('nav.game-dock button, .dock-btn')];
-    const cand = btns.find(x => {
-      const img = x.querySelector ? x.querySelector('img') : null;
-      const txt = (x.title || '') + ' ' + (x.getAttribute ? (x.getAttribute('aria-label') || '') : '')
+    // aberto? fecha no proprio X do analyzer (button.ha-x). fechado? abre pelo icone do game-dock.
+    const x = document.querySelector('button.ha-x');
+    if (x) { x.click(); return 'fechou'; }
+    const btn = [...document.querySelectorAll('nav.game-dock button, .dock-btn')].find(el => {
+      const img = el.querySelector ? el.querySelector('img') : null;
+      const txt = (el.title || '') + ' ' + (el.getAttribute ? (el.getAttribute('aria-label') || '') : '')
         + ' ' + (img ? (img.getAttribute('alt') || '') + ' ' + (img.getAttribute('src') || '') : '');
       return /hunt/i.test(txt);
     });
-    if (cand) { cand.click(); return true; }
-    return false;
+    if (btn) { btn.click(); return 'abriu'; }
+    return 'nada';
   })()`;
   const huntBtn = document.getElementById('hunt');
   huntBtn.onclick = () => {

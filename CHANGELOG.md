@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1
+
+- **Login mais confiável**: reenche o campo se o jogo o limpar e só envia quando e-mail e senha estão corretos
+  *More reliable login: refills a field if the game clears it, and only submits when e-mail and password are correct*
+- **Hunt vira toggle**: o botão Hunt abre e fecha o Hunt Analyzer (fecha no X do próprio painel)
+  *Hunt is now a toggle: the Hunt button opens and closes the Hunt Analyzer (closes via the panel's own X)*
+
 ## 1.1.0
 
 - **Multiplataforma**: agora com builds para Windows, macOS e Linux (instalador, .dmg e .AppImage), via GitHub Actions
