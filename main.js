@@ -121,7 +121,7 @@ app.whenReady().then(() => {
     backgroundColor: '#0d1117',
     webPreferences: { webviewTag: true, preload: path.join(__dirname, 'preload.js') }
   });
-  win.loadFile('index.html');
+  win.loadFile(path.join(__dirname, 'index.html')); // caminho absoluto: robusto no build empacotado (asar)
   if (!process.argv.includes('--hidden')) win.maximize(); // --hidden: nasce na bandeja, farmando
 
   // Atalhos (funcionam mesmo com o jogo focado): Ctrl+1..4 expande painel, Ctrl+M mudo.
