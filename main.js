@@ -3,6 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const https = require('https');
 
+// Silencia o spam do Chromium no terminal (ex.: STUN/WebRTC do jogo que a rede nao resolve).
+// E so log, nao afeta o app. Mantem so erros fatais.
+app.commandLine.appendSwitch('log-level', '3');
+
 // Aviso de atualizacao: compara a versao local com a ultima release do GitHub.
 const REPO = 'soufoka/PokeGrid';
 function versaoMaior(a, b) {
