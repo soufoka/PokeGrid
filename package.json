@@ -1,6 +1,6 @@
 {
   "name": "pokegrid",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Rode 4 contas de Poke Idle World ao mesmo tempo, em uma janela so / Run 4 Poke Idle World accounts at once, in a single window",
   "main": "main.js",
   "author": "soufoka",
@@ -17,7 +17,7 @@
   "build": {
     "appId": "online.idleworld.pokegrid",
     "productName": "PokeGrid",
-    "files": ["main.js", "preload.js", "index.html", "tray.png"],
+    "files": ["main.js", "preload.js", "index.html", "tray.png", "presets/**/*"],
     "publish": { "provider": "github", "owner": "soufoka", "repo": "PokeGrid" },
     "win": { "target": ["nsis", "portable", "zip"], "icon": "build/icon.png" },
     "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "artifactName": "PokeGrid-Setup-${version}.${ext}" },

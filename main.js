@@ -92,12 +92,15 @@ app.userAgentFallback = app.userAgentFallback
   .replace(/ Electron\/[\d.]+/, '')
   .replace(/(Chrome\/\d+)[\d.]+/, '$1.0.0.0');
 
-// Doacao: abre no navegador padrao, fora do app.
-ipcMain.handle('donate', () => shell.openExternal('https://www.buymeacoffee.com/foka'));
-
 // Notificacao do SO (alertas de queda e de sem pokebola).
 ipcMain.handle('notify', (_e, title, body) => {
   try { if (Notification.isSupported()) new Notification({ title, body }).show(); } catch {}
+});
+
+// Le um preset de userscript da pasta presets/ (nome saneado, sem path traversal).
+ipcMain.handle('preset:read', (_e, name) => {
+  if (typeof name !== 'string' || !/^[\w.-]+\.js$/.test(name)) return '';
+  try { return fs.readFileSync(path.join(__dirname, 'presets', name), 'utf8'); } catch { return ''; }
 });
 
 // Anti-sono: impede o PC de dormir enquanto farma (a tela ainda pode desligar).

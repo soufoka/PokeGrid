@@ -13,14 +13,8 @@
     display: flex; align-items: center; gap: 8px;
     padding: 8px 14px; background: #161b22; border-bottom: 1px solid #21262d; flex-shrink: 0;
   }
-  #topbar .logo { display: flex; align-items: center; gap: 8px; font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 2.5px; }
+  #topbar .logo { display: flex; align-items: center; gap: 8px; font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 2.5px; margin-right: auto; }
   #topbar .logo svg { display: block; }
-  #donate {
-    margin-right: auto; margin-left: 10px;
-    background: #95d600; border: 1px solid rgba(0,0,0,.35); color: #10240a;
-    font-weight: 700; letter-spacing: .3px; padding: 6px 16px; border-radius: 999px;
-  }
-  #donate:hover { background: #a9e81f; }
   button {
     background: #21262d; color: #e6edf3; border: 1px solid #30363d;
     border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; letter-spacing: .2px; cursor: pointer;
@@ -54,6 +48,8 @@
   #grid.count-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
   #grid.one-col { grid-template-columns: 1fr !important; grid-template-rows: none; }
   #grid.one-col .panel { grid-column: auto !important; }
+  #grid.one-row { grid-template-columns: none !important; grid-template-rows: 1fr !important; grid-auto-flow: column; grid-auto-columns: 1fr; }
+  #grid.one-row .panel { grid-column: auto !important; }
 
   .panel { display: flex; flex-direction: column; min-height: 0;
     background: #161b22; border: 1px solid #21262d; border-radius: 8px; overflow: hidden; }
@@ -82,6 +78,183 @@
   .acc-row input { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; padding: 6px 8px; font-size: 12px; width: 100%; }
   .acc-row input:focus { outline: none; border-color: #e3350d; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+  /* Modal de Scripts / Extras */
+  #scOverlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 100; }
+  #scOverlay.show { display: flex; }
+  #scModal { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 18px 20px; width: 520px; max-width: 94vw; max-height: 88vh; overflow-y: auto; }
+  #scModal h2 { font-size: 15px; margin-bottom: 4px; }
+  #scModal p.hint { font-size: 11px; color: #8b949e; margin-bottom: 14px; line-height: 1.5; }
+  #scList { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .sc-row { display: flex; align-items: center; gap: 10px; padding: 9px 11px; background: #0d1117; border: 1px solid #21262d; border-radius: 8px; }
+  .sc-chk { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #c9d1d9; cursor: pointer; flex: 1; }
+  .sc-chk input { accent-color: #e3350d; width: 16px; height: 16px; }
+  .sc-chk b { font-weight: 600; }
+  .sc-tag { font-size: 10px; color: #6e7681; text-transform: uppercase; letter-spacing: .04em; }
+  .sc-del { padding: 2px 8px; font-size: 12px; background: #21262d; }
+  .sc-del:hover { background: #6e2634; border-color: #f85149; }
+  .sc-add { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid #21262d; }
+  .sc-add input, .sc-add textarea { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; padding: 8px 10px; font-size: 12px; width: 100%; font-family: inherit; }
+  .sc-add textarea { min-height: 90px; resize: vertical; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+  .sc-add input:focus, .sc-add textarea:focus { outline: none; border-color: #e3350d; }
+  .sc-add .primary { align-self: flex-start; }
+
+  /* Painel de resumo (barra lateral HUD) */
+  #stats { position: fixed; left: 0; z-index: 150; width: 350px; max-width: 92vw;
+    background: #0d1117; border-right: 1px solid #232a33; display: flex; flex-direction: column;
+    transform: translateX(-100%); transition: transform .18s ease; box-shadow: 8px 0 40px rgba(0,0,0,.55); }
+  #stats.show { transform: none; }
+  #stats .sb-top { height: 3px; background: linear-gradient(90deg, #e3350d, #ff7a4d); flex-shrink: 0; }
+  #stats .st-head { display: flex; align-items: center; gap: 8px; padding: 8px 13px; background: #0b0f15;
+    font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #7d8590; flex-shrink: 0; }
+  #stats .st-head .st-gear { margin-left: auto; padding: 2px 8px; font-size: 14px; }
+  #stats .st-head .st-gear.on { color: #e3350d; }
+  #stats .st-head .st-x { margin-left: 5px; padding: 2px 9px; font-size: 13px; }
+  #stats .st-tabs { display: flex; gap: 4px; padding: 8px 9px; background: #0b0f15; border-bottom: 1px solid #1c2229; flex-shrink: 0; }
+  #stats .st-tab { flex: 1; min-width: 0; padding: 7px 4px; font-size: 11px; text-align: center; border-radius: 8px;
+    background: #12171e; color: #7d8590; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
+  #stats .st-tab.on { color: #fff; background: #171f29; }
+  #stats .st-tab.on { color: #fff; }
+  #stats .st-tab.on::after { content: ''; position: absolute; left: 22%; right: 22%; bottom: -1px; height: 2px; border-radius: 2px; background: var(--tabc, #e3350d); }
+  #stats .st-body { flex: 1; overflow-y: auto; overflow-x: hidden; margin-right: 9px; }
+  #stats .st-body::-webkit-scrollbar { width: 9px; }
+  #stats .st-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 5px; }
+  #stats .st-empty { padding: 30px 18px; color: #6e7681; font-size: 12.5px; text-align: center; line-height: 1.7; }
+  #stats .div { height: 1px; background: #1c2229; }
+  #stats .pb { padding-bottom: 9px; }
+  #stats .dsect { position: relative; }
+  #stats .dsect .dgrip { position: absolute; left: 3px; top: 13px; color: #586069; font-size: 11px; letter-spacing: -2px; cursor: grab; opacity: 0; z-index: 3; }
+  #stats .dsect:hover .dgrip { opacity: .85; }
+  #stats .dsect.dragover { outline: 2px dashed rgba(227,53,13,.55); outline-offset: -2px; border-radius: 6px; }
+  /* header do treinador */
+  #stats .head { padding: 11px 15px 10px; position: relative; }
+  #stats .idrow { display: flex; align-items: center; gap: 11px; }
+  #stats .ava { position: relative; flex: none; line-height: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
+  #stats .ava svg { width: 38px; height: 38px; }
+  #stats .ava .lvl { position: absolute; bottom: -4px; right: -5px; background: #12171e; border: 1.5px solid #e3350d; color: #fff; font-size: 9px; font-weight: 700; line-height: 1; padding: 2px 4px; border-radius: 7px; }
+  #stats .nm { font-size: 15px; font-weight: 600; color: #f0f6fc; display: flex; align-items: center; gap: 7px; letter-spacing: .2px; min-width: 0; }
+  #stats .nm .nmt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #stats .vip { font-size: 9px; font-weight: 800; letter-spacing: .06em; color: #1a1400; background: #e3b341; padding: 2px 6px; border-radius: 5px; flex: none; }
+  #stats .clan-emb { width: 20px; height: 20px; object-fit: contain; flex: none; vertical-align: middle; }
+  #stats .loc { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #8b949e; margin-top: 3px; }
+  #stats .idcol { min-width: 0; flex: 1; }
+  #stats .goldline { display: flex; align-items: center; gap: 7px; margin-top: 5px; }
+  #stats .goldline svg { width: 15px; height: 15px; }
+  #stats .gv { font-size: 15px; font-weight: 700; color: #f2c665; font-variant-numeric: tabular-nums; letter-spacing: .3px; }
+  #stats .gl { font-size: 9.5px; color: #6e7681; text-transform: uppercase; letter-spacing: .06em; }
+  #stats .dia { margin-left: auto; display: flex; align-items: center; gap: 4px; color: #8ab4ff; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  #stats .dia svg { flex: none; }
+  /* KPIs */
+  #stats .kpis { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  #stats .kpi { padding: 10px 12px 9px; position: relative; }
+  #stats .kpi + .kpi { border-left: 1px solid #171d25; }
+  #stats .kpi .ac { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  #stats .kpi.g { background: #0e1912; } #stats .kpi.g .ac { background: #3fb950; }
+  #stats .kpi.b { background: #0c1620; } #stats .kpi.b .ac { background: #58a6ff; }
+  #stats .kpi.n { background: #0f141b; } #stats .kpi.n .ac { background: #7d8590; }
+  #stats .kv { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: .2px; }
+  #stats .kl { font-size: 9px; color: #6e7681; margin-top: 5px; text-transform: uppercase; letter-spacing: .07em; }
+  /* seções */
+  #stats .sec { display: flex; align-items: center; gap: 8px; padding: 8px 15px 5px; }
+  #stats .sec .mk { width: 7px; height: 7px; border-radius: 2px; flex: none; transform: rotate(45deg); }
+  #stats .sec .lb { font-size: 10.5px; color: #adbac7; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; }
+  #stats .sec .rt { margin-left: auto; font-size: 10.5px; color: #8b949e; font-variant-numeric: tabular-nums; background: #12171e; border: 1px solid #1c2229; padding: 1px 7px; border-radius: 6px; }
+  #stats .r { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 3px 15px; font-size: 12.5px; }
+  #stats .r .l { color: #8b949e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #stats .r .v { font-variant-numeric: tabular-nums; flex: none; font-weight: 500; color: #e6edf3; }
+  #stats .grid4 { display: grid; grid-template-columns: 1fr 1fr; }
+  #stats .g4 { padding: 7px 15px; }
+  #stats .g4:nth-child(odd) { border-right: 1px solid #171d25; }
+  #stats .g4:nth-child(-n+2) { border-bottom: 1px solid #171d25; }
+  #stats .g4 .v { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  #stats .g4 .l { font-size: 9.5px; color: #6e7681; margin-top: 1px; text-transform: uppercase; letter-spacing: .05em; }
+  #stats .saldo { margin: 6px 15px 4px; padding: 8px 13px; border-radius: 9px; display: flex; justify-content: space-between; align-items: center; }
+  #stats .saldo .sl { font-size: 11.5px; }
+  #stats .saldo .sv { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .3px; }
+  #stats .drop { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 2.5px 15px; font-size: 12px; }
+  #stats .drop .dn { color: #8b949e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #stats .drop .dn b { color: #c9d1d9; font-weight: 500; }
+  #stats .drop .dq { color: #586069; font-size: 10.5px; }
+  #stats .drop .dg { color: #e0b458; font-variant-numeric: tabular-nums; flex: none; font-weight: 600; }
+  #stats .cat { display: flex; align-items: center; gap: 9px; padding: 6px 15px 2px; }
+  #stats .cat .cd { width: 7px; height: 7px; border-radius: 50%; flex: none; box-shadow: 0 0 6px currentColor; }
+  #stats .cat .cn { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  #stats .cat .ct { margin-left: auto; font-size: 11.5px; color: #c9d1d9; font-variant-numeric: tabular-nums; font-weight: 600; }
+  #stats .it { display: flex; justify-content: space-between; gap: 10px; padding: 1px 15px 1px 31px; font-size: 11.5px; color: #8b949e; }
+  #stats .it span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #stats .it .q { color: #adbac7; font-variant-numeric: tabular-nums; flex: none; }
+  #stats .baggrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #171d25; margin-top: 2px; }
+  #stats .bg { display: flex; align-items: center; gap: 7px; padding: 7px 13px; background: #0d1117; font-size: 12px; }
+  #stats .bg .bcd { width: 7px; height: 7px; border-radius: 50%; flex: none; box-shadow: 0 0 5px currentColor; }
+  #stats .bg .bn { color: #8b949e; text-transform: uppercase; font-size: 9.5px; letter-spacing: .05em; font-weight: 600; }
+  #stats .bg .bt { margin-left: auto; color: #c9d1d9; font-variant-numeric: tabular-nums; font-weight: 600; }
+  #stats .baggrid .bg:last-child:nth-child(odd) { grid-column: 1 / -1; } /* total ímpar: último item ocupa a linha inteira */
+  #stats .st-resize { position: absolute; top: 0; right: 0; bottom: 0; width: 10px; cursor: ew-resize; z-index: 20; }
+  #stats .st-resize::before { content: ''; position: absolute; top: 50%; right: 3px; transform: translateY(-50%); width: 3px; height: 34px; border-radius: 2px; background: #30363d; }
+  #stats .st-resize:hover { background: rgba(227,53,13,.18); }
+  #stats .st-resize:hover::before { background: #e3350d; }
+  #stats .team { display: flex; flex-wrap: wrap; gap: 5px; padding: 4px 15px 6px; }
+  #stats .tm { font-size: 11px; color: #8b949e; background: #12171e; border: 1px solid #1c2229; border-radius: 6px; padding: 3px 7px; white-space: nowrap; }
+  #stats .tm b { color: #c9d1d9; font-weight: 600; font-variant-numeric: tabular-nums; }
+  /* visão de totais */
+  #stats .st-all { flex: 0 0 30px; font-weight: 700; }
+  #stats .agg { display: grid; grid-template-columns: 1.5fr 1fr 1fr .85fr; gap: 6px; padding: 6px 15px; font-size: 12.5px; align-items: center; }
+  #stats .agg span { text-align: right; font-variant-numeric: tabular-nums; color: #e6edf3; }
+  #stats .agg .an { text-align: left; color: #c9d1d9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #stats .agg-h { padding-bottom: 5px; border-bottom: 1px solid #1c2229; }
+  #stats .agg-h span { color: #6e7681; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+  #stats .agg-t { border-top: 1px solid #1c2229; margin-top: 3px; font-weight: 700; }
+  #stats .agg-t .an { color: #f0f6fc; }
+  /* compilado: 4 stats + cartões por conta */
+  #stats .agg4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; }
+  #stats .a4 { padding: 9px 4px; text-align: center; }
+  #stats .a4 + .a4 { border-left: 1px solid #171d25; }
+  #stats .a4v { font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  #stats .a4l { font-size: 9px; color: #6e7681; margin-top: 3px; text-transform: uppercase; letter-spacing: .03em; }
+  #stats .acard { padding: 9px 15px; border-top: 1px solid #171d25; }
+  #stats .acard:first-of-type { border-top: 0; }
+  #stats .ac1 { display: flex; align-items: center; gap: 8px; }
+  #stats .acd { width: 8px; height: 8px; border-radius: 50%; flex: none; box-shadow: 0 0 5px currentColor; }
+  #stats .acn { color: #f0f6fc; font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #stats .acm { margin-left: auto; color: #8b949e; font-size: 11px; font-variant-numeric: tabular-nums; flex: none; }
+  #stats .ac2 { display: flex; flex-wrap: wrap; gap: 3px 12px; margin-top: 5px; padding-left: 16px; font-size: 12px; color: #adbac7; font-variant-numeric: tabular-nums; }
+  /* painel de configuração */
+  #stats .st-cfg { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 12px; margin-right: 9px; }
+  #stats .st-cfg::-webkit-scrollbar { width: 9px; }
+  #stats .st-cfg::-webkit-scrollbar-thumb { background: #30363d; border-radius: 5px; }
+  #stats .cfg-h { padding: 13px 15px 6px; font-size: 10.5px; color: #8b949e; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
+  #stats .cfg-secs { padding: 0 10px; }
+  #stats .cfg-row { display: flex; align-items: center; gap: 8px; padding: 7px 9px; background: #12171e; border: 1px solid #1c2229; border-radius: 7px; margin-bottom: 5px; }
+  #stats .cfg-grip { color: #586069; font-size: 13px; cursor: grab; letter-spacing: -2px; }
+  #stats .cfg-chk { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #c9d1d9; cursor: pointer; flex: 1; }
+  #stats .cfg-chk input, #stats .cfg-toggle input { accent-color: #e3350d; width: 15px; height: 15px; }
+  #stats .cfg-toggle { display: flex; align-items: center; gap: 8px; padding: 6px 16px 2px; font-size: 12.5px; color: #c9d1d9; cursor: pointer; }
+  #stats .cfg-search { width: calc(100% - 30px); margin: 2px 15px; padding: 7px 10px; background: #0b0f15; border: 1px solid #232a33; border-radius: 7px; color: #e6edf3; font-size: 12.5px; }
+  #stats .cfg-search:focus { outline: none; border-color: #e3350d; }
+  #stats .cfg-results { padding: 2px 12px; }
+  #stats .cfg-res { padding: 6px 9px; font-size: 12.5px; color: #adbac7; border-radius: 6px; cursor: pointer; }
+  #stats .cfg-res:hover { background: #171f29; color: #fff; }
+  #stats .cfg-noc { padding: 6px 9px; font-size: 12px; color: #6e7681; }
+  #stats .cfg-pinned { padding: 2px 15px; }
+  #stats .cfg-pin { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; font-size: 12.5px; color: #c9d1d9; background: #12171e; border-radius: 6px; margin-bottom: 4px; }
+  #stats .cfg-pin button { padding: 0 4px; font-size: 12px; background: transparent; border: 0; color: #f0883e; cursor: pointer; }
+  #stats .cfg-items { padding: 2px 12px; max-height: 220px; overflow-y: auto; }
+  #stats .cfg-items::-webkit-scrollbar { width: 8px; }
+  #stats .cfg-items::-webkit-scrollbar-thumb { background: #30363d; border-radius: 5px; }
+  #stats .cfg-item { display: flex; align-items: center; gap: 8px; padding: 4px 6px; font-size: 12px; color: #c9d1d9; cursor: pointer; }
+  #stats .cfg-item input { accent-color: #e3350d; width: 14px; height: 14px; flex: none; }
+  #stats .cfg-item span:first-of-type { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #stats .cfg-iq { color: #6e7681; font-variant-numeric: tabular-nums; }
+  #stats .cfg-isub { padding: 7px 6px 2px; font-size: 9.5px; color: #7d8590; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  #stats .cfg-credit { padding: 2px 15px 4px; font-size: 11px; color: #6e7681; line-height: 1.6; }
+  #stats .cfg-credit b { color: #adbac7; font-weight: 600; }
+  /* comparação com a hunt anterior */
+  #stats .cmp { display: grid; grid-template-columns: 1fr .9fr .9fr; gap: 6px; padding: 4px 15px; font-size: 12.5px; align-items: center; }
+  #stats .cmp .cl { color: #8b949e; }
+  #stats .cmp .cp, #stats .cmp .cc { text-align: right; font-variant-numeric: tabular-nums; }
+  #stats .cmp .cp { color: #6e7681; }
+  #stats .cmp-h { padding-bottom: 1px; }
+  #stats .cmp-h span { color: #6e7681; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
 </style>
 </head>
 <body>
@@ -97,15 +270,16 @@
       </svg>
       POKEGRID
     </span>
-    <button id="donate" title="Doe para o criador do app :)">🥤 Buy me a monster</button>
     <button id="loginAll" class="primary">▶ Logar equipe</button>
     <button id="accounts">👤 Treinadores</button>
     <button id="reloadAll">⟳ Atualizar tudo</button>
     <button id="dock" title="Mostra ou esconde o menu de ícones do jogo. F2 alterna no painel em foco.">🎛 Menu do jogo</button>
-    <button id="hunt" title="Abre o Hunt Analyzer em todos os painéis">🎯 Hunt</button>
+    <button id="statsBtn" title="Resumo da conta em foco (gold/h, XP/h, bag, drops)">📊 Painel</button>
     <div id="menuWrap">
       <button id="menuBtn">☰ Opções</button>
       <div id="menu">
+        <button id="hunt" title="Abre o Hunt Analyzer em todos os painéis">🎯 Hunt</button>
+        <button id="scriptsBtn" title="Rode userscripts (IV calc e os seus) nos painéis">🧩 Scripts</button>
         <button id="count" title="Quantas contas rodar ao mesmo tempo (2 a 4)">🔢 Painéis: 4</button>
         <button id="alerts" title="Avisa quando uma conta cai ou fica sem pokébola">🔔 Alertas</button>
         <button id="chat" title="Mostra ou esconde o chat do jogo em todos os painéis">💬 Chat</button>
@@ -128,6 +302,22 @@
       <div class="modal-actions">
         <button id="accCancel">Cancelar</button>
         <button id="accSave" class="primary">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="scOverlay">
+    <div id="scModal">
+      <h2>🧩 Scripts / Extras</h2>
+      <p class="hint">Rode userscripts (estilo Tampermonkey) dentro de cada painel do jogo. O IV calc já vem pronto. Você pode colar os seus. <b>Só adicione scripts em que você confia</b>, eles têm acesso total à página do jogo.</p>
+      <div id="scList"></div>
+      <div class="sc-add">
+        <input id="scName" placeholder="Nome do script">
+        <textarea id="scCode" placeholder="Cole aqui o código do userscript (@grant none)"></textarea>
+        <button id="scAdd" class="primary">+ Adicionar script</button>
+      </div>
+      <div class="modal-actions">
+        <button id="scClose">Fechar</button>
       </div>
     </div>
   </div>
@@ -155,8 +345,16 @@
       optionsBtn:'☰ Opções',
       dockLabel:'🎛 Menu do jogo', dockTitle:'Mostra ou esconde o menu de ícones do jogo (verde = visível). F2 alterna no painel em foco.',
       hunt:'🎯 Hunt', huntTitle:'Abre o Hunt Analyzer em todos os painéis', accClear:'Limpar esta conta',
-      alerts:'🔔 Alertas', alertsTitle:'Avisa por notificação quando uma conta cai ou fica sem pokébola', msgDown:'caiu', msgBalls:'está sem pokébolas', count:'🔢 Painéis',
-      donateTitle:'Doe para o criador do app :)', refTitle:'Referral do criador, copie se quiser ajudar :)', refCopied:'✓ Copiado!',
+      alerts:'🔔 Alertas', alertsTitle:'Avisa por notificação quando uma conta cai ou fica sem pokébola', msgDown:'caiu', msgBalls:'está sem pokébolas', count:'🔢 Painéis', stats:'📊 Painel', statsTitle:'Resumo da conta em foco (gold/h, XP/h, bag, drops)', statsResumo:'Resumo', statsWaiting:'Aguardando dados do jogo…', statsWaiting2:'Deixe o painel logado e farmando alguns segundos.', statsOff:'Painel desligado.',
+      stLevel:'Nível', stSession:'Sessão', stDefeated:'Derrotados', stXpGain:'XP ganha', stCaptures:'Capturas', stGold:'Ouro da sessão', stLoot:'Loot (venda)', stCapSell:'Capturas (venda)', stSupply:'Bolas / potions gastas', stBalance:'Saldo da sessão', stDrops:'Drops da sessão', stAccount:'Conta', stProfession:'Profissão', stMail:'Presentes no correio', stCatchTotal:'Capturas totais', stTeam:'Time',
+      msgShiny:'encontrou um SHINY! ✨', msgFaint:'teve um pokémon derrubado', msgBallsLow:'está com poucas pokébolas', msgPotionsLow:'está com poucas potions', msgRevivesLow:'está com poucos revives',
+      stAllTitle:'Resumo geral', stTotal:'Total', stAcc:'Conta', stCompare:'Comparação (hunt anterior)', stPrev:'anterior', stCur:'atual', stMoney:'dólares', stPerAcc:'Por conta',
+      stShinyFound:'Shiny enc.', stShinyCap:'✨ Shiny capturados', stShinyF:'Shiny enc.', stShinyC:'Shiny capt.', stSupplies:'Suprimentos', stAssets:'Patrimônio',
+      stKpis:'Ritmo (por hora)', stPinned:'Itens fixados', cfgSections:'Seções (arraste para ordenar, marque para mostrar)', cfgBagItems:'Mostrar TODOS os itens da bag', cfgImportantOnly:'Só itens importantes (Ultra Ball, melhor potion/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Buscar item, bola, pedra…', cfgNoCat:'Abra o jogo pra carregar a lista de itens', cfgBagCats:'Bag — categorias (arraste, marque pra mostrar)', cfgBagHideItems:'Bag — esconder itens específicos',
+      stShinyLife:'Shinies Enc. Total', stShinyLifeAll:'Shinies Enc. Total (todas)',
+      cfgCredits:'Créditos', creditSidebar:'Painel lateral inspirado em', creditIV:'Calculadora de IV:',
+      stTargetLabel:'🎯 Alvo shiny', stTargetStatus:'Status', stCaught:'capturado!', stFoundNotCaught:'apareceu, não capturado', stNotAppeared:'ainda não apareceu', stTargetShinyTries:'Tentativas no shiny', stTargetFarm:'Farm na espécie', stTries:'tent.', cfgTarget:'Alvo shiny (acompanhar a caça)', cfgTargetSearch:'Buscar espécie pra caçar…',
+      refTitle:'Referral do criador, copie se quiser ajudar :)', refCopied:'✓ Copiado!',
       stLoading:'carregando…', stOnline:'online', stError:'erro', stOff:'desligada', trainer:'Treinador',
       tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tPower:'Desligar / ligar', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
       mH2:'Treinadores salvos', mHint:'Preencha e-mail/usuário e senha de cada painel. As senhas ficam criptografadas neste PC. "Logar equipe" entra automaticamente onde houver dados, e se a sessão cair o painel loga sozinho.',
@@ -170,8 +368,16 @@
       optionsBtn:'☰ Options',
       dockLabel:'🎛 Game menu', dockTitle:'Shows or hides the game icon menu (green = shown). F2 toggles it in the focused panel.',
       hunt:'🎯 Hunt', huntTitle:'Opens the Hunt Analyzer in all panels', accClear:'Clear this account',
-      alerts:'🔔 Alerts', alertsTitle:'Notifies you when an account drops or runs out of Pokéballs', msgDown:'disconnected', msgBalls:'is out of Pokéballs', count:'🔢 Panels',
-      donateTitle:"Donate to the app's creator :)", refTitle:"Creator's referral, copy it if you want to help :)", refCopied:'✓ Copied!',
+      alerts:'🔔 Alerts', alertsTitle:'Notifies you when an account drops or runs out of Pokéballs', msgDown:'disconnected', msgBalls:'is out of Pokéballs', count:'🔢 Panels', stats:'📊 Panel', statsTitle:'Summary of the focused account (gold/h, XP/h, bag, drops)', statsResumo:'Summary', statsWaiting:'Waiting for game data…', statsWaiting2:'Keep the panel logged in and farming for a few seconds.', statsOff:'Panel is off.',
+      stLevel:'Level', stSession:'Session', stDefeated:'Defeated', stXpGain:'XP gained', stCaptures:'Captures', stGold:'Session gold', stLoot:'Loot (sell)', stCapSell:'Captures (sell)', stSupply:'Balls / potions used', stBalance:'Session balance', stDrops:'Session drops', stAccount:'Account', stProfession:'Profession', stMail:'Gifts in mail', stCatchTotal:'Total catches', stTeam:'Team',
+      msgShiny:'found a SHINY! ✨', msgFaint:'had a Pokémon knocked out', msgBallsLow:'is low on Poké Balls', msgPotionsLow:'is low on potions', msgRevivesLow:'is low on revives',
+      stAllTitle:'Overview', stTotal:'Total', stAcc:'Account', stCompare:'Comparison (previous hunt)', stPrev:'previous', stCur:'current', stMoney:'dollars', stPerAcc:'Per account',
+      stShinyFound:'Shiny found', stShinyCap:'✨ Shiny captured', stShinyF:'Shiny found', stShinyC:'Shiny capt.', stSupplies:'Supplies', stAssets:'Assets',
+      stKpis:'Rate (per hour)', stPinned:'Pinned items', cfgSections:'Sections (drag to reorder, check to show)', cfgBagItems:'Show ALL bag items', cfgImportantOnly:'Only important items (Ultra Ball, best potion/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Search item, ball, stone…', cfgNoCat:'Open the game to load the item list', cfgBagCats:'Bag — categories (drag, check to show)', cfgBagHideItems:'Bag — hide specific items',
+      stShinyLife:'Total shinies found', stShinyLifeAll:'Total shinies found (all)',
+      cfgCredits:'Credits', creditSidebar:'Sidebar inspired by', creditIV:'IV calculator:',
+      stTargetLabel:'🎯 Shiny target', stTargetStatus:'Status', stCaught:'caught!', stFoundNotCaught:'appeared, not caught', stNotAppeared:'not appeared yet', stTargetShinyTries:'Shiny attempts', stTargetFarm:'Species farm', stTries:'tries', cfgTarget:'Shiny target (track the hunt)', cfgTargetSearch:'Search species to hunt…',
+      refTitle:"Creator's referral, copy it if you want to help :)", refCopied:'✓ Copied!',
       stLoading:'loading…', stOnline:'online', stError:'error', stOff:'off', trainer:'Trainer',
       tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tPower:'Turn off / on', tRename:'Double-click to rename', promptRename:'Trainer name:',
       mH2:'Saved accounts', mHint:'Fill in the e-mail/username and password for each panel. Passwords are encrypted on this PC. "Log in all" signs in automatically where data exists, and if the session drops the panel logs in by itself.',
@@ -231,6 +437,7 @@
         if (!off[i]) { dot.className = 'dot ok'; status.textContent = t('stOnline'); fails = 0; alertedDown = false; } // carregou: zera o watchdog
         try {
           wv.setAudioMuted(muted); wv.setZoomFactor(zoom);
+          wv.executeJavaScript(`(()=>{if(window.__poke)return;const mk=()=>({start:Date.now(),kills:0,xp:0,balls:0,captures:0,drops:{},shinyN:0,shinySeen:{},shinyCapN:0,faintN:0,hp:{}});const P={ws:{},api:{},sess:mk(),prev:null,knownPokes:{},pokesBaselined:false};window.__poke=P;let auth=null;const OW=window.WebSocket;window.WebSocket=function(...ar){const s=Reflect.construct(OW,ar);s.addEventListener('message',e=>{try{if(typeof e.data==='string'){const m=JSON.parse(e.data);if(m&&m.type){P.ws[m.type]=m;const S=P.sess;if(m.type==='field-init'){P.prev=P.sess;P.prev.end=Date.now();P.sess=mk();}else if(m.type==='field-kill'){S.kills++;S.xp+=m.xpGained||0;(m.loot||[]).forEach(l=>{const d=S.drops[l.itemId]||(S.drops[l.itemId]={name:l.name,qty:0});d.qty+=l.qty||0;});}else if(m.type==='catch-result'){S.balls++;if(m.success)S.captures++;}else if(m.type==='field'){(m.mobs||[]).forEach(mo=>{if(mo.shiny){const k=mo.slot+'_'+mo.speciesId;if(!S.shinySeen[k]){S.shinySeen[k]=1;S.shinyN++;}}});}else if(m.type==='poke-delta'){const pk=m.poke;if(pk){const was=S.hp[pk.id];if(pk.team&&pk.hp===0&&was>0)S.faintN++;S.hp[pk.id]=pk.hp;if(P.pokesBaselined&&!P.knownPokes[pk.id]&&pk.shiny)S.shinyCapN++;P.knownPokes[pk.id]=1;}}else if(m.type==='pokes'){(m.list||[]).forEach(pk=>{const was=S.hp[pk.id];if(pk.team&&pk.hp===0&&was>0)S.faintN++;S.hp[pk.id]=pk.hp;if(P.pokesBaselined&&!P.knownPokes[pk.id]&&pk.shiny)S.shinyCapN++;P.knownPokes[pk.id]=1;});if(!P.pokesBaselined)P.pokesBaselined=true;}}}}catch(x){}});return s;};window.WebSocket.prototype=OW.prototype;['CONNECTING','OPEN','CLOSING','CLOSED'].forEach(k=>{try{window.WebSocket[k]=OW[k]}catch(x){}});const OF=window.fetch;window.fetch=function(...a){try{let H;const r0=a[0],ini=a[1];if(ini&&ini.headers)H=ini.headers;else if(r0&&typeof r0==='object'&&r0.headers)H=r0.headers;if(H){let au;if(typeof H.get==='function')au=H.get('authorization');else au=H.Authorization||H.authorization;if(au)auth=au;}}catch(x){}const p=OF.apply(this,a);try{let u=(a[0]&&a[0].url)||a[0];if(typeof u==='string'&&/\\/api\\/|items\\.json/.test(u)){p.then(r=>{const c=r.clone();c.json().then(j=>{const key=u.split('?')[0];if(key==='/api/game/used-balls'){if(j&&j.pokemons){P.shinyEnc=j.pokemons.reduce((s,p)=>s+(p.shiny?(p.attempts||0):0),0);P.usedList=j.pokemons.map(p=>({sid:p.speciesId,name:p.name,shiny:!!p.shiny,attempts:p.attempts||0,total:p.total||0,caught:!!p.caught}));}return;}if(key==='/api/characters/me'&&(!j||!j.character))return;P.api[key]=j}).catch(()=>{})}).catch(()=>{})}}catch(x){}return p;};const poll=()=>{try{const o=auth?{headers:{Authorization:auth}}:undefined;fetch('/api/characters/me',o).catch(()=>{});fetch('/api/game/used-balls',o).catch(()=>{});}catch(x){}};setInterval(poll,30000);setTimeout(poll,9000);})()`).catch(() => {}); // coletor de estado + sessao (refetch autenticado de gold/nivel a cada 30s)
           wv.executeJavaScript(ecoScript(eco ? 15 : 0)).catch(() => {});
           wv.executeJavaScript(POPUP_SCRIPT).catch(() => {});
           wv.executeJavaScript(chatScript(chatHidden)).catch(() => {});
@@ -238,6 +445,7 @@
           // so na tela de login, pra nao rodar a toa dentro do jogo
           if ((wv.getURL() || '').startsWith(LOGIN_URL)) wv.executeJavaScript(scrollLoginScript).catch(() => {});
           wv.executeJavaScript(`localStorage.setItem('poke_lang', ${JSON.stringify(lang === 'en' ? 'en' : 'pt')})`).catch(() => {}); // mantem o jogo no idioma escolhido nas proximas cargas
+          injectScripts(wv); // userscripts habilitados (IV calc e os do usuário)
         } catch {}
       });
       wv.addEventListener('did-fail-load', (e) => {
@@ -556,6 +764,7 @@
     webviews.forEach((w, i) => { if (off[i]) return; try { w.executeJavaScript(huntScript).catch(() => {}); } catch {} });
   };
 
+
   // ----- Anti-sono: impede o PC de dormir enquanto farma -----
   const awakeBtn = document.getElementById('awake');
   let awake = localStorage.getItem('awake') === '1';
@@ -582,18 +791,31 @@
     const nome = (accounts[i] && accounts[i].name) || defName(i);
     try { window.pokeAPI.notify('PokeGrid', nome + ' ' + t(chave)); } catch {}
   }
-  // varre o texto do jogo a cada 15s procurando o estado "sem pokebola" (pt e tentativa em en)
+  // Alertas via coletor: shiny, pokemon derrubado e inventario baixo (contagem exata do jogo).
+  const READ_ALERTS = `(()=>{const P=window.__poke;if(!P||!P.ws)return null;const ws=P.ws,api=P.api||{};const cat={};const doc=api['/game/items.json'];if(doc&&doc.items)doc.items.forEach(it=>cat[it.id]=it);let balls=0;const bm=ws.balls;if(bm&&bm.counts)for(const k in bm.counts)balls+=bm.counts[k];let potions=0,revives=0;const inv=(ws.inventory&&ws.inventory.items)||[];inv.forEach(it=>{const c=(cat[it.itemId]||{}).category;if(c==='heal'||c==='potion')potions+=it.quantity;else if(c==='revive')revives+=it.quantity;});const S=P.sess||{};const ch=(api['/api/characters/me']&&api['/api/characters/me'].character)||{};return {balls,potions,revives,shinyN:S.shinyN||0,faintN:S.faintN||0,cid:ch.id||''};})()`;
+  const BALL_MIN = 100, POTION_MIN = 15, REVIVE_MIN = 5; // limites do "está com poucos ..."
+  const lastShiny = [], lastFaint = [], lowOn = [{}, {}, {}, {}];
+  function checkLow(i, key, val, min, msgKey) {
+    if (val < min) { if (!lowOn[i][key]) { lowOn[i][key] = true; alerta(i, msgKey); } }
+    else lowOn[i][key] = false; // reabasteceu: pode avisar de novo depois
+  }
   setInterval(() => {
-    if (!alertsOn) return;
     webviews.forEach((w, i) => {
       if (off[i]) return;
-      w.executeJavaScript(`/sem pok[eé]bola|no pok[eé]ball|out of pok[eé]ball/i.test(document.body ? document.body.innerText : '')`)
-        .then(sem => {
-          if (sem && !alertedBalls[i]) { alertedBalls[i] = true; alerta(i, 'msgBalls'); }
-          else if (!sem) alertedBalls[i] = false; // reencheu: pode avisar de novo na proxima falta
-        }).catch(() => {});
+      w.executeJavaScript(READ_ALERTS).then(r => {
+        if (!r) return;
+        // shiny encontrado: acumula na vida da conta (sempre) e avisa (se alertas ligados)
+        if (lastShiny[i] === undefined || r.shinyN < lastShiny[i]) lastShiny[i] = r.shinyN;
+        else if (r.shinyN > lastShiny[i]) { const delta = r.shinyN - lastShiny[i]; lastShiny[i] = r.shinyN; addShinyLife(r.cid, delta); if (alertsOn) alerta(i, 'msgShiny'); }
+        if (!alertsOn) return;
+        if (lastFaint[i] === undefined || r.faintN < lastFaint[i]) lastFaint[i] = r.faintN;
+        else if (r.faintN > lastFaint[i]) { lastFaint[i] = r.faintN; alerta(i, 'msgFaint'); }
+        checkLow(i, 'balls', r.balls, BALL_MIN, 'msgBallsLow');
+        checkLow(i, 'potions', r.potions, POTION_MIN, 'msgPotionsLow');
+        checkLow(i, 'revives', r.revives, REVIVE_MIN, 'msgRevivesLow');
+      }).catch(() => {});
     });
-  }, 15000);
+  }, 6000);
 
   // ----- Idioma: aplica na interface e (ao trocar) no jogo -----
   const langBtn = document.getElementById('langBtn');
@@ -604,13 +826,14 @@
     document.getElementById('reloadAll').textContent = t('reloadAll');
     document.getElementById('layout').textContent = t('layout');
     document.getElementById('menuBtn').textContent = t('optionsBtn');
-    document.getElementById('donate').title = t('donateTitle');
     langBtn.textContent = t('langBtn');
     refBtn.title = t('refTitle');
     awakeBtn.title = t('awakeTitle');
     chatBtn.title = t('chatTitle');
     dockBtn.title = t('dockTitle');
     huntBtn.textContent = t('hunt'); huntBtn.title = t('huntTitle');
+    statsBtn.textContent = t('stats'); statsBtn.title = t('statsTitle');
+    statsEl.querySelector('.st-head span').textContent = '📊 ' + t('statsResumo');
     document.querySelector('#modal h2').textContent = t('mH2');
     document.querySelector('#modal .hint').textContent = t('mHint');
     document.getElementById('accCancel').textContent = t('mCancel');
@@ -644,9 +867,6 @@
     else if (k.startsWith('expand')) toggleExpand(+k.slice(6));
   });
 
-  // ----- Doacao: abre o Buy Me a Coffee no navegador -----
-  document.getElementById('donate').onclick = () => window.pokeAPI?.donate?.();
-
   // ----- Referral: copia o link de convite -----
   const refBtn = document.getElementById('refBtn');
   refBtn.onclick = async () => {
@@ -655,7 +875,16 @@
     setTimeout(() => { refBtn.textContent = '🔗'; }, 1500);
   };
   document.getElementById('reloadAll').onclick = () => webviews.forEach((w, i) => { if (!off[i]) w.reload(); });
-  document.getElementById('layout').onclick = () => grid.classList.toggle('one-col');
+  // Layout dos paineis: grade (2x2) -> coluna (vertical) -> linha (horizontal)
+  let layoutMode = localStorage.getItem('layout') || 'grid';
+  function applyLayout() {
+    grid.classList.remove('one-col', 'one-row');
+    if (layoutMode === 'col') grid.classList.add('one-col');
+    else if (layoutMode === 'row') grid.classList.add('one-row');
+    localStorage.setItem('layout', layoutMode);
+  }
+  document.getElementById('layout').onclick = () => { layoutMode = layoutMode === 'grid' ? 'col' : layoutMode === 'col' ? 'row' : 'grid'; applyLayout(); };
+  applyLayout();
   document.getElementById('loginAll').onclick = loginAll;
 
   // ----- Dropdown "Menu" (Som, Eco, Dormir, Chat, Grade, idioma) -----
@@ -664,12 +893,503 @@
   document.getElementById('menuBtn').onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); };
   document.addEventListener('click', (e) => { if (!menuWrap.contains(e.target)) menu.classList.remove('show'); });
 
+  // ===== Painel de resumo: le o coletor window.__poke da conta em foco =====
+  const READ_STATE = `(() => {
+    const P = window.__poke;
+    if (!P || !P.ws) return { ok:false };
+    const ws = P.ws, api = P.api || {};
+    const ch = (api['/api/characters/me'] && api['/api/characters/me'].character) || {};
+    const cat = {};
+    const doc = api['/game/items.json'];
+    if (doc && doc.items) doc.items.forEach(it => cat[it.id] = it);
+    // sessao ao vivo, calculada dos eventos (nao depende do Hunt Analyzer aberto)
+    let ballPrice = 0; const bmc = ws.balls;
+    if (bmc && bmc.catalog) { const abid = ch.autoCatchBallId || (ws['catch-result'] && ws['catch-result'].ballId); const bb = bmc.catalog.find(x => x.id === abid); ballPrice = bb ? bb.priceGold : 0; }
+    const calc = (S, end) => {
+      if (!S || !S.start) return null;
+      const secs = Math.max(1, (end - S.start) / 1000);
+      let lootGold = 0; const dr = [];
+      for (const id in S.drops) { const dd = S.drops[id]; const g = dd.qty * ((cat[id] && cat[id].npcPrice) || 0); lootGold += g; dr.push({ name: dd.name, qty: dd.qty, gold: g }); }
+      dr.sort((x, y) => y.gold - x.gold);
+      const supplyGold = S.balls * ballPrice, balance = lootGold - supplyGold, ph = v => Math.round(v / secs * 3600);
+      return { kills: S.kills, seconds: secs, captures: S.captures, shinyFound: S.shinyN || 0, shinyCap: S.shinyCapN || 0, xpg: S.xp, lootGold, capturesGold: 0, supplyGold, balance, gph: ph(balance), xph: ph(S.xp), kph: ph(S.kills), drops: dr };
+    };
+    const a = calc(P.sess, Date.now());
+    const drops = a ? a.drops : [];
+    const prev = calc(P.prev, (P.prev && P.prev.end) || Date.now());
+    const bag = [];
+    const bm = ws.balls;
+    if (bm && bm.counts) {
+      const byId = {}; (bm.catalog||[]).forEach(b => byId[b.id]=b);
+      const items = Object.keys(bm.counts).map(id => ({ id:'b'+id, name:(byId[id]||{}).name||('#'+id), qty:bm.counts[id] })).filter(x=>x.qty>0).sort((x,y)=>y.qty-x.qty);
+      if (items.length) bag.push({ label:'Pokébolas', total: items.reduce((s,x)=>s+x.qty,0), items });
+    }
+    const inv = (ws.inventory && ws.inventory.items) || [];
+    const groups = {};
+    inv.forEach(it => { const m = cat[it.itemId] || {}; const c = m.category || 'outros'; (groups[c] = groups[c] || []).push({ id: 'i'+it.itemId, name: m.name || ('#'+it.itemId), qty: it.quantity }); });
+    const LABELS = { potion:'Heal', heal:'Heal', revive:'Revive', loot:'Loot', stone:'Stones', key:'Chaves', outros:'Outros' };
+    const ORDER = ['potion','heal','revive','loot','stone','key','outros'];
+    const done = {};
+    const pushGrp = c => { const items = groups[c].sort((x,y)=>y.qty-x.qty); bag.push({ label: LABELS[c]||c, total: items.reduce((s,x)=>s+x.qty,0), items }); done[c]=1; };
+    ORDER.forEach(c => { if (groups[c]) pushGrp(c); });
+    Object.keys(groups).forEach(c => { if (!done[c]) pushGrp(c); });
+    const team = ((ws.pokes && ws.pokes.list)||[]).filter(p=>p.team).sort((x,y)=>(x.slot||0)-(y.slot||0)).map(p=>({name:p.name,level:p.level,shiny:!!p.shiny}));
+    let hunt = (ws['field-init'] && ws['field-init'].slug) || '';
+    hunt = hunt.replace(/[_-]+/g,' ').replace(/\\b\\w/g, m=>m.toUpperCase());
+    const mail = ws['mail-badge'] || {};
+    let sBalls = 0, sPot = 0, sRev = 0;
+    bag.forEach(g => { if (g.label === 'Pokébolas') sBalls = g.total; else if (g.label === 'Heal') sPot = g.total; else if (g.label === 'Revive') sRev = g.total; });
+    const invMap = {}; inv.forEach(it => invMap[it.itemId] = it.quantity);
+    const ballMap = {}; if (bm && bm.counts) for (const bk in bm.counts) ballMap[bk] = bm.counts[bk];
+    return { ok:true, cid: ch.id||'', name: ch.name||'', level: ch.level||0, gold: ch.gold||0, diamonds: ch.diamonds||0, vip: !!ch.isVip, clan: ch.clan||null, clanRank: ch.clanRank||0, shinyEnc: P.shinyEnc||0, usedList: P.usedList||[], balls: sBalls, potions: sPot, revives: sRev, invMap, ballMap,
+      prof: ch.profession||'', profRank: ch.professionRank||0, catches: ch.catches||0, hunt, gifts: mail.gifts||0,
+      a, drops, bag, team, prev };
+  })()`;
+
+  const statsEl = document.createElement('div');
+  statsEl.id = 'stats';
+  statsEl.innerHTML = '<div class="sb-top"></div><div class="st-head"><span>📊 Resumo</span><button class="st-gear" title="Configurar o painel">⚙</button><button class="st-x" title="Fechar">✕</button></div><div class="st-tabs"></div><div class="st-body"></div><div class="st-cfg"></div><div class="st-resize" title="Arraste para ajustar a largura"></div>';
+  document.body.appendChild(statsEl);
+  statsEl.style.top = document.getElementById('topbar').offsetHeight + 'px';
+  statsEl.style.bottom = '0';
+  statsEl.style.width = (+localStorage.getItem('statsW') || 350) + 'px';
+  const stTabs = statsEl.querySelector('.st-tabs');
+  const stBody = statsEl.querySelector('.st-body');
+  const statsBtn = document.getElementById('statsBtn');
+  let statsIdx = 0;
+  const tabNames = [];
+  let statsOpen = localStorage.getItem('statsOpen') === '1';
+  let cfgOpen = false;
+  let dragging = false; // arrastando uma seção no painel (pausa o refresh)
+
+  const nf = n => (n == null ? '–' : Math.round(n).toLocaleString('pt-BR'));
+  const sgn = n => (n > 0 ? '+' : '') + nf(n);
+  const tsec = s => { s = Math.max(0, Math.round(s || 0)); const m = Math.floor(s % 3600 / 60), ss = s % 60, h = Math.floor(s / 3600); return h ? h + 'h ' + String(m).padStart(2, '0') + 'm' : m + 'm ' + String(ss).padStart(2, '0') + 's'; };
+  const stName = i => (accounts[i] && accounts[i].name) || defName(i);
+  const nc = n => { if (n == null) return '–'; const s = n < 0 ? '-' : '', x = Math.abs(n); if (x >= 1e6) return s + (x / 1e6).toFixed(x >= 1e7 ? 0 : 1).replace('.0', '').replace('.', ',') + 'M'; if (x >= 1e4) return s + (x / 1e3).toFixed(x >= 1e5 ? 0 : 1).replace('.0', '').replace('.', ',') + 'K'; return nf(n); };
+  const ncs = n => (n > 0 ? '+' : '') + nc(n);
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  const sec = (color, lb, rt) => '<div class="div"></div><div class="sec"><span class="mk" style="background:' + color + ';"></span><span class="lb">' + lb + '</span>' + (rt ? '<span class="rt">' + rt + '</span>' : '') + '</div>';
+  const row = (l, v, c) => '<div class="r"><span class="l">' + l + '</span><span class="v"' + (c ? ' style="color:' + c + '"' : '') + '>' + v + '</span></div>';
+  const g4 = (l, v, c) => '<div class="g4"><div class="v"' + (c ? ' style="color:' + c + '"' : '') + '>' + v + '</div><div class="l">' + l + '</div></div>';
+
+  function buildStatsTabs() {
+    stTabs.innerHTML = '';
+    const all = document.createElement('div'); // aba de totais (Σ)
+    all.className = 'st-tab st-all' + (statsIdx === -1 ? ' on' : '');
+    all.textContent = 'Σ';
+    all.title = t('stAllTitle');
+    all.onclick = () => { statsIdx = -1; buildStatsTabs(); refreshStats(); };
+    stTabs.appendChild(all);
+    for (let i = 0; i < count; i++) {
+      const b = document.createElement('div');
+      b.className = 'st-tab' + (i === statsIdx ? ' on' : '');
+      b.style.setProperty('--tabc', ACOR[i] || '#e3350d'); // destaque na cor da conta
+      b.textContent = tabNames[i] || stName(i);
+      b.onclick = () => { statsIdx = i; buildStatsTabs(); refreshStats(); };
+      stTabs.appendChild(b);
+    }
+  }
+
+  const BAGCOR = { 'Pokébolas':'#e3350d', 'Heal':'#f778ba', 'Revive':'#58a6ff', 'Loot':'#e0b458', 'Stones':'#bc8cff', 'Chaves':'#f2c665', 'Outros':'#7d8590' };
+  // ----- Config modular do painel (ordem, visibilidade, itens fixados) -----
+  const SECTIONS = ['kpis', 'session', 'gold', 'compare', 'drops', 'bag', 'pinned', 'target', 'team'];
+  const BAGCATS = ['Pokébolas', 'Heal', 'Revive', 'Loot', 'Stones', 'Chaves', 'Outros'];
+  const secLabel = (k) => ({ kpis: t('stKpis'), session: t('stSession'), gold: t('stGold'), compare: t('stCompare'), drops: t('stDrops'), bag: 'Bag', pinned: t('stPinned'), target: t('stTargetLabel'), team: t('stTeam') }[k] || k);
+  function loadStatsCfg() {
+    let c = {}; try { c = JSON.parse(localStorage.getItem('statsCfg') || '{}'); } catch {}
+    c.order = Array.isArray(c.order) ? c.order.filter(x => SECTIONS.includes(x)) : [];
+    SECTIONS.forEach(s => { if (!c.order.includes(s)) c.order.push(s); });
+    c.bagOrder = Array.isArray(c.bagOrder) ? c.bagOrder.filter(x => BAGCATS.includes(x)) : [];
+    BAGCATS.forEach(s => { if (!c.bagOrder.includes(s)) c.bagOrder.push(s); });
+    c.hide = c.hide || {};
+    c.bagHide = c.bagHide || {};
+    c.itemHide = c.itemHide || {};
+    c.pinned = Array.isArray(c.pinned) ? c.pinned : [];
+    c.bagItems = !!c.bagItems;
+    c.bagImportantOnly = c.bagImportantOnly !== false; // padrão: mostra só os itens úteis
+    return c;
+  }
+  let cfg = loadStatsCfg();
+  let lastData = null; // ultimo d valido (pra listar itens da bag na config)
+  const saveStatsCfg = () => { try { localStorage.setItem('statsCfg', JSON.stringify(cfg)); } catch {} };
+  // Shinies encontrados na vida da conta (acumulado pelo PokeGrid, por id de personagem)
+  const loadShinyLife = () => { try { return JSON.parse(localStorage.getItem('shinyLife') || '{}'); } catch { return {}; } };
+  const addShinyLife = (cid, n) => { if (!cid || !n) return; const m = loadShinyLife(); m[cid] = (m[cid] || 0) + n; try { localStorage.setItem('shinyLife', JSON.stringify(m)); } catch {} };
+  // Emblema/nome do clã no header (defensivo: o formato do clã varia; tenta os campos comuns)
+  const clanHtml = (clan) => {
+    if (!clan) return '';
+    const raw = (typeof clan === 'string') ? clan : (clan.slug || clan.name || clan.tag || '');
+    const slug = String(raw).toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (!slug) return '';
+    // emblema é um asset do jogo em /assets/clans/{slug}.png; some sozinho se o clã nao tiver imagem
+    return '<img class="clan-emb" src="https://poke.idleworld.online/assets/clans/' + slug + '.png" alt="" title="Clã: ' + esc(String(raw)) + '" onerror="this.style.display=\'none\'">';
+  };
+
+  // Construtores de cada seção (retornam HTML). Recebem d (dados) e a (analyzer da sessão).
+  const B = {
+    kpis: (d, a) => '<div class="kpis">'
+      + '<div class="kpi g"><span class="ac"></span><div class="kv" style="color:' + (a && a.gph < 0 ? '#f0883e' : '#3fb950') + ';">' + (a ? ncs(a.gph) : '–') + '</div><div class="kl">gold / h</div></div>'
+      + '<div class="kpi b"><span class="ac"></span><div class="kv" style="color:#79c0ff;">' + (a ? nc(a.xph) : '–') + '</div><div class="kl">XP / h</div></div>'
+      + '<div class="kpi n"><span class="ac"></span><div class="kv">' + (a ? nf(a.kph) : '–') + '</div><div class="kl">kills / h</div></div></div>',
+    session: (d, a) => {
+      if (!a) return '';
+      const life = d.shinyEnc || 0;
+      return sec('#58a6ff', t('stSession'), tsec(a.seconds))
+        + '<div class="grid4">' + g4(t('stDefeated'), nf(a.kills)) + g4(t('stXpGain'), nc(a.xpg), '#79c0ff') + g4(t('stCaptures'), nf(a.captures)) + g4(t('stShinyFound'), nf(a.shinyFound), a.shinyFound > 0 ? '#f778ba' : '#e6edf3') + '</div>'
+        + row(t('stShinyCap'), '✨ ' + nf(a.shinyCap), a.shinyCap > 0 ? '#f778ba' : '#6e7681')
+        + row(t('stShinyLife'), '✨ ' + nf(life), '#f2c665');
+    },
+    gold: (d, a) => {
+      if (!a) return '';
+      let s = sec('#d9a441', t('stGold')) + row(t('stLoot'), sgn(a.lootGold), '#3fb950');
+      if (a.capturesGold) s += row(t('stCapSell'), sgn(a.capturesGold), '#3fb950');
+      s += row(t('stSupply'), sgn(-a.supplyGold), '#f0883e');
+      const pos = a.balance >= 0;
+      return s + '<div class="saldo" style="background:' + (pos ? '#0f2417' : '#2a1315') + ';border:1px solid ' + (pos ? '#1c4a2c' : '#5a2327') + ';"><span class="sl" style="color:' + (pos ? '#7ee0a0' : '#f0a3a3') + ';">' + t('stBalance') + '</span><span class="sv" style="color:' + (pos ? '#3fb950' : '#f85149') + ';">' + sgn(a.balance) + '</span></div>';
+    },
+    compare: (d, a) => {
+      const pv = d.prev;
+      if (!a || !pv || pv.seconds <= 20 || pv.kills <= 0) return '';
+      const cmp = (l, p, c, f) => { const eq = c === p, up = c > p; return '<div class="cmp"><span class="cl">' + l + '</span><span class="cp">' + f(p) + '</span><span class="cc" style="color:' + (eq ? '#8b949e' : up ? '#3fb950' : '#f85149') + '">' + f(c) + (eq ? '' : up ? ' ▲' : ' ▼') + '</span></div>'; };
+      return sec('#a371f7', t('stCompare')) + '<div class="cmp cmp-h"><span class="cl"></span><span class="cp">' + t('stPrev') + '</span><span class="cc">' + t('stCur') + '</span></div>'
+        + cmp('Gold/h', pv.gph, a.gph, ncs) + cmp('XP/h', pv.xph, a.xph, nc) + cmp('Kills/h', pv.kph, a.kph, nf);
+    },
+    drops: (d, a) => {
+      if (!a || !d.drops || !d.drops.length) return '';
+      let s = sec('#d9a441', t('stDrops')) + '<div class="pb">';
+      d.drops.slice(0, 5).forEach(x => s += '<div class="drop"><span class="dn"><b>' + x.name + '</b> <span class="dq">×' + nf(x.qty) + '</span></span><span class="dg">$' + nf(x.gold) + '</span></div>');
+      return s + '</div>';
+    },
+    bag: (d) => {
+      if (!d.bag || !d.bag.length) return '';
+      const byLabel = {}; d.bag.forEach(g => byLabel[g.label] = g);
+      const order = cfg.bagOrder.filter(l => byLabel[l]); d.bag.forEach(g => { if (!order.includes(g.label)) order.push(g.label); });
+      // filtra categorias escondidas e itens escondidos, recalcula o total
+      const vis = order.filter(l => !cfg.bagHide[l]).map(l => { const g = byLabel[l]; const items = (g.items || []).filter(it => !cfg.itemHide[it.id]); return { label: l, items, total: items.reduce((s, x) => s + x.qty, 0) }; }).filter(g => g.items.length);
+      if (!vis.length) return '';
+      let s = sec('#2bb0a8', 'Bag') + '<div class="baggrid">';
+      vis.forEach(g => { const cc = BAGCOR[g.label] || '#7d8590'; s += '<div class="bg"><span class="bcd" style="background:' + cc + ';color:' + cc + ';"></span><span class="bn">' + g.label + '</span><span class="bt">' + nf(g.total) + '</span></div>'; });
+      s += '</div>';
+      const showAll = cfg.bagItems, impMode = !showAll && cfg.bagImportantOnly;
+      if (showAll || impMode) {
+        let imp = null;
+        if (impMode) {
+          const inv = d.invMap || {};
+          imp = new Set(['b4', 'i59195', 'i44417']); // Ultra Ball, Rare Pokémon Picture, Strange Pheromone
+          for (const pid of [204, 203, 202, 201, 200]) if (inv[pid]) { imp.add('i' + pid); break; } // potion mais forte que tiver
+          for (const rid of [206, 205]) if (inv[rid]) { imp.add('i' + rid); break; } // revive mais forte que tiver
+        }
+        s += '<div class="pb">';
+        vis.forEach(g => {
+          const items = imp ? g.items.filter(it => imp.has(it.id)) : g.items;
+          if (!items.length) return;
+          const cc = BAGCOR[g.label] || '#7d8590';
+          s += '<div class="cat"><span class="cd" style="background:' + cc + ';color:' + cc + '"></span><span class="cn">' + g.label + '</span></div>';
+          items.slice(0, 8).forEach(it => s += '<div class="it"><span>' + esc(it.name) + '</span><span class="q">' + nf(it.qty) + '</span></div>');
+        });
+        s += '</div>';
+      }
+      return s;
+    },
+    pinned: (d) => {
+      if (!cfg.pinned.length) return '';
+      let s = sec('#f2c665', t('stPinned')) + '<div class="pb">';
+      cfg.pinned.forEach(p => { const qty = p.t === 'ball' ? ((d.ballMap && d.ballMap[p.id]) || 0) : ((d.invMap && d.invMap[p.id]) || 0); s += '<div class="drop"><span class="dn"><b>' + p.name + '</b></span><span class="dg" style="color:#c9d1d9">' + nf(qty) + '</span></div>'; });
+      return s + '</div>';
+    },
+    target: (d) => {
+      if (!cfg.shinyTarget) return '';
+      const tg = cfg.shinyTarget, list = d.usedList || [];
+      const shiny = list.find(x => x.sid === tg.id && x.shiny);
+      const norm = list.find(x => x.sid === tg.id && !x.shiny);
+      let s = sec('#f778ba', '🎯 ' + tg.name);
+      if (shiny) {
+        s += row(t('stTargetStatus'), shiny.caught ? '✓ ' + t('stCaught') : t('stFoundNotCaught'), shiny.caught ? '#3fb950' : '#f0883e');
+        s += row(t('stTargetShinyTries'), nf(shiny.attempts), '#f778ba');
+      } else s += row(t('stTargetStatus'), t('stNotAppeared'), '#8b949e');
+      if (norm) s += row(t('stTargetFarm'), nf(norm.total) + ' 🔴 · ' + nf(norm.attempts) + ' ' + t('stTries'), '#adbac7');
+      return s;
+    },
+    team: (d) => {
+      if (!d.team || !d.team.length) return '';
+      let s = sec('#3fb950', t('stTeam')) + '<div class="team">';
+      d.team.forEach(p => s += '<span class="tm">' + (p.shiny ? '✨ ' : '') + esc(p.name) + ' <b>Lv' + nf(p.level) + '</b></span>');
+      return s + '</div>';
+    }
+  };
+  function renderStats(d) {
+    if (!d || !d.ok) { stBody.innerHTML = '<div class="st-empty">' + t('statsWaiting') + '<br>' + t('statsWaiting2') + '</div>'; return; }
+    lastData = d;
+    const a = d.a;
+    const pokeball = '<svg width="42" height="42" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#f6f8fa" stroke="#0b0f14" stroke-width="2"/><path d="M1.6 16a14.4 14.4 0 0 1 28.8 0Z" fill="#e3350d"/><path d="M4 12.5a12.4 12.4 0 0 1 10-6" fill="none" stroke="#ff8566" stroke-width="2" stroke-linecap="round" opacity=".85"/><rect x="1.2" y="14.4" width="29.6" height="3.2" fill="#0b0f14"/><circle cx="16" cy="16" r="4.8" fill="#0b0f14"/><circle cx="16" cy="16" r="3.2" fill="#f6f8fa" stroke="#0b0f14" stroke-width="1"/><circle cx="16" cy="16" r="1.4" fill="#cfe8ff"/></svg>';
+    const pin = '<svg width="10" height="10" viewBox="0 0 24 24" fill="#e3350d"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>';
+    const coin = '<svg width="18" height="18" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#f2c665" stroke="#a9781f" stroke-width="1"/><circle cx="8" cy="8" r="4.6" fill="none" stroke="#c9922f" stroke-width="1"/><path d="M5 4.3a5 5 0 0 1 4-1.1" stroke="#fff2c8" stroke-width="1" fill="none" stroke-linecap="round" opacity=".85"/></svg>';
+    let h = '<div class="head"><div class="idrow"><span class="ava">' + pokeball + '<span class="lvl">' + nf(d.level) + '</span></span>'
+      + '<div class="idcol"><div class="nm"><span class="nmt">' + esc(d.name || '—') + '</span>' + (d.vip ? '<span class="vip">VIP</span>' : '') + clanHtml(d.clan) + '</div>'
+      + '<div class="loc">' + (d.hunt ? pin + ' ' + d.hunt : t('stLevel') + ' ' + nf(d.level)) + '</div>'
+      + '<div class="goldline">' + coin + '<span class="gv">$' + nf(d.gold) + '</span><span class="dia"><svg width="13" height="13" viewBox="0 0 24 24" fill="#5bc0ff"><path d="M6 2h12l4 7-10 13L2 9z"/></svg>' + nf(d.diamonds) + '</span></div>'
+      + '</div></div></div>';
+    cfg.order.forEach(name => { if (cfg.hide[name]) return; const fn = B[name]; if (!fn) return; const html = fn(d, a); if (html) h += '<div class="dsect" data-sec="' + name + '" draggable="true"><span class="dgrip" title="Arraste para reordenar">⋮⋮</span>' + html + '</div>'; });
+    h += '<div style="height:12px;"></div>';
+    stBody.innerHTML = h;
+    wireSectionDrag();
+  }
+  let dragSectName = null;
+  function wireSectionDrag() {
+    stBody.querySelectorAll('.dsect').forEach(el => {
+      el.addEventListener('dragstart', () => { dragging = true; dragSectName = el.dataset.sec; el.style.opacity = '.4'; });
+      el.addEventListener('dragend', () => { dragging = false; el.style.opacity = ''; stBody.querySelectorAll('.dsect').forEach(x => x.classList.remove('dragover')); });
+      el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('dragover'); });
+      el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+      el.addEventListener('drop', (e) => {
+        e.preventDefault(); const tgt = el.dataset.sec;
+        if (dragSectName && dragSectName !== tgt) { cfg.order.splice(cfg.order.indexOf(dragSectName), 1); cfg.order.splice(cfg.order.indexOf(tgt), 0, dragSectName); saveStatsCfg(); }
+        dragging = false; refreshStats();
+      });
+    });
+  }
+
+  // le o nome do treinador (do jogo) de cada painel pra rotular as abas
+  const NAME_JS = "(window.__poke&&window.__poke.api&&window.__poke.api['/api/characters/me']&&window.__poke.api['/api/characters/me'].character.name)||''";
+  async function loadTabNames() {
+    let changed = false;
+    for (let i = 0; i < count; i++) {
+      if (off[i] || !webviews[i]) continue;
+      try { const nm = await webviews[i].executeJavaScript(NAME_JS); if (nm && tabNames[i] !== nm) { tabNames[i] = nm; changed = true; } } catch {}
+    }
+    if (changed) buildStatsTabs();
+  }
+
+  // Visão de totais + cartão por conta.
+  const ACOR = ['#c07bf5', '#3987e5', '#1baf7a', '#eda100']; // cor de cada conta (1=violeta)
+  function aggCard(dot, name, d) {
+    const a = d && d.ok ? d.a : null;
+    const gc = a && a.gph < 0 ? '#f0883e' : '#3fb950';
+    const money = d ? '$' + nc(d.gold || 0) : '–';
+    const dia = d ? (d.diamonds || 0) : 0;
+    const life = d ? (d.shinyEnc || 0) : 0;
+    const stats = a
+      ? '<span style="color:' + gc + '">' + ncs(a.gph) + '/h</span><span style="color:#79c0ff">' + nc(a.xph) + ' xp</span><span>' + nf(a.kph) + ' k/h</span><span>' + nf(a.captures) + ' cap</span><span style="color:' + (a.shinyFound > 0 ? '#f778ba' : '#8b949e') + '">✨' + nf(a.shinyFound) + ' enc</span><span style="color:' + (a.shinyCap > 0 ? '#f778ba' : '#8b949e') + '">✨' + nf(a.shinyCap) + ' cap</span><span style="color:#f2c665">✨' + nf(life) + ' vida</span>'
+      : '<span style="color:#6e7681">' + (d ? t('statsWaiting') : t('statsOff')) + '</span>';
+    return '<div class="acard"><div class="ac1"><span class="acd" style="background:' + dot + ';color:' + dot + '"></span><span class="acn">' + esc(name) + '</span><span class="acm">' + money + ' · 💎' + nf(dia) + '</span></div><div class="ac2">' + stats + '</div></div>';
+  }
+  const a4c = (l, v, c) => '<div class="a4"><div class="a4v"' + (c ? ' style="color:' + c + '"' : '') + '>' + v + '</div><div class="a4l">' + l + '</div></div>';
+  const sgrid = (n, inner) => '<div class="agg4" style="grid-template-columns:repeat(' + n + ',1fr)">' + inner + '</div>';
+  async function renderAggregate() {
+    let gph = 0, xph = 0, kph = 0, kills = 0, caps = 0, shF = 0, shC = 0, money = 0, dia = 0, balls = 0, pot = 0, rev = 0, lifeT = 0, cards = '';
+    for (let i = 0; i < count; i++) {
+      const nm0 = tabNames[i] || stName(i), dot = ACOR[i] || '#8b949e';
+      if (off[i] || !webviews[i]) { cards += aggCard(dot, nm0, null); continue; }
+      let d = null; try { d = await webviews[i].executeJavaScript(READ_STATE); } catch {}
+      if (d && d.name && tabNames[i] !== d.name) { tabNames[i] = d.name; buildStatsTabs(); }
+      cards += aggCard(dot, (d && d.name) || nm0, d);
+      const a = d && d.ok ? d.a : null;
+      if (a) { gph += a.gph || 0; xph += a.xph || 0; kph += a.kph || 0; kills += a.kills || 0; caps += a.captures || 0; shF += a.shinyFound || 0; shC += a.shinyCap || 0; }
+      if (d) { money += d.gold || 0; dia += d.diamonds || 0; balls += d.balls || 0; pot += d.potions || 0; rev += d.revives || 0; lifeT += d.shinyEnc || 0; }
+    }
+    let h = '<div class="head" style="padding:12px 16px 8px;"><div class="sec" style="border:0;padding:0;"><span class="mk" style="background:#e3350d;"></span><span class="lb">' + t('stAllTitle') + '</span></div></div>';
+    h += '<div class="kpis">'
+      + '<div class="kpi g"><span class="ac"></span><div class="kv" style="color:' + (gph < 0 ? '#f0883e' : '#3fb950') + ';">' + ncs(gph) + '</div><div class="kl">gold / h</div></div>'
+      + '<div class="kpi b"><span class="ac"></span><div class="kv" style="color:#79c0ff;">' + nc(xph) + '</div><div class="kl">XP / h</div></div>'
+      + '<div class="kpi n"><span class="ac"></span><div class="kv">' + nf(kph) + '</div><div class="kl">kills / h</div></div></div>';
+    h += sec('#58a6ff', t('stSession')) + sgrid(4, a4c(t('stDefeated'), nc(kills)) + a4c(t('stCaptures'), nf(caps)) + a4c(t('stShinyF'), nf(shF), shF > 0 ? '#f778ba' : null) + a4c(t('stShinyC'), nf(shC), shC > 0 ? '#f778ba' : null))
+      + row(t('stShinyLifeAll'), '✨ ' + nf(lifeT), '#f2c665');
+    h += sec('#2bb0a8', t('stSupplies')) + sgrid(3, a4c('Pokébolas', nc(balls), '#e3350d') + a4c('Potions', nc(pot), '#f778ba') + a4c('Revives', nc(rev), '#58a6ff'));
+    h += sec('#f2c665', t('stAssets')) + sgrid(2, a4c('$ total', '$' + nc(money), '#f2c665') + a4c('💎 total', nf(dia), '#8ab4ff'));
+    h += sec('#e3350d', t('stPerAcc')) + cards;
+    stBody.innerHTML = h + '<div style="height:12px;"></div>';
+  }
+
+  async function refreshStats() {
+    if (!statsOpen || dragging) return;
+    if (stTabs.childElementCount !== count + 1) buildStatsTabs();
+    if (statsIdx >= count) { statsIdx = 0; buildStatsTabs(); }
+    if (statsIdx === -1) { await renderAggregate(); return; }
+    const w = webviews[statsIdx];
+    if (off[statsIdx] || !w) { stBody.innerHTML = '<div class="st-empty">' + t('statsOff') + '</div>'; return; }
+    try {
+      const d = await w.executeJavaScript(READ_STATE);
+      renderStats(d);
+      if (d && d.ok && d.name && tabNames[statsIdx] !== d.name) { tabNames[statsIdx] = d.name; buildStatsTabs(); }
+    } catch { stBody.innerHTML = '<div class="st-empty">' + t('statsWaiting') + '</div>'; }
+  }
+  setInterval(refreshStats, 2000);
+
+  function applyStats() {
+    statsEl.classList.toggle('show', statsOpen);
+    statsBtn.classList.toggle('on', statsOpen);
+    localStorage.setItem('statsOpen', statsOpen ? '1' : '0');
+    if (statsOpen) {
+      cfgOpen = false; const c = statsEl.querySelector('.st-cfg'); if (c) c.style.display = 'none';
+      stBody.style.display = ''; stTabs.style.display = ''; const g = statsEl.querySelector('.st-gear'); if (g) g.classList.remove('on');
+      buildStatsTabs(); loadTabNames(); refreshStats();
+    }
+  }
+  statsBtn.onclick = () => { statsOpen = !statsOpen; applyStats(); };
+  statsEl.querySelector('.st-x').onclick = () => { statsOpen = false; applyStats(); };
+  // largura ajustável: arrasta a borda direita (os elementos se reencaixam sozinhos)
+  (() => {
+    const handle = statsEl.querySelector('.st-resize');
+    let ov = null;
+    const move = (e) => { statsEl.style.width = Math.max(288, Math.min(760, e.clientX)) + 'px'; };
+    const stop = () => { if (!ov) return; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', stop); ov.remove(); ov = null; localStorage.setItem('statsW', parseInt(statsEl.style.width, 10)); };
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      // overlay por cima de tudo (inclusive dos webviews) pra nao perder o mouse durante o arraste
+      ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:ew-resize';
+      document.body.appendChild(ov);
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', stop);
+    });
+  })();
+
+  // ----- Configuração modular do painel (engrenagem) -----
+  const stCfg = statsEl.querySelector('.st-cfg');
+  const gearBtn = statsEl.querySelector('.st-gear');
+  let catalogCache = null;
+  const READ_CATALOG = `(()=>{const P=window.__poke;if(!P)return null;const api=P.api||{};const o={items:[],balls:[]};const doc=api['/game/items.json'];if(doc&&doc.items)o.items=doc.items.map(i=>({id:i.id,name:i.name}));const bm=P.ws&&P.ws.balls;if(bm&&bm.catalog)o.balls=bm.catalog.map(b=>({id:b.id,name:b.name}));return o;})()`;
+  async function loadCatalog() {
+    if (catalogCache) return catalogCache;
+    const i = webviews.findIndex((w, k) => !off[k] && w);
+    if (i < 0) return null;
+    try { catalogCache = await webviews[i].executeJavaScript(READ_CATALOG); } catch {}
+    return catalogCache;
+  }
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function renderSettings() {
+    let h = '<div class="cfg-h">' + t('cfgSections') + '</div><div class="cfg-secs">';
+    cfg.order.forEach(name => h += '<div class="cfg-row" draggable="true" data-sec="' + name + '"><span class="cfg-grip">⋮⋮</span><label class="cfg-chk"><input type="checkbox" data-sec="' + name + '"' + (cfg.hide[name] ? '' : ' checked') + '> ' + secLabel(name) + '</label></div>');
+    h += '</div>';
+    // Bag: categorias (reordenar + esconder)
+    h += '<div class="cfg-h">' + t('cfgBagCats') + '</div><div class="cfg-secs">';
+    cfg.bagOrder.forEach(l => h += '<div class="cfg-row" draggable="true" data-bag="' + l + '"><span class="cfg-grip">⋮⋮</span><label class="cfg-chk"><input type="checkbox" data-bag="' + l + '"' + (cfg.bagHide[l] ? '' : ' checked') + '> ' + l + '</label></div>');
+    h += '</div><label class="cfg-toggle"><input type="checkbox" id="cfgBagImp"' + (cfg.bagImportantOnly ? ' checked' : '') + '> ' + t('cfgImportantOnly') + '</label>';
+    h += '<label class="cfg-toggle"><input type="checkbox" id="cfgBagItems"' + (cfg.bagItems ? ' checked' : '') + '> ' + t('cfgBagItems') + '</label>';
+    // Bag: esconder itens específicos (da bag atual)
+    const bagNow = (lastData && lastData.bag) || [];
+    h += '<div class="cfg-h">' + t('cfgBagHideItems') + '</div>';
+    if (bagNow.length) {
+      h += '<div class="cfg-items">';
+      bagNow.forEach(g => { h += '<div class="cfg-isub">' + esc(g.label) + '</div>'; (g.items || []).forEach(it => h += '<label class="cfg-item"><input type="checkbox" data-item="' + it.id + '"' + (cfg.itemHide[it.id] ? '' : ' checked') + '> <span>' + esc(it.name) + '</span><span class="cfg-iq">' + nf(it.qty) + '</span></label>'); });
+      h += '</div>';
+    } else h += '<div class="cfg-noc" style="padding:2px 15px">' + t('cfgNoCat') + '</div>';
+    // Itens fixados
+    h += '<div class="cfg-h">' + t('stPinned') + '</div><input class="cfg-search" id="cfgSearch" placeholder="' + t('cfgSearch') + '"><div class="cfg-results" id="cfgResults"></div><div class="cfg-pinned">';
+    cfg.pinned.forEach((p, idx) => h += '<div class="cfg-pin"><span>' + esc(p.name) + '</span><button data-rm="' + idx + '" title="Remover">✕</button></div>');
+    h += '</div>';
+    // Alvo shiny
+    h += '<div class="cfg-h">' + t('cfgTarget') + '</div>';
+    if (cfg.shinyTarget) h += '<div class="cfg-pinned"><div class="cfg-pin"><span>🎯 ' + esc(cfg.shinyTarget.name) + '</span><button data-cleartarget="1" title="Remover">✕</button></div></div>';
+    if (lastData && lastData.usedList && lastData.usedList.length) h += '<input class="cfg-search" id="cfgTargetSearch" placeholder="' + t('cfgTargetSearch') + '"><div class="cfg-results" id="cfgTargetResults"></div>';
+    else h += '<div class="cfg-noc" style="padding:2px 15px">' + t('cfgNoCat') + '</div>';
+    h += '<div class="cfg-h">' + t('cfgCredits') + '</div><div class="cfg-credit">' + t('creditSidebar') + ' <b>poke-idle-launcher</b> · AntonioFleck<br>' + t('creditIV') + ' <b>JustPokédex</b> · guilherme-se</div>';
+    stCfg.innerHTML = h + '<div style="height:14px"></div>';
+    wireSettings();
+  }
+  function wireSettings() {
+    stCfg.querySelectorAll('.cfg-chk input[data-sec]').forEach(chk => chk.onchange = () => { cfg.hide[chk.dataset.sec] = !chk.checked; saveStatsCfg(); refreshStats(); });
+    stCfg.querySelectorAll('.cfg-chk input[data-bag]').forEach(chk => chk.onchange = () => { cfg.bagHide[chk.dataset.bag] = !chk.checked; saveStatsCfg(); refreshStats(); });
+    stCfg.querySelectorAll('.cfg-item input[data-item]').forEach(chk => chk.onchange = () => { cfg.itemHide[chk.dataset.item] = !chk.checked; saveStatsCfg(); refreshStats(); });
+    const bi = stCfg.querySelector('#cfgBagItems'); if (bi) bi.onchange = () => { cfg.bagItems = bi.checked; saveStatsCfg(); refreshStats(); };
+    const bimp = stCfg.querySelector('#cfgBagImp'); if (bimp) bimp.onchange = () => { cfg.bagImportantOnly = bimp.checked; saveStatsCfg(); refreshStats(); };
+    const setupDrag = (rows, key, arr) => {
+      let dragV = null;
+      rows.forEach(rowEl => {
+        rowEl.addEventListener('dragstart', () => { dragV = rowEl.dataset[key]; rowEl.style.opacity = '.4'; });
+        rowEl.addEventListener('dragend', () => { rowEl.style.opacity = ''; });
+        rowEl.addEventListener('dragover', e => e.preventDefault());
+        rowEl.addEventListener('drop', e => { e.preventDefault(); const tgt = rowEl.dataset[key]; if (!dragV || dragV === tgt) return; arr.splice(arr.indexOf(dragV), 1); arr.splice(arr.indexOf(tgt), 0, dragV); saveStatsCfg(); renderSettings(); refreshStats(); });
+      });
+    };
+    setupDrag(stCfg.querySelectorAll('.cfg-row[data-sec]'), 'sec', cfg.order);
+    setupDrag(stCfg.querySelectorAll('.cfg-row[data-bag]'), 'bag', cfg.bagOrder);
+    stCfg.querySelectorAll('.cfg-pin button').forEach(btn => btn.onclick = () => { cfg.pinned.splice(+btn.dataset.rm, 1); saveStatsCfg(); renderSettings(); refreshStats(); });
+    const search = stCfg.querySelector('#cfgSearch'), results = stCfg.querySelector('#cfgResults');
+    if (search) search.oninput = async () => {
+      const q = search.value.trim().toLowerCase();
+      if (q.length < 2) { results.innerHTML = ''; return; }
+      const cat = await loadCatalog();
+      if (!cat) { results.innerHTML = '<div class="cfg-noc">' + t('cfgNoCat') + '</div>'; return; }
+      const list = [];
+      cat.balls.forEach(b => { if (b.name && b.name.toLowerCase().includes(q)) list.push({ t: 'ball', id: b.id, name: b.name }); });
+      cat.items.forEach(it => { if (it.name && it.name.toLowerCase().includes(q)) list.push({ t: 'item', id: it.id, name: it.name }); });
+      results.innerHTML = list.slice(0, 12).map(x => '<div class="cfg-res" data-t="' + x.t + '" data-id="' + x.id + '" data-name="' + esc(x.name) + '">' + esc(x.name) + '</div>').join('') || '<div class="cfg-noc">—</div>';
+      results.querySelectorAll('.cfg-res').forEach(r => r.onclick = () => {
+        const id = +r.dataset.id, tp = r.dataset.t;
+        if (!cfg.pinned.some(p => p.t === tp && p.id === id)) { cfg.pinned.push({ t: tp, id, name: r.dataset.name }); saveStatsCfg(); }
+        search.value = ''; results.innerHTML = ''; renderSettings(); refreshStats();
+      });
+    };
+    const ts = stCfg.querySelector('#cfgTargetSearch'), tr = stCfg.querySelector('#cfgTargetResults');
+    if (ts) ts.oninput = () => {
+      const q = ts.value.trim().toLowerCase();
+      if (q.length < 2) { tr.innerHTML = ''; return; }
+      const uniq = {}; ((lastData && lastData.usedList) || []).forEach(x => { const base = (x.name || '').replace(/^Shiny\s+/i, ''); if (!uniq[x.sid]) uniq[x.sid] = base; });
+      const list = Object.keys(uniq).map(sid => ({ sid: +sid, name: uniq[sid] })).filter(x => x.name.toLowerCase().includes(q)).slice(0, 12);
+      tr.innerHTML = list.map(x => '<div class="cfg-res" data-tid="' + x.sid + '" data-tname="' + esc(x.name) + '">' + esc(x.name) + '</div>').join('') || '<div class="cfg-noc">—</div>';
+      tr.querySelectorAll('.cfg-res').forEach(r => r.onclick = () => { cfg.shinyTarget = { id: +r.dataset.tid, name: r.dataset.tname }; saveStatsCfg(); renderSettings(); refreshStats(); });
+    };
+    const ct = stCfg.querySelector('[data-cleartarget]'); if (ct) ct.onclick = () => { cfg.shinyTarget = null; saveStatsCfg(); renderSettings(); refreshStats(); };
+  }
+  gearBtn.onclick = () => {
+    cfgOpen = !cfgOpen;
+    stCfg.style.display = cfgOpen ? 'block' : 'none';
+    stBody.style.display = cfgOpen ? 'none' : '';
+    stTabs.style.display = cfgOpen ? 'none' : '';
+    gearBtn.classList.toggle('on', cfgOpen);
+    if (cfgOpen) { renderSettings(); loadCatalog(); }
+  };
+
+  // ===== Gerenciador de scripts / extras (userscripts injetados nos painéis) =====
+  const PRESETS = [{ id: 'justpokedex', name: 'JustPokédex — Calculadora de IV', file: 'justpokedex.js', author: 'guilherme-se' }];
+  let scriptsOn = {}; try { scriptsOn = JSON.parse(localStorage.getItem('scriptsOn') || '{}'); } catch {}
+  let userScripts = []; try { userScripts = JSON.parse(localStorage.getItem('userScripts') || '[]'); } catch {}
+  const saveScripts = () => { try { localStorage.setItem('scriptsOn', JSON.stringify(scriptsOn)); localStorage.setItem('userScripts', JSON.stringify(userScripts)); } catch {} };
+  const escH = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const presetCache = {};
+  const allScripts = () => PRESETS.concat(userScripts);
+  async function getScriptCode(s) {
+    if (s.file) { if (presetCache[s.file] == null) { try { presetCache[s.file] = (await window.pokeAPI.readPreset(s.file)) || ''; } catch { presetCache[s.file] = ''; } } return presetCache[s.file]; }
+    return s.code || '';
+  }
+  async function injectScripts(wv) {
+    for (const s of allScripts()) { if (!scriptsOn[s.id]) continue; const code = await getScriptCode(s); if (code) { try { wv.executeJavaScript(code).catch(() => {}); } catch {} } }
+  }
+  async function applyScriptToAll(sid) {
+    const s = allScripts().find(x => x.id === sid); if (!s) return;
+    const code = await getScriptCode(s); if (!code) return;
+    webviews.forEach((w, i) => { if (!off[i] && w) w.executeJavaScript(code).catch(() => {}); });
+  }
+  function renderScriptsList() {
+    const el = document.getElementById('scList');
+    el.innerHTML = allScripts().map(s => '<div class="sc-row"><label class="sc-chk"><input type="checkbox" data-sid="' + s.id + '"' + (scriptsOn[s.id] ? ' checked' : '') + '> <b>' + escH(s.name) + '</b></label>'
+      + (s.file ? '<span class="sc-tag">preset · ' + escH(s.author || '') + '</span>' : '<button class="sc-del" data-del="' + s.id + '" title="Remover">✕</button>') + '</div>').join('');
+    el.querySelectorAll('.sc-chk input').forEach(chk => chk.onchange = () => { scriptsOn[chk.dataset.sid] = chk.checked; saveScripts(); if (chk.checked) applyScriptToAll(chk.dataset.sid); });
+    el.querySelectorAll('.sc-del').forEach(b => b.onclick = () => { userScripts = userScripts.filter(u => u.id !== b.dataset.del); delete scriptsOn[b.dataset.del]; saveScripts(); renderScriptsList(); });
+  }
+  const scOverlay = document.getElementById('scOverlay');
+  document.getElementById('scriptsBtn').onclick = () => { renderScriptsList(); scOverlay.classList.add('show'); };
+  document.getElementById('scClose').onclick = () => scOverlay.classList.remove('show');
+  scOverlay.onclick = (e) => { if (e.target === scOverlay) scOverlay.classList.remove('show'); };
+  document.getElementById('scAdd').onclick = () => {
+    const nm = document.getElementById('scName').value.trim(), code = document.getElementById('scCode').value;
+    if (!nm || !code.trim()) return;
+    const id = 'u' + Date.now();
+    userScripts.push({ id, name: nm, code }); scriptsOn[id] = true; saveScripts();
+    document.getElementById('scName').value = ''; document.getElementById('scCode').value = '';
+    renderScriptsList(); applyScriptToAll(id);
+  };
+
   // ----- Init -----
   (async () => {
     try { accounts = normalize(await window.pokeAPI.loadCreds()); }
     catch { accounts = normalize([]); }
     build();
     applyLang(); // aplica idioma na interface e ja chama applyMute/Eco/Chat/Awake
+    applyStats(); // restaura o painel de resumo se estava aberto
   })();
 </script>
 </body>

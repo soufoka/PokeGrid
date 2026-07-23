@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.3.0
+
+- **📊 Painel de estatísticas** (botão no topo): barra lateral com os números de cada conta ao vivo (gold/h, XP/h, kills/h, ouro da sessão, drops, bag), mais um compilado com o total de todas as contas. Não precisa abrir o Hunt Analyzer.
+  *📊 Stats panel: a live sidebar with each account's numbers (gold/h, XP/h, kills/h, session gold, drops, bag), plus a combined view totaling all accounts. No need to open the in-game Hunt Analyzer.*
+- **Shinies**: contador de shinies encontrados na vida da conta, alerta quando um shiny aparece, e um "alvo" pra acompanhar a caça de um shiny específico.
+  *Shinies: a lifetime shinies-found counter, an alert when a shiny shows up, and a "target" to track hunting a specific shiny.*
+- **Mais alertas**: pokémon do time derrubado e inventário baixo (bolas/potions/revives) com contagem exata.
+  *More alerts: team Pokémon fainting and low inventory (balls/potions/revives) with exact counts.*
+- **Painel personalizável** (⚙): arraste as seções pra reordenar, esconda o que não usa, escolha itens da bag pra mostrar/esconder, fixe itens específicos e ajuste a largura. Emblema do clã ao lado do nome.
+  *Customizable panel (⚙): drag sections to reorder, hide what you don't use, pick which bag items show, pin specific items and resize it. Clan emblem next to the name.*
+- **🧩 Scripts**: rode userscripts nos painéis, com uma calculadora de IV (JustPokédex, do guilherme-se) já embutida.
+  *🧩 Scripts: run userscripts in the panels, with an IV calculator (JustPokédex, by guilherme-se) built in.*
+- **Layout em linha**: o botão ▦ Grade agora cicla entre grade, coluna e linha.
+  *Row layout: the ▦ Grid button now cycles between grid, column and row.*
+- Correções de segurança (o token de login não fica mais exposto na página) e o botão de doação foi removido.
+  *Security fixes (the login token is no longer exposed on the page) and the donate button was removed.*
+
 ## 1.2.0
 
 - **Escolha quantos painéis rodar (2, 3 ou 4)** no menu Opções. Roda menos contas pra gastar menos, e o layout se ajusta sozinho.
