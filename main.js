@@ -36,6 +36,35 @@ function checarAtualizacao(win) {
     }).on('error', () => {}); // falha de rede: ignora em silencio
 }
 
+// ===== Relatorio de erros: qualquer crash/travamento cai num arquivo que o usuario pode enviar =====
+const errFile = () => path.join(app.getPath('userData'), 'relatorio-de-erros.log');
+let errCabecalho = false;
+function logErro(origem, detalhe) {
+  try {
+    const f = errFile();
+    try { if (fs.statSync(f).size > 512 * 1024) fs.renameSync(f, f.replace(/\.log$/, '.antigo.log')); } catch {}
+    let txt = '';
+    if (!errCabecalho) {
+      errCabecalho = true;
+      txt += `\n=== sessao de ${new Date().toLocaleString('pt-BR')} · PokeGrid v${app.getVersion()} · Electron ${process.versions.electron} · ${process.platform} ${require('os').release()} ===\n`;
+    }
+    txt += `[${new Date().toLocaleString('pt-BR')}] [${origem}] ${String(detalhe).slice(0, 4000)}\n`;
+    fs.appendFileSync(f, txt);
+  } catch {}
+}
+process.on('uncaughtException', (e) => logErro('app', (e && e.stack) || e));
+process.on('unhandledRejection', (e) => logErro('app-promise', (e && e.stack) || e));
+app.on('child-process-gone', (_e, d) => { if (d && d.reason !== 'clean-exit') logErro('processo-' + (d.type || '?'), d.reason + (d.exitCode != null ? ' (exit ' + d.exitCode + ')' : '')); });
+// erros vindos da interface (window.onerror do index.html)
+ipcMain.handle('errlog:write', (_e, origem, msg) => { if (typeof origem === 'string' && typeof msg === 'string') logErro(origem.slice(0, 40), msg); });
+// abre a pasta com o arquivo selecionado, pro usuario mandar pro suporte
+ipcMain.handle('errlog:open', () => {
+  try {
+    if (!fs.existsSync(errFile())) fs.writeFileSync(errFile(), 'Nenhum erro registrado ate agora. / No errors recorded yet.\n');
+    shell.showItemInFolder(errFile());
+  } catch {}
+});
+
 // Instancia unica: abrir o app de novo so foca a janela ja aberta.
 if (!app.requestSingleInstanceLock()) app.quit();
 
@@ -53,8 +82,12 @@ app.on('web-contents-created', (_e, contents) => {
   contents.on('will-redirect', guarda);
   // watchdog: se o processo do painel morrer (crash/OOM), recarrega sozinho
   contents.on('render-process-gone', (_ev, d) => {
-    if (d.reason !== 'clean-exit') setTimeout(() => { try { contents.reload(); } catch {} }, 1500);
+    if (d.reason !== 'clean-exit') {
+      logErro('painel', 'processo do painel caiu: ' + d.reason + (d.exitCode != null ? ' (exit ' + d.exitCode + ')' : ''));
+      setTimeout(() => { try { contents.reload(); } catch {} }, 1500);
+    }
   });
+  contents.on('unresponsive', () => logErro('painel', 'painel travou (sem responder)'));
 });
 
 const credFile = () => path.join(app.getPath('userData'), 'accounts.enc');
@@ -129,6 +162,11 @@ app.whenReady().then(() => {
     webPreferences: { webviewTag: true, preload: path.join(__dirname, 'preload.js') }
   });
   win.loadFile(path.join(__dirname, 'index.html')); // caminho absoluto: robusto no build empacotado (asar)
+
+  // registra travamento/queda da propria interface no relatorio de erros
+  win.webContents.on('unresponsive', () => logErro('janela', 'interface travou (sem responder)'));
+  win.webContents.on('responsive', () => logErro('janela', 'interface voltou a responder'));
+  win.webContents.on('render-process-gone', (_e2, d) => { if (d.reason !== 'clean-exit') logErro('janela', 'interface caiu: ' + d.reason); });
   if (!process.argv.includes('--hidden')) win.maximize(); // --hidden: nasce na bandeja, farmando
 
   // Atalhos (funcionam mesmo com o jogo focado): Ctrl+1..4 expande painel, Ctrl+M mudo.
