@@ -6,8 +6,7 @@
 
 **Four Poke Idle World accounts in a single window.**
 
-[![Release](https://img.shields.io/github/v/release/soufoka/PokeGrid?color=e3350d)](https://github.com/soufoka/PokeGrid/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/soufoka/PokeGrid/total?color=3fb950)](https://github.com/soufoka/PokeGrid/releases/latest)
+[![Download](https://img.shields.io/badge/Download-latest%20version-e3350d)](https://github.com/soufoka/PokeGrid/releases/latest)
 ![Platform](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-0078D6)
 ![Electron](https://img.shields.io/badge/Electron-43-47848F)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
