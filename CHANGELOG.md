@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- **Escolha quantos painéis rodar (2, 3 ou 4)** no menu Opções. Roda menos contas pra gastar menos, e o layout se ajusta sozinho.
+  *Choose how many panels to run (2, 3 or 4) in the Options menu. Run fewer accounts to use less, and the layout adapts on its own.*
+
 ## 1.1.3
 
 - **Alertas (🔔 no menu Opções)**: notificação do Windows quando uma conta cai (o painel não carrega ou trava) ou quando fica sem pokébola. Dá pra desligar.

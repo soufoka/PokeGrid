@@ -31,6 +31,7 @@ Aba comum do navegador não dá conta porque todas dividem os mesmos cookies: en
 
 ## O que ele faz
 
+- Rode 2, 3 ou 4 contas, você escolhe quantos painéis abrir.
 - Login automático, mesmo quando a sessão expira no meio do farm.
 - Modo Eco: segura os jogos em 15 fps e derruba o uso de CPU sem atrapalhar o progresso.
 - Liga e desliga cada painel pra devolver memória quando não estiver usando.

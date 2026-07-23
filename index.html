@@ -45,10 +45,15 @@
 
   #grid {
     flex: 1; display: grid; gap: 6px; padding: 6px;
-    grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr;
     position: relative; min-height: 0;
   }
-  #grid.one-col { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+  #grid.count-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+  #grid.count-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  #grid.count-3 .panel:last-child { grid-column: 1 / -1; }   /* 3o painel ocupa a linha de baixo inteira */
+  #grid.count-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  #grid.one-col { grid-template-columns: 1fr !important; grid-template-rows: none; }
+  #grid.one-col .panel { grid-column: auto !important; }
 
   .panel { display: flex; flex-direction: column; min-height: 0;
     background: #161b22; border: 1px solid #21262d; border-radius: 8px; overflow: hidden; }
@@ -101,6 +106,7 @@
     <div id="menuWrap">
       <button id="menuBtn">☰ Opções</button>
       <div id="menu">
+        <button id="count" title="Quantas contas rodar ao mesmo tempo (2 a 4)">🔢 Painéis: 4</button>
         <button id="alerts" title="Avisa quando uma conta cai ou fica sem pokébola">🔔 Alertas</button>
         <button id="chat" title="Mostra ou esconde o chat do jogo em todos os painéis">💬 Chat</button>
         <button id="muteAll">🔊 Som</button>
@@ -137,6 +143,7 @@
   const off = [false, false, false, false];
   const lastLogin = [0, 0, 0, 0]; // cooldown do auto-login por painel (evita ressubmeter em loop)
   const alertedBalls = [false, false, false, false]; // ja avisou "sem pokebola" nesta falta?
+  let count = Math.min(4, Math.max(2, +localStorage.getItem('count') || 4)); // quantos paineis rodar (2 a 4)
   let muted = localStorage.getItem('muted') === '1';
 
   // ----- Idioma (interface + jogo) -----
@@ -148,7 +155,7 @@
       optionsBtn:'☰ Opções',
       dockLabel:'🎛 Menu do jogo', dockTitle:'Mostra ou esconde o menu de ícones do jogo (verde = visível). F2 alterna no painel em foco.',
       hunt:'🎯 Hunt', huntTitle:'Abre o Hunt Analyzer em todos os painéis', accClear:'Limpar esta conta',
-      alerts:'🔔 Alertas', alertsTitle:'Avisa por notificação quando uma conta cai ou fica sem pokébola', msgDown:'caiu', msgBalls:'está sem pokébolas',
+      alerts:'🔔 Alertas', alertsTitle:'Avisa por notificação quando uma conta cai ou fica sem pokébola', msgDown:'caiu', msgBalls:'está sem pokébolas', count:'🔢 Painéis',
       donateTitle:'Doe para o criador do app :)', refTitle:'Referral do criador, copie se quiser ajudar :)', refCopied:'✓ Copiado!',
       stLoading:'carregando…', stOnline:'online', stError:'erro', stOff:'desligada', trainer:'Treinador',
       tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tPower:'Desligar / ligar', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
@@ -163,7 +170,7 @@
       optionsBtn:'☰ Options',
       dockLabel:'🎛 Game menu', dockTitle:'Shows or hides the game icon menu (green = shown). F2 toggles it in the focused panel.',
       hunt:'🎯 Hunt', huntTitle:'Opens the Hunt Analyzer in all panels', accClear:'Clear this account',
-      alerts:'🔔 Alerts', alertsTitle:'Notifies you when an account drops or runs out of Pokéballs', msgDown:'disconnected', msgBalls:'is out of Pokéballs',
+      alerts:'🔔 Alerts', alertsTitle:'Notifies you when an account drops or runs out of Pokéballs', msgDown:'disconnected', msgBalls:'is out of Pokéballs', count:'🔢 Panels',
       donateTitle:"Donate to the app's creator :)", refTitle:"Creator's referral, copy it if you want to help :)", refCopied:'✓ Copied!',
       stLoading:'loading…', stOnline:'online', stError:'error', stOff:'off', trainer:'Trainer',
       tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tPower:'Turn off / on', tRename:'Double-click to rename', promptRename:'Trainer name:',
@@ -183,8 +190,7 @@
     return out;
   }
 
-  function build() {
-    for (let i = 0; i < 4; i++) {
+  function criarPainel(i) {
       const panel = document.createElement('div');
       panel.className = 'panel';
       panel.innerHTML = `
@@ -258,11 +264,36 @@
         const novo = prompt(t('promptRename'), accounts[i].name || defName(i));
         if (novo != null) { accounts[i].name = novo; nameEl.textContent = novo || defName(i); save(); }
       };
-    }
   }
+
+  // ----- Numero de paineis (2 a 4), escolhido no menu -----
+  const countBtn = document.getElementById('count');
+  function aplicaCountLayout() {
+    grid.classList.remove('count-2', 'count-3', 'count-4');
+    grid.classList.add('count-' + count);
+    countBtn.textContent = t('count') + ': ' + count;
+    localStorage.setItem('count', count);
+  }
+  function build() { for (let i = 0; i < count; i++) criarPainel(i); aplicaCountLayout(); }
+  function setCount(n) {
+    n = Math.min(4, Math.max(2, n));
+    const atual = webviews.length;
+    count = n;
+    if (n < atual) { // remove os paineis do fim (remover do DOM ja destroi o webview)
+      for (let i = atual - 1; i >= n; i--) {
+        if (grid.children[i]) grid.children[i].remove();
+        webviews.pop();
+      }
+    } else if (n > atual) { // adiciona sem recarregar os existentes
+      for (let i = atual; i < n; i++) { off[i] = false; lastLogin[i] = 0; alertedBalls[i] = false; criarPainel(i); }
+    }
+    aplicaCountLayout();
+  }
+  countBtn.onclick = () => setCount(count === 4 ? 2 : count + 1); // cicla 4 -> 2 -> 3 -> 4
 
   function toggleExpand(i) {
     const p = grid.children[i];
+    if (!p) return; // painel nao existe (rodando menos de 4)
     const on = !p.classList.contains('expanded');
     [...grid.children].forEach(c => c.classList.remove('expanded')); // um por vez
     if (on) p.classList.add('expanded');
@@ -594,7 +625,7 @@
       p.querySelector('.expand').title = t('tExpand');
       p.querySelector('.power').title = t('tPower');
     });
-    applyMute(); applyEco(); applyChat(); applyDock(); applyAwake(); applyAlerts();
+    applyMute(); applyEco(); applyChat(); applyDock(); applyAwake(); applyAlerts(); aplicaCountLayout();
     localStorage.setItem('lang', lang);
   }
   function applyGameLang() {

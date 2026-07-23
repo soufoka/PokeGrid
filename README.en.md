@@ -31,6 +31,7 @@ Regular browser tabs do not cut it, since they all share the same cookies: loggi
 
 ## What it does
 
+- Run 2, 3 or 4 accounts, you choose how many panels to open.
 - Auto login, even when the session expires in the middle of a farm.
 - Eco mode: holds the games at 15 fps and cuts CPU use without hurting progress.
 - Turn each panel on or off to give memory back when you are not using it.
