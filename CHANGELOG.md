@@ -2,6 +2,10 @@
 
 ## 1.5.1
 
+- **Cor da conta na barra de cada painel.** A bolinha de status agora usa a cor da conta (a mesma do modo Simples e do painel lateral); o estado aparece pelo brilho, pelo anel vermelho no erro e pela transparência quando está desligada.
+  *Account color in each panel header. The status dot now uses the account color (the same one used in Simple mode and the side panel); state shows through the glow, a red ring on error, and transparency when off.*
+- **Correção: painel não fica mais preso em "carregando...".** O rótulo só era limpo quando a página recarregava inteira, e navegação interna do jogo deixava ele travado com a conta funcionando normalmente.
+  *Fix: panels no longer get stuck on "loading...". The label was only cleared on a full page reload, so the game internal navigation left it frozen while the account was running fine.*
 - **Potions e revives agora contam no gasto da sessão.** Só as bolas eram descontadas, então o saldo e o gold/h ficavam otimistas pra quem usa cura. O painel também mostra a contagem ao lado (bolas e curas usadas), como o Hunt Analyzer do jogo. É estimativa: o inventário é lido a cada 30s, e vender cura no mercado é indistinguível de consumir.
   *Potions and revives now count as session cost. Only balls were deducted, so balance and gold/h looked optimistic for anyone using heals. The panel also shows the counts next to it (balls and heals used), like the game Hunt Analyzer. It is an estimate: the inventory is read every 30s, and selling heals on the market is indistinguishable from using them.*
 - **Correção: o aviso de "poucas potions" não insiste mais com a conta deslogada.** Sem inventário o app lia 0 item e concluía que tinha acabado, e cada religada repetia a notificação. Agora cada aviso depende do dado que ele mede, então conta deslogada (ou ainda carregando) não gera alerta nenhum.

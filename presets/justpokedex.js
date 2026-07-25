@@ -971,9 +971,22 @@
         if (titulo) titulo.textContent = minimizado ? "IV's" : "JustPokédex";
     }
 
+    // Recolhido = fora da tela, sem pilula flutuante: quem abre e fecha e o botao IV's da
+    // barra do app. O display vai no proprio elemento pra nenhum CSS trazer a pilula de volta.
+    function aplicarVisibilidade(painel) {
+        // setProperty com "important": inline important vence qualquer CSS de autor, entao
+        // nem regra externa nem outro userscript consegue reexibir a pilula.
+        painel.style.setProperty(
+            "display",
+            painel.classList.contains("minimized") ? "none" : "flex",
+            "important"
+        );
+    }
+
     function alternarMinimizado(painel) {
         painel.classList.toggle("minimized");
 
+        aplicarVisibilidade(painel);
         atualizarBotaoMinimizar(painel);
         limitarPainelNaTela(painel);
         salvarEstadoPainel(painel);
@@ -1303,6 +1316,7 @@
 
         restaurarEstadoPainel(painel);
         painel.classList.add("minimized"); // sempre comeca minimizado; expande no clique do "IV's"
+        aplicarVisibilidade(painel);
         atualizarBotaoMinimizar(painel);
         ativarArraste(painel);
         ativarRedimensionamento(painel);
@@ -1320,8 +1334,9 @@
             .getElementById("close")
             .addEventListener("click", evento => {
                 evento.stopPropagation();
-                // recolhe pra pilula "IV's" (nao some de vez: assim sempre da pra reabrir num clique)
+                // recolhe (sai da tela); reabrir e pelo botao IV's da barra do app
                 painel.classList.add("minimized");
+                aplicarVisibilidade(painel);
                 atualizarBotaoMinimizar(painel);
                 limitarPainelNaTela(painel);
                 salvarEstadoPainel(painel);

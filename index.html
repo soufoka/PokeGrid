@@ -70,10 +70,11 @@
   .panel.expanded { position: absolute; inset: 6px; z-index: 10; }
   .panel.off webview { visibility: hidden; }
   .panel-header { display: flex; align-items: center; gap: 8px; padding: 4px 10px; background: #161b22; flex-shrink: 0; font-size: 12px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #8b949e; flex-shrink: 0; }
-  .dot.ok { background: #3fb950; }
-  .dot.err { background: #f85149; }
-  .dot.off { background: #6e7681; }
+  /* a cor vem da conta (inline, igual ao modo Simples); o estado vira opacidade e anel */
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #8b949e; flex-shrink: 0; opacity: .35; }
+  .dot.ok { opacity: 1; box-shadow: 0 0 6px currentColor; }
+  .dot.err { opacity: 1; box-shadow: 0 0 0 2px #f85149; }
+  .dot.off { opacity: .18; }
   .name { font-weight: 600; cursor: pointer; }
   .status { color: #8b949e; font-size: 11px; margin-right: auto; }
   .panel-header button { padding: 2px 8px; font-size: 11px; }
@@ -602,7 +603,12 @@
       const nameEl = panel.querySelector('.name');
       nameEl.textContent = accounts[i].name || defName(i);
 
-      wv.addEventListener('did-start-loading', () => { if (!off[i]) { dot.className = 'dot'; status.textContent = t('stLoading'); } });
+      dot.style.background = dot.style.color = ACOR[i] || '#8b949e'; // cor da conta (o color alimenta o brilho quando online)
+      let falhou = false; // ultima carga falhou? (evita o did-stop-loading apagar o estado de erro)
+      wv.addEventListener('did-start-loading', () => { if (!off[i]) { falhou = false; dot.className = 'dot'; status.textContent = t('stLoading'); } });
+      // o did-stop-loading sempre fecha o par do did-start-loading. Sem ele, navegacao interna da
+      // SPA do jogo (que nao redispara o dom-ready) deixava o painel preso em "carregando...".
+      wv.addEventListener('did-stop-loading', () => { if (!off[i] && !falhou) { dot.className = 'dot ok'; status.textContent = t('stOnline'); } });
       let fails = 0, alertedDown = false; // watchdog: falhas de carga do painel e se ja avisou a queda
       let zoom = +(localStorage.getItem('zoom' + i) || 1);
       const setZoom = (z) => {
@@ -650,7 +656,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
       });
       wv.addEventListener('did-fail-load', (e) => {
         if (e.errorCode === -3 || off[i]) return;
-        dot.className = 'dot err'; status.textContent = t('stError');
+        falhou = true; dot.className = 'dot err'; status.textContent = t('stError');
         if (++fails === 3 && !alertedDown) { alertedDown = true; alerta(i, 'msgDown'); } // queda sustentada: avisa
         if (fails <= 5) setTimeout(() => { if (!off[i]) wv.reload(); }, 6000); // watchdog: tenta reconectar
       });
