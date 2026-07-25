@@ -199,7 +199,13 @@ app.whenReady().then(() => {
   win.webContents.on('unresponsive', () => logErro('janela', 'interface travou (sem responder)'));
   win.webContents.on('responsive', () => logErro('janela', 'interface voltou a responder'));
   win.webContents.on('render-process-gone', (_e2, d) => { if (d.reason !== 'clean-exit') logErro('janela', 'interface caiu: ' + d.reason); });
-  if (!process.argv.includes('--hidden')) win.maximize(); // --hidden: nasce na bandeja, farmando
+  // Mostra a janela quando o conteudo esta pronto. Precisa do show() explicito: no Linux
+  // varios gerenciadores de janela ignoram maximize() em janela ainda nao exibida, e o app
+  // subia sem abrir nada. --hidden: nasce na bandeja, farmando.
+  if (!process.argv.includes('--hidden')) {
+    win.once('ready-to-show', () => { win.show(); win.maximize(); });
+    setTimeout(() => { if (!win.isDestroyed() && !win.isVisible()) { win.show(); win.maximize(); } }, 8000); // rede de seguranca se o evento nao vier
+  }
 
   // Atalhos (funcionam mesmo com o jogo focado): Ctrl+1..4 expande painel, Ctrl+M mudo.
   Menu.setApplicationMenu(Menu.buildFromTemplate([{
@@ -222,17 +228,29 @@ app.whenReady().then(() => {
   win.on('unmaximize', () => { wasMax = false; });
   const mostrar = () => { const m = wasMax; win.show(); if (m && !win.isMaximized()) win.maximize(); };
   const liOpts = { path: process.execPath, args: app.isPackaged ? ['--hidden'] : [__dirname, '--hidden'] };
-  tray = new Tray(path.join(__dirname, 'tray.png'));
-  tray.setToolTip('PokeGrid');
-  tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Mostrar', click: mostrar },
-    { label: 'Iniciar com o Windows', type: 'checkbox',
-      checked: app.getLoginItemSettings(liOpts).openAtLogin,
-      click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked, ...liOpts }) },
-    { label: 'Sair', click: () => app.quit() }
-  ]));
-  tray.on('click', () => win.isVisible() ? win.hide() : mostrar());
-  win.on('minimize', () => { if (minToTray) win.hide(); });
+  // Bandeja e "iniciar com o sistema" nao existem em todo ambiente (Linux sem indicador,
+  // por exemplo). Se falhar, o app segue funcionando sem bandeja em vez de morrer no boot.
+  try {
+    tray = new Tray(path.join(__dirname, 'tray.png'));
+    tray.setToolTip('PokeGrid');
+    let liOn = false;
+    try { liOn = app.getLoginItemSettings(liOpts).openAtLogin; } catch {}
+    tray.setContextMenu(Menu.buildFromTemplate([
+      { label: 'Mostrar', click: mostrar },
+      { label: 'Iniciar com o Windows', type: 'checkbox',
+        checked: liOn,
+        click: (item) => { try { app.setLoginItemSettings({ openAtLogin: item.checked, ...liOpts }); } catch (e) { logErro('bandeja', 'iniciar com o sistema nao suportado: ' + e.message); } } },
+      { label: 'Sair', click: () => app.quit() }
+    ]));
+    tray.on('click', () => win.isVisible() ? win.hide() : mostrar());
+  } catch (e) {
+    tray = null;
+    logErro('bandeja', 'sem bandeja neste sistema: ' + e.message);
+  }
+  // sem bandeja, esconder ao minimizar deixaria a janela inalcancavel: minimiza normal
+  win.on('minimize', () => { if (minToTray && tray) win.hide(); });
+  // nasceu escondido pra bandeja, mas nao ha bandeja: mostra, senao seria um processo invisivel
+  if (!tray && process.argv.includes('--hidden')) mostrar();
   app.on('second-instance', () => mostrar());
 
   // checa atualizacao (nao incomoda quem abriu escondido na bandeja pra farmar)

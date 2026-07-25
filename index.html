@@ -1157,7 +1157,7 @@
     try { window.pokeAPI.notify('PokeGrid', nome + ' ' + t(chave)); } catch {}
   }
   // Alertas via coletor: shiny, pokemon derrubado e inventario baixo (contagem exata do jogo).
-  const READ_ALERTS = `(()=>{const P=window.__poke;if(!P||!P.ws)return null;const ws=P.ws,api=P.api||{};const cat={};const doc=api['/game/items.json'];if(doc&&doc.items)doc.items.forEach(it=>cat[it.id]=it);let balls=0;const bm=ws.balls;if(bm&&bm.counts)for(const k in bm.counts)balls+=bm.counts[k];let potions=0,revives=0;const inv=(ws.inventory&&ws.inventory.items)||[];inv.forEach(it=>{const c=(cat[it.itemId]||{}).category;if(c==='heal'||c==='potion')potions+=it.quantity;else if(c==='revive')revives+=it.quantity;});const S=P.sess||{};const ch=(api['/api/characters/me']&&api['/api/characters/me'].character)||{};let ballPrice=0;if(bm&&bm.catalog){const abid=ch.autoCatchBallId||(ws['catch-result']&&ws['catch-result'].ballId);const bb=bm.catalog.find(x=>x.id===abid);ballPrice=bb?bb.priceGold:0;}let lootGold=0;for(const id in (S.drops||{})){const dd=S.drops[id];lootGold+=(dd.qty||0)*((cat[id]||{}).npcPrice||0);}return {balls,potions,revives,shinyN:S.shinyN||0,faintN:S.faintN||0,cid:ch.id||'',kills:S.kills||0,xp:S.xp||0,caps:S.captures||0,shinyCapN:S.shinyCapN||0,saldo:lootGold+(S.sellG||0)-(S.balls||0)*ballPrice,shinyLog:P.shinyLog||[],catchLog:P.catchLog||[],sess:S,slug:P.lastSlug||''};})()`;
+  const READ_ALERTS = `(()=>{const P=window.__poke;if(!P||!P.ws)return null;const ws=P.ws,api=P.api||{};const cat={};const doc=api['/game/items.json'];if(doc&&doc.items)doc.items.forEach(it=>cat[it.id]=it);let balls=0;const bm=ws.balls;if(bm&&bm.counts)for(const k in bm.counts)balls+=bm.counts[k];let potions=0,revives=0;const inv=(ws.inventory&&ws.inventory.items)||[];inv.forEach(it=>{const c=(cat[it.itemId]||{}).category;if(c==='heal'||c==='potion')potions+=it.quantity;else if(c==='revive')revives+=it.quantity;});const S=P.sess||{};const ch=(api['/api/characters/me']&&api['/api/characters/me'].character)||{};let ballPrice=0;if(bm&&bm.catalog){const abid=ch.autoCatchBallId||(ws['catch-result']&&ws['catch-result'].ballId);const bb=bm.catalog.find(x=>x.id===abid);ballPrice=bb?bb.priceGold:0;}let lootGold=0;for(const id in (S.drops||{})){const dd=S.drops[id];lootGold+=(dd.qty||0)*((cat[id]||{}).npcPrice||0);}const hasBalls=!!(bm&&bm.counts),hasInv=!!(ws.inventory&&ws.inventory.items),live=!!(ch.id||hasBalls||hasInv);return {live,hasBalls,hasInv,balls,potions,revives,shinyN:S.shinyN||0,faintN:S.faintN||0,cid:ch.id||'',kills:S.kills||0,xp:S.xp||0,caps:S.captures||0,shinyCapN:S.shinyCapN||0,saldo:lootGold+(S.sellG||0)-(S.balls||0)*ballPrice,shinyLog:P.shinyLog||[],catchLog:P.catchLog||[],sess:S,slug:P.lastSlug||''};})()`;
   const BALL_MIN = 100, POTION_MIN = 15, REVIVE_MIN = 5; // limites do "está com poucos ..."
   const lastShiny = [], lastFaint = [], lowOn = [{}, {}, {}, {}];
   function checkLow(i, key, val, min, msgKey) {
@@ -1273,7 +1273,7 @@
   function checkStall(i, r) {
     const now = Date.now();
     if (lastK[i] === undefined || r.kills !== lastK[i]) { lastK[i] = r.kills; lastKT[i] = now; stallOn[i] = false; return; }
-    if (r.kills > 0 && !stallOn[i] && alertsOn && now - (lastKT[i] || now) > 600e3) { stallOn[i] = true; alerta(i, 'msgStalled'); }
+    if (r.kills > 0 && !stallOn[i] && alertsOn && now - (lastKT[i] != null ? lastKT[i] : now) > 600e3) { stallOn[i] = true; alerta(i, 'msgStalled'); }
   }
 
   const pendA = [0, 0, 0, 0]; // ticks seguidos sem resposta (renderer travado deixa a promise pendente pra sempre)
@@ -1296,13 +1296,16 @@
         else if (r.shinyN > lastShiny[i]) { const delta = r.shinyN - lastShiny[i]; lastShiny[i] = r.shinyN; addShinyLife(r.cid, delta); if (sndShinyOn) beepShiny(); if (alertsOn) alerta(i, 'msgShiny'); }
         mergeLogs(i, r);  // logs vitalicios + webhook de shiny
         accumHist(i, r);  // historico diario
+        // conta deslogada (ou ainda carregando) nao tem inventario: 0 potions ali nao e "pouca potion",
+        // e o farm nao esta travado, so nao existe. Zera as travas pro proximo login avisar direito.
+        if (!r.live) { lowOn[i] = {}; stallOn[i] = false; lastK[i] = undefined; return; }
         checkStall(i, r); // farm parado
         if (!alertsOn) return;
         if (lastFaint[i] === undefined || r.faintN < lastFaint[i]) lastFaint[i] = r.faintN;
         else if (r.faintN > lastFaint[i]) { lastFaint[i] = r.faintN; alerta(i, 'msgFaint'); }
-        checkLow(i, 'balls', r.balls, BALL_MIN, 'msgBallsLow');
-        checkLow(i, 'potions', r.potions, POTION_MIN, 'msgPotionsLow');
-        checkLow(i, 'revives', r.revives, REVIVE_MIN, 'msgRevivesLow');
+        // cada aviso depende do dado que ele mede: inventario ainda carregando nao vale como "acabou"
+        if (r.hasBalls) checkLow(i, 'balls', r.balls, BALL_MIN, 'msgBallsLow');
+        if (r.hasInv) { checkLow(i, 'potions', r.potions, POTION_MIN, 'msgPotionsLow'); checkLow(i, 'revives', r.revives, REVIVE_MIN, 'msgRevivesLow'); }
       }).catch(() => { pendA[i] = 0; }); // rejeicao rapida (navegando/crash) nao e travamento: outros watchdogs cuidam
     });
   }, 6000);

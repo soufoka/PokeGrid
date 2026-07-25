@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.5.1
+
+- **Correção: o aviso de "poucas potions" não insiste mais com a conta deslogada.** Sem inventário o app lia 0 item e concluía que tinha acabado, e cada religada repetia a notificação. Agora cada aviso depende do dado que ele mede, então conta deslogada (ou ainda carregando) não gera alerta nenhum.
+  *Fix: the "low potions" alert no longer nags when the account is logged out. With no inventory the app read 0 items and assumed you had run out, repeating the notification on every relog. Each alert now depends on the data it measures, so a logged-out (or still loading) account triggers nothing.*
+- **Correção: o app abre no Linux.** A janela nascia escondida e só era maximizada, o que vários gerenciadores de janela ignoram, então o processo subia sem mostrar nada. Agora ela é exibida explicitamente quando o conteúdo fica pronto.
+  *Fix: the app opens on Linux. The window was created hidden and only maximized, which several window managers ignore, so the process started without showing anything. It is now shown explicitly once the content is ready.*
+- **O erro deixa de ficar escondido**: o `iniciar.sh` não descarta mais a saída de erro e, se o app fechar com falha, mostra o que tentar (sandbox, bibliotecas do sistema).
+  *Errors are no longer hidden: `iniciar.sh` stops discarding stderr and, if the app exits with a failure, suggests what to try (sandbox, system libraries).*
+- **Bandeja opcional**: em sistema sem ícone de bandeja o app continua funcionando em vez de falhar no início, e minimizar não esconde a janela quando não há bandeja pra restaurá-la.
+  *Optional tray: on systems without a tray icon the app keeps working instead of failing at startup, and minimizing does not hide the window when there is no tray to restore it from.*
+- **Atalho dos IV's dentro do jogo removido**: quem abre e fecha a calculadora agora é só o botão IV's da barra do app.
+  *In-game IV's shortcut removed: the IV's button in the app bar is now the only control for the calculator.*
+
 ## 1.5.0
 
 ### Correções que os usuários pediram
