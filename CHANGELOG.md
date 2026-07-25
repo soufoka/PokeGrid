@@ -46,8 +46,8 @@
   *Settings backup: export and import layout, preferences and history in a file.*
 - **Espanhol**, com seletor de idioma PT / EN / ES no menu.
   *Spanish, with a PT / EN / ES language selector in the menu.*
-- **Botão IV's na barra do app**: abre e fecha a calculadora em todos os painéis de uma vez.
-  *IV's button in the app bar: opens and closes the calculator in every panel at once.*
+- **Botão IV's na barra do app**: abre e fecha a calculadora em todos os painéis de uma vez. A pílula flutuante dentro do jogo saiu, o controle agora é só pelo botão da barra.
+  *IV's button in the app bar: opens and closes the calculator in every panel at once. The floating in-game pill is gone; the app bar button is now the only control.*
 - **🧼 Limpar jogo**: esconde o auto-helper, o popup de captura e o HUD do canto; a conta e o menu do jogo aparecem ao passar o mouse.
   *🧼 Clean game: hides the auto-helper, the capture popup and the corner HUD; account and game menu appear on hover.*
 - **Minimizar do seu jeito**: escolha entre bandeja ou barra de tarefas, e ao voltar a janela abre no mesmo estado de antes (maximizada continua maximizada).

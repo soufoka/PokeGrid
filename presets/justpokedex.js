@@ -785,8 +785,9 @@
             } catch (e) { }
 
             const estado = {
-                left: rect.left,
-                top: rect.top,
+                // recolhido o painel fica escondido, e ai o rect vem zerado: preserva a posicao salva
+                left: isMin ? (anterior.left != null ? anterior.left : rect.left) : rect.left,
+                top: isMin ? (anterior.top != null ? anterior.top : rect.top) : rect.top,
                 width: isMin ? (anterior.width || 340) : rect.width,
                 height: isMin ? (anterior.height || null) : rect.height,
                 minimized: isMin,
@@ -920,6 +921,7 @@
     }
 
     function limitarPainelNaTela(painel) {
+        if (painel.classList.contains("minimized")) return; // escondido: rect zerado, nao ha o que ajustar
         const rect = painel.getBoundingClientRect();
 
         const maxLeft = Math.max(
@@ -3328,6 +3330,7 @@
             /* minimizado = "botao da extensao": pilula fixa no canto inferior direito,
                fora do caminho do login e do jogo; clique abre */
             #${CONFIG.panelId}.minimized {
+                display: none !important; /* recolhido = escondido: quem abre e fecha e o botao IV's da barra do app */
                 width: 110px !important;
                 height: 40px !important;
                 left: auto !important;
