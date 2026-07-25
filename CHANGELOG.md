@@ -2,6 +2,8 @@
 
 ## 1.5.1
 
+- **Potions e revives agora contam no gasto da sessão.** Só as bolas eram descontadas, então o saldo e o gold/h ficavam otimistas pra quem usa cura. O painel também mostra a contagem ao lado (bolas e curas usadas), como o Hunt Analyzer do jogo. É estimativa: o inventário é lido a cada 30s, e vender cura no mercado é indistinguível de consumir.
+  *Potions and revives now count as session cost. Only balls were deducted, so balance and gold/h looked optimistic for anyone using heals. The panel also shows the counts next to it (balls and heals used), like the game Hunt Analyzer. It is an estimate: the inventory is read every 30s, and selling heals on the market is indistinguishable from using them.*
 - **Correção: o aviso de "poucas potions" não insiste mais com a conta deslogada.** Sem inventário o app lia 0 item e concluía que tinha acabado, e cada religada repetia a notificação. Agora cada aviso depende do dado que ele mede, então conta deslogada (ou ainda carregando) não gera alerta nenhum.
   *Fix: the "low potions" alert no longer nags when the account is logged out. With no inventory the app read 0 items and assumed you had run out, repeating the notification on every relog. Each alert now depends on the data it measures, so a logged-out (or still loading) account triggers nothing.*
 - **Correção: o app abre no Linux.** A janela nascia escondida e só era maximizada, o que vários gerenciadores de janela ignoram, então o processo subia sem mostrar nada. Agora ela é exibida explicitamente quando o conteúdo fica pronto.
