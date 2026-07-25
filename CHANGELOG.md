@@ -1,5 +1,69 @@
 # Changelog
 
+## 1.5.0
+
+### Correções que os usuários pediram
+
+- **Shiny derrotado agora conta.** Em auto-battle o shiny nascia e morria entre duas leituras, então não entrava em "Aparições de shiny". Agora a contagem vem do desfecho (derrotado ou capturado), com ✓ verde pra capturado e ✕ vermelho pra perdido.
+  *Defeated shinies now count. In auto-battle a shiny could spawn and die between two reads, so it never showed in "Shiny appearances". Counting now comes from the outcome (defeated or caught), with a green ✓ for caught and a red ✕ for lost.*
+- **Os números não zeram mais quando o painel recarrega.** Se a conta cai e reloga, a sessão continua de onde estava (kills, XP, capturas, shinies, drops, tempo na hunt). Trocar de hunt continua zerando, como antes.
+  *Stats no longer reset when a panel reloads. If an account drops and logs back in, the session continues where it was. Switching hunts still resets, as before.*
+- **Painel travado se recupera sozinho.** Três camadas: painel sem responder por 20s é reiniciado, painel silencioso por 60s recarrega, e jogo congelado por perda de contexto gráfico recarrega. Cada recuperação fica no relatório de erros.
+  *Frozen panels now recover on their own, in three layers, and each recovery is logged in the error report.*
+- **Calculadora de IV mostra o IV exato do jogo.** Abaixo do Nv 15 a estimativa por atributos errava por arredondamento (149 em vez de 150). Agora o valor informado pelo jogo tem prioridade.
+  *IV calculator shows the game's exact IV. Below Lv 15 the stat-based estimate was off by rounding; the value reported by the game now takes priority.*
+- **Rare Pokémon Picture** entra no loot e no loot/hora.
+  *Rare Pokémon Picture is now counted in loot and loot/hour.*
+- **Shiny de uma só conta** mostra em qual conta foi, igual aos outros.
+  *Single-account shinies now show which account they came from.*
+
+### Modo Simples (era "Cartas")
+
+- **Layout customizável de verdade.** Cada seção pode ser movida (arraste o ⋮⋮), ter a largura ajustada (borda direita) e a altura ajustada (borda de baixo, com clique duplo pra voltar ao automático). Grade de 12 colunas que fecha sem lacunas em tela cheia. Tudo salvo.
+  *Truly customizable layout: move, resize width and height per section, on a 12-column grid that fills the screen without gaps. All saved.*
+- **Seção "Hoje"** com gold, XP, kills, capturas e shinies do dia, mais os totais de 7 dias e de sempre.
+  *A "Today" section with the day's gold, XP, kills, captures and shinies, plus 7-day and all-time totals.*
+- **Metas diárias** de gold e de capturas, com barra de progresso.
+  *Daily gold and capture goals, with a progress bar.*
+- **Coluna Tempo** (tempo na hunt) e o **pokémon em uso** na coluna Status.
+  *A Time column (time on the hunt) and the Pokémon in use in the Status column.*
+- **Shinies tentados** com três modos: total, só a sessão, ou só os alvos que você marcar com a ★.
+  *Attempted shinies in three modes: all-time, session only, or just the targets you star.*
+- **Histórico de shinies e capturas não se perde** ao fechar o app.
+  *Shiny and capture history survives closing the app.*
+
+### Novidades
+
+- **Som do shiny**: um alerta sonoro quando aparece shiny, pra quem farma AFK. Dá pra desligar.
+  *Shiny sound: an audible alert when a shiny shows up, for AFK farming. Can be turned off.*
+- **Aviso de farm parado**: se a conta está online mas os kills não sobem há 10 minutos, você é avisado.
+  *Stalled-farm alert: if an account is online but kills haven't moved in 10 minutes, you get notified.*
+- **Webhook do Discord** (opcional): receba shiny encontrado e o resumo do dia no seu servidor. A URL é sua, o app só envia.
+  *Discord webhook (optional): get shiny alerts and the daily summary in your own server.*
+- **Exportar CSV** do histórico diário, pra abrir em planilha.
+  *Export the daily history as CSV.*
+- **Backup das configurações**: exportar e importar layout, preferências e histórico num arquivo.
+  *Settings backup: export and import layout, preferences and history in a file.*
+- **Espanhol**, com seletor de idioma PT / EN / ES no menu.
+  *Spanish, with a PT / EN / ES language selector in the menu.*
+- **Botão IV's na barra do app**: abre e fecha a calculadora em todos os painéis de uma vez.
+  *IV's button in the app bar: opens and closes the calculator in every panel at once.*
+- **🧼 Limpar jogo**: esconde o auto-helper, o popup de captura e o HUD do canto; a conta e o menu do jogo aparecem ao passar o mouse.
+  *🧼 Clean game: hides the auto-helper, the capture popup and the corner HUD; account and game menu appear on hover.*
+- **Minimizar do seu jeito**: escolha entre bandeja ou barra de tarefas, e ao voltar a janela abre no mesmo estado de antes (maximizada continua maximizada).
+  *Minimize your way: tray or taskbar, and the window returns exactly as it was.*
+- **Venda protegida** agora mostra IV, qualidade e nível do pokémon no aviso.
+  *Sell guard now shows the Pokémon's IV, quality and level in the warning.*
+
+### Segurança
+
+- **Importar configuração não carrega mais código.** Userscripts ficam fora do backup: um arquivo de config compartilhado por terceiros não pode mais rodar código na sua conta.
+  *Importing settings no longer carries code. Userscripts are excluded from backups, so a config file from someone else cannot run code in your account.*
+- **Dados salvos em disco são validados** antes de ir pra tela (cores, nomes e números), fechando XSS armazenado via arquivo importado.
+  *Data loaded from disk is validated before rendering, closing stored-XSS via imported files.*
+- **CSV sem injeção de fórmula** e **webhook sem @everyone**: nome vindo do jogo não executa nada na planilha nem marca todo mundo no Discord.
+  *No formula injection in the CSV and no @everyone in the webhook.*
+
 ## 1.4.0
 
 - **Rode 1 conta também**: o menu Painéis agora vai de 1 a 4. Quem quer focar numa conta só usa a janela inteira.

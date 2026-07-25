@@ -1282,7 +1282,7 @@
 
 
                 <div class="footer">
-                    Poke Idle World Tools
+                    Poke Idle World Tools · Discord: justpand
                 </div>
             </div>
             <div id="resize-handle"></div>
@@ -1318,7 +1318,11 @@
             .getElementById("close")
             .addEventListener("click", evento => {
                 evento.stopPropagation();
-                painel.style.display = "none";
+                // recolhe pra pilula "IV's" (nao some de vez: assim sempre da pra reabrir num clique)
+                painel.classList.add("minimized");
+                atualizarBotaoMinimizar(painel);
+                limitarPainelNaTela(painel);
+                salvarEstadoPainel(painel);
                 const movesPanelEl = document.getElementById("moves-panel");
                 if (movesPanelEl) movesPanelEl.style.display = "none";
                 mostrarAbaMoves = false;
@@ -2749,9 +2753,14 @@
         // Soma direta dos floats brutos (sem perda de precisão)
         const somaFloatExact = Object.values(ivsFloats).reduce((s, v) => s + (v || 0), 0);
 
-        // IV Total oficial (Math.ceil da soma dos floats)
-        const ivTotal = Math.ceil(somaFloatExact);
-        const percentualIV = (somaFloatExact / CONFIG.maxIVTotal) * 100;
+        // IV Total: o jogo informa o valor exato no tooltip (ivAtual). A estimativa pelos
+        // stats erra por arredondamento (principalmente abaixo do Nv 15), então o valor
+        // observado tem prioridade, desde que o nível digitado ainda seja o do pokémon lido.
+        const ivObservado = (ultimoPokemon && ultimoPokemon.ivAtual != null && Number(ultimoPokemon.nivel) === nivel)
+            ? Number(ultimoPokemon.ivAtual) : null;
+        const usaObservado = Number.isFinite(ivObservado) && ivObservado > 0;
+        const ivTotal = usaObservado ? ivObservado : Math.ceil(somaFloatExact);
+        const percentualIV = ((usaObservado ? ivObservado : somaFloatExact) / CONFIG.maxIVTotal) * 100;
 
         const ivsMaximos = {
             hp: CONFIG.maxIVIndividual,
@@ -3332,8 +3341,10 @@
                 cursor: pointer;
                 min-height: 40px;
                 padding: 5px 12px;
+                border-top: none;
                 border-bottom: none;
                 border-radius: 999px;
+                background: linear-gradient(#e8403d, #9d252b);
             }
 
             #${CONFIG.panelId}.minimized .header-actions {
@@ -3377,14 +3388,9 @@
                 padding: 9px 10px;
                 cursor: grab;
                 user-select: none;
-                background:
-                    linear-gradient(
-                        180deg,
-                        #e8403d,
-                        #b91f27 55%,
-                        #8e141c
-                    );
-                border-bottom: 3px solid #151515;
+                background: #0b0f15;
+                border-top: 2px solid #e3350d;
+                border-bottom: 1px solid #21262d;
             }
 
             #${CONFIG.panelId}

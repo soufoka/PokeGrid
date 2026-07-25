@@ -4,6 +4,8 @@ contextBridge.exposeInMainWorld('pokeAPI', {
   loadCreds: () => ipcRenderer.invoke('creds:load'),
   saveCreds: (accounts) => ipcRenderer.invoke('creds:save', accounts),
   setAwake: (on) => ipcRenderer.invoke('awake:set', on),
+  setMinToTray: (on) => ipcRenderer.invoke('mintray:set', on),
+  webhook: (url, text) => ipcRenderer.invoke('webhook:send', url, text),
   onHotkey: (cb) => ipcRenderer.on('hotkey', (_e, k) => cb(k)),
   notify: (title, body) => ipcRenderer.invoke('notify', title, body),
   readPreset: (name) => ipcRenderer.invoke('preset:read', name),

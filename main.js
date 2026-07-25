@@ -87,7 +87,16 @@ app.on('web-contents-created', (_e, contents) => {
       setTimeout(() => { try { contents.reload(); } catch {} }, 1500);
     }
   });
-  contents.on('unresponsive', () => logErro('painel', 'painel travou (sem responder)'));
+  // travou (processo vivo mas sem responder): 20s de tolerancia; se nao voltar,
+  // derruba o processo de proposito, o watchdog acima recarrega o painel sozinho
+  let hangTimer = null;
+  contents.on('unresponsive', () => {
+    logErro('painel', 'painel travou (sem responder)');
+    clearTimeout(hangTimer);
+    hangTimer = setTimeout(() => { try { if (!contents.isDestroyed()) contents.forcefullyCrashRenderer(); } catch {} }, 20000);
+  });
+  contents.on('responsive', () => { clearTimeout(hangTimer); logErro('painel', 'painel voltou a responder'); });
+  contents.on('destroyed', () => clearTimeout(hangTimer));
 });
 
 const credFile = () => path.join(app.getPath('userData'), 'accounts.enc');
@@ -144,6 +153,26 @@ ipcMain.handle('awake:set', (_e, on) => {
   return awakeId !== null;
 });
 
+// Minimizar: pra bandeja (padrao) ou normal, na barra de tarefas. A interface persiste a escolha.
+let minToTray = true;
+ipcMain.handle('mintray:set', (_e, on) => { minToTray = !!on; return minToTray; });
+
+// Webhook do Discord (opcional): o usuario cola a URL do proprio servidor. So aceita o dominio
+// oficial de webhooks; o envio sai daqui porque a CSP do renderer bloqueia rede externa.
+ipcMain.handle('webhook:send', (_e, url, text) => {
+  try {
+    const u = new URL(String(url));
+    if (u.protocol !== 'https:' || !/^(discord\.com|discordapp\.com)$/.test(u.hostname) || !u.pathname.startsWith('/api/webhooks/')) return false;
+    // allowed_mentions vazio: nome de conta/pokemon vem do jogo, nao pode virar ping de @everyone
+    const body = JSON.stringify({ content: String(text).slice(0, 1900), allowed_mentions: { parse: [] } });
+    const req = https.request(u, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => res.resume());
+    req.on('error', () => {});
+    req.setTimeout(8000, () => req.destroy());
+    req.end(body);
+    return true;
+  } catch { return false; }
+});
+
 let tray; // referencia viva para o icone nao sumir (GC)
 
 app.whenReady().then(() => {
@@ -186,19 +215,25 @@ app.whenReady().then(() => {
 
   // Bandeja: minimizar esconde da barra de tarefas; clique no icone alterna.
   // "Iniciar com o Windows" abre ja escondido na bandeja (--hidden).
+  // Ao voltar da bandeja, restaura o mesmo estado de antes: hide()+show() no
+  // Windows perde o "maximizado", entao rastreamos e reaplicamos.
+  let wasMax = true; // nasce maximizado (win.maximize() acima)
+  win.on('maximize', () => { wasMax = true; });
+  win.on('unmaximize', () => { wasMax = false; });
+  const mostrar = () => { const m = wasMax; win.show(); if (m && !win.isMaximized()) win.maximize(); };
   const liOpts = { path: process.execPath, args: app.isPackaged ? ['--hidden'] : [__dirname, '--hidden'] };
   tray = new Tray(path.join(__dirname, 'tray.png'));
   tray.setToolTip('PokeGrid');
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Mostrar', click: () => win.show() },
+    { label: 'Mostrar', click: mostrar },
     { label: 'Iniciar com o Windows', type: 'checkbox',
       checked: app.getLoginItemSettings(liOpts).openAtLogin,
       click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked, ...liOpts }) },
     { label: 'Sair', click: () => app.quit() }
   ]));
-  tray.on('click', () => win.isVisible() ? win.hide() : win.show());
-  win.on('minimize', () => win.hide());
-  app.on('second-instance', () => win.show());
+  tray.on('click', () => win.isVisible() ? win.hide() : mostrar());
+  win.on('minimize', () => { if (minToTray) win.hide(); });
+  app.on('second-instance', () => mostrar());
 
   // checa atualizacao (nao incomoda quem abriu escondido na bandeja pra farmar)
   if (!process.argv.includes('--hidden')) checarAtualizacao(win);
