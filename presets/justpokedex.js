@@ -983,8 +983,23 @@
         );
     }
 
+    // Ao abrir, cai sempre na aba do card com o formulario de calculo recolhido: e o estado que
+    // mostra nome, tipos, qualidade, IV total, os 6 stats e o poder sem precisar rolar.
+    function abrirMaximizado(painel) {
+        formularioRecolhido = true;
+        const form = document.getElementById("analysis-form");
+        if (form) form.classList.add("form-collapsed");
+        const btn = document.getElementById("toggle-form");
+        if (btn) btn.textContent = "Mostrar";
+        trocarAba("leitor");
+        // altura acompanha o conteudo (o max-height do CSS limita na tela): uma altura menor
+        // salva de antes cortaria o card e forcaria rolagem
+        painel.style.height = "auto";
+    }
+
     function alternarMinimizado(painel) {
         painel.classList.toggle("minimized");
+        if (!painel.classList.contains("minimized")) abrirMaximizado(painel);
 
         aplicarVisibilidade(painel);
         atualizarBotaoMinimizar(painel);

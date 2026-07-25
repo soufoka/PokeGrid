@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.5.2
+
+- **Aviso claro quando um shiny é CAPTURADO.** Como é o evento mais raro, agora aparece um cartão na tela com o sprite do shiny, o nome, a conta, IV e qualidade, e ele fica até você fechar. O som é mais longo que o de "apareceu" e a notificação é própria.
+  *Clear notice when a shiny is CAUGHT. Being the rarest event, a card now shows up with the shiny sprite, name, account, IV and quality, and it stays until you close it. The sound is longer than the "appeared" one and the notification is its own.*
+- **Correção: a rolagem das seções não volta mais pro topo.** No modo Simples, a atualização automática reconstruía as seções e zerava a rolagem interna de quem tinha altura ajustada.
+  *Fix: section scrolling no longer jumps back to the top. In Simple mode the auto-refresh rebuilt the sections and reset the inner scroll of any section with an adjusted height.*
+- **Melhor catch com critério à sua escolha**: IV × qualidade (padrão), só IV ou só qualidade. A qualidade multiplica os stats e o poder, então IV puro sozinho engana. A coluna passa a mostrar o multiplicador.
+  *Best catch with your choice of criterion: IV × quality (default), IV only or quality only. Quality multiplies stats and power, so raw IV alone is misleading. The column now shows the multiplier.*
+- **O botão de layout mostra o modo atual** (▦ Grade, ▤ Uma coluna, ▥ Uma linha). Antes dizia "Grade" sempre, e não dava pra saber por que os painéis estavam empilhados.
+  *The layout button now shows the current mode (grid, single column, single row). It used to always read "Grid", so there was no way to tell why panels were stacked.*
+- **A calculadora de IV abre no card do pokémon**, com o formulário de cálculo recolhido e altura acompanhando o conteúdo: mostra nome, tipos, qualidade, IV total, os 6 stats e o poder sem precisar rolar.
+  *The IV calculator opens on the Pokémon card, with the calculation form collapsed and the height following the content: name, types, quality, total IV, the 6 stats and power, no scrolling needed.*
+
 ## 1.5.1
 
 - **Cor da conta na barra de cada painel.** A bolinha de status agora usa a cor da conta (a mesma do modo Simples e do painel lateral); o estado aparece pelo brilho, pelo anel vermelho no erro e pela transparência quando está desligada.

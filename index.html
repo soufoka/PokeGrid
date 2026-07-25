@@ -214,6 +214,25 @@
   #stats .st-resize:hover { background: rgba(227,53,13,.18); }
   #stats .st-resize:hover::before { background: #e3350d; }
 
+  /* Shiny CAPTURADO: o evento mais raro do jogo, então o aviso fica na tela até ser fechado */
+  #shinyParty { position: fixed; top: 58px; left: 50%; /* abaixo da barra: nao cobre os botoes do app */ transform: translateX(-50%); z-index: 900; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+  #shinyParty .sp { pointer-events: auto; display: flex; align-items: center; gap: 14px; min-width: 380px; max-width: 92vw;
+    padding: 14px 18px; border-radius: 14px; border: 2px solid #f2c665; background: linear-gradient(135deg, #2a1033, #17202b 55%, #101820);
+    box-shadow: 0 12px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(247,120,186,.35), 0 0 26px rgba(247,120,186,.28); animation: spIn .32s ease-out, spGlow 1.9s ease-in-out infinite alternate; }
+  @keyframes spIn { from { opacity: 0; transform: translateY(-14px) scale(.94); } to { opacity: 1; transform: none; } }
+  @keyframes spGlow { from { box-shadow: 0 12px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(247,120,186,.35), 0 0 18px rgba(247,120,186,.22); }
+    to { box-shadow: 0 12px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(242,198,101,.55), 0 0 34px rgba(242,198,101,.42); } }
+  #shinyParty .sp-img { width: 76px; height: 76px; image-rendering: pixelated; object-fit: contain; flex: none; filter: drop-shadow(0 0 10px rgba(247,120,186,.55)); }
+  #shinyParty .sp-txt { min-width: 0; }
+  #shinyParty .sp-h { font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #f2c665; }
+  #shinyParty .sp-n { font-size: 22px; font-weight: 800; color: #f778ba; line-height: 1.15; margin: 2px 0 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #shinyParty .sp-sub { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #adbac7; flex-wrap: wrap; }
+  #shinyParty .sp-acd { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 6px currentColor; flex: none; }
+  #shinyParty .sp-iv { color: #55e6d3; font-variant-numeric: tabular-nums; }
+  #shinyParty .sp-q { color: #f2c665; font-variant-numeric: tabular-nums; }
+  #shinyParty .sp-t { color: #6e7681; }
+  #shinyParty .sp-x { margin-left: auto; align-self: flex-start; background: transparent; border: 1px solid #30363d; border-radius: 7px; color: #8b949e; font-size: 13px; padding: 2px 8px; cursor: pointer; flex: none; }
+  #shinyParty .sp-x:hover { border-color: #f778ba; color: #fff; }
   /* Modo Cartas: dashboard ultra leve; o grid dos webviews fica vivo mas invisível */
   #cards { display: none; flex: 1; min-height: 0; overflow-y: auto; flex-direction: column; gap: 10px; padding: 10px 14px; scrollbar-width: thin; scrollbar-color: #30363d #0d1117; }
   body.cards-on #cards { display: flex; }
@@ -400,6 +419,7 @@
   <div id="grid"></div>
   <div id="cards"></div>
 
+  <div id="shinyParty"></div>
   <div id="overlay">
     <div id="modal">
       <h2>Treinadores salvos</h2>
@@ -449,7 +469,7 @@
   // ----- Idioma (interface + jogo) -----
   const I18N = {
     pt: {
-      loginAll:'▶ Logar equipe', accounts:'👤 Treinadores', reloadAll:'⟳ Atualizar tudo', layout:'▦ Grade',
+      loginAll:'▶ Logar equipe', accounts:'👤 Treinadores', reloadAll:'⟳ Atualizar tudo', layout:'▦ Grade', layoutCol:'▤ Uma coluna', layoutRow:'▥ Uma linha', layoutTitle:'Como os painéis se organizam. Clique pra alternar: grade, uma coluna (empilhado) ou uma linha (lado a lado).',
       sound:'🔊 Som', muted:'🔇 Mudo', eco:'⚡ Eco', ecoOff:'⚡ Eco off', sleep:'💤 Dormir', awake:'☕ Acordado',
       chatHidden:'💬 Chat oculto', chatShown:'💬 Chat visível',
       optionsBtn:'☰ Opções', errlog:'🐞 Erros', errlogTitle:'Abre o relatório de erros. Se o app travar ou fechar sozinho, envie esse arquivo pro suporte.',
@@ -464,7 +484,7 @@
       sellguard:'🛡 Venda protegida', sellguardTitle:'Pede confirmação antes de vender shiny, Lendária+ ou item raro (verde = ligado)',
       clean:'🧼 Limpar jogo', cleanTitle:'Esconde o auto-helper, o popup de captura e o HUD do canto; a conta e o menu do jogo aparecem ao passar o mouse (verde = ligado)',
       reset:'Zerar', resetTitle:'Zera as estatísticas da sessão (todas as contas), pra monitorar a partir de agora', resetConfirm:'Zerar as estatísticas da sessão de todas as contas? Os totais da conta (gold, nível, shinies de vida) não mudam.',
-      msgShiny:'encontrou um SHINY! ✨', msgFaint:'teve um pokémon derrubado', msgBallsLow:'está com poucas pokébolas', msgPotionsLow:'está com poucas potions', msgRevivesLow:'está com poucos revives',
+      msgShiny:'encontrou um SHINY! ✨', msgShinyCap:'CAPTUROU um SHINY! ✨🎉', spTitle:'Shiny capturado!', spClose:'Fechar o aviso', msgFaint:'teve um pokémon derrubado', msgBallsLow:'está com poucas pokébolas', msgPotionsLow:'está com poucas potions', msgRevivesLow:'está com poucos revives',
       stAllTitle:'Resumo geral', stTotal:'Total', stAcc:'Conta', stCompare:'Comparação (hunt anterior)', stPrev:'anterior', stCur:'atual', stMoney:'dólares', stPerAcc:'Por conta',
       stShinyFound:'Shiny enc.', stShinyCap:'✨ Shiny capturados', stShinyF:'Shiny enc.', stShinyC:'Shiny capt.', stSupplies:'Suprimentos', stAssets:'Patrimônio',
       stKpis:'Ritmo (por hora)', stPinned:'Itens fixados', cfgSections:'Seções (arraste para ordenar, marque para mostrar)', cfgBagItems:'Mostrar TODOS os itens da bag', cfgImportantOnly:'Só itens importantes (Ultra Ball, melhor potion/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Buscar item, bola, pedra…', cfgNoCat:'Abra o jogo pra carregar a lista de itens', cfgBagCats:'Bag — categorias (arraste, marque pra mostrar)', cfgBagHideItems:'Bag — esconder itens específicos',
@@ -483,12 +503,12 @@
       sndOn:'✨🔊 Som do shiny', sndOff:'✨🔇 Som do shiny', sndTitle:'Toca um som quando um shiny aparece (além da notificação)',
       msgStalled:'parece ter parado de farmar (10 min sem kills)',
       cdToday:'Hoje', cdWeek:'7 dias', cdAllTime:'Total', goalG:'Meta gold/dia', goalC:'Meta capturas/dia', csvTitle:'Baixa o histórico diário em CSV (planilha)', cdLifeHint:'contadores: sessão · lista: histórico',
-      cdTargets:'Alvos', cdTargetsHint:'Sem alvos ainda: no modo Total, passe o mouse num card e clique na ★ para marcar', cdTargetsMark:'Marcar/desmarcar como alvo',
+      cdTargets:'Alvos', cdCritIvQ:'IV × qual.', cdCritIv:'IV', cdCritQ:'Qualidade', cdBestCritTitle:'Critério do melhor catch. A qualidade multiplica os stats e o poder, então IV × qualidade reflete melhor a força real.', cdTargetsHint:'Sem alvos ainda: no modo Total, passe o mouse num card e clique na ★ para marcar', cdTargetsMark:'Marcar/desmarcar como alvo',
       whTitle:'Webhook do Discord: cole a URL do seu servidor pra receber avisos', whTest:'Testar', whShiny:'Avisar shiny', whSum:'Resumo diário', whDay:'📊 Resumo de', whCaught:'CAPTURADO ✅', whLost:'perdido ✕', whTestMsg:'✅ PokeGrid conectado! Os avisos vão chegar aqui.',
       bkExp:'💾 Exportar config', bkImp:'📂 Importar config', bkExpTitle:'Salva um arquivo com todas as configurações e o histórico (senhas ficam fora)', bkImpTitle:'Restaura configurações e histórico de um arquivo exportado', bkConfirm:'Substituir as configurações atuais pelas do arquivo? O app vai recarregar. (Senhas não são afetadas.)', bkBad:'Arquivo inválido.'
     },
     en: {
-      loginAll:'▶ Log in all', accounts:'👤 Accounts', reloadAll:'⟳ Reload all', layout:'▦ Grid',
+      loginAll:'▶ Log in all', accounts:'👤 Accounts', reloadAll:'⟳ Reload all', layout:'▦ Grid', layoutCol:'▤ Single column', layoutRow:'▥ Single row', layoutTitle:'How the panels are arranged. Click to cycle: grid, single column (stacked) or single row (side by side).',
       sound:'🔊 Sound', muted:'🔇 Muted', eco:'⚡ Eco', ecoOff:'⚡ Eco off', sleep:'💤 Sleep', awake:'☕ Awake',
       chatHidden:'💬 Chat hidden', chatShown:'💬 Chat shown',
       optionsBtn:'☰ Options', errlog:'🐞 Errors', errlogTitle:'Opens the error report. If the app freezes or closes on its own, send this file to support.',
@@ -503,7 +523,7 @@
       sellguard:'🛡 Sell guard', sellguardTitle:'Asks for confirmation before selling shiny, Legendary+ or rare items (green = on)',
       clean:'🧼 Clean game', cleanTitle:'Hides the auto-helper, the capture popup and the corner HUD; the account and game menu appear on hover (green = on)',
       reset:'Reset', resetTitle:'Resets the session stats (all accounts), to monitor from now on', resetConfirm:'Reset the session stats for all accounts? Account totals (gold, level, lifetime shinies) are unchanged.',
-      msgShiny:'found a SHINY! ✨', msgFaint:'had a Pokémon knocked out', msgBallsLow:'is low on Poké Balls', msgPotionsLow:'is low on potions', msgRevivesLow:'is low on revives',
+      msgShiny:'found a SHINY! ✨', msgShinyCap:'CAUGHT a SHINY! ✨🎉', spTitle:'Shiny caught!', spClose:'Close this notice', msgFaint:'had a Pokémon knocked out', msgBallsLow:'is low on Poké Balls', msgPotionsLow:'is low on potions', msgRevivesLow:'is low on revives',
       stAllTitle:'Overview', stTotal:'Total', stAcc:'Account', stCompare:'Comparison (previous hunt)', stPrev:'previous', stCur:'current', stMoney:'dollars', stPerAcc:'Per account',
       stShinyFound:'Shiny found', stShinyCap:'✨ Shiny captured', stShinyF:'Shiny found', stShinyC:'Shiny capt.', stSupplies:'Supplies', stAssets:'Assets',
       stKpis:'Rate (per hour)', stPinned:'Pinned items', cfgSections:'Sections (drag to reorder, check to show)', cfgBagItems:'Show ALL bag items', cfgImportantOnly:'Only important items (Ultra Ball, best potion/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Search item, ball, stone…', cfgNoCat:'Open the game to load the item list', cfgBagCats:'Bag — categories (drag, check to show)', cfgBagHideItems:'Bag — hide specific items',
@@ -522,12 +542,12 @@
       sndOn:'✨🔊 Shiny sound', sndOff:'✨🔇 Shiny sound', sndTitle:'Plays a sound when a shiny appears (besides the notification)',
       msgStalled:'seems to have stopped farming (10 min without kills)',
       cdToday:'Today', cdWeek:'7 days', cdAllTime:'All time', goalG:'Gold goal/day', goalC:'Catch goal/day', csvTitle:'Downloads the daily history as a CSV (spreadsheet)', cdLifeHint:'counters: session · list: all-time',
-      cdTargets:'Targets', cdTargetsHint:'No targets yet: in Total mode, hover a card and click the ★ to mark it', cdTargetsMark:'Mark/unmark as target',
+      cdTargets:'Targets', cdCritIvQ:'IV × qual.', cdCritIv:'IV', cdCritQ:'Quality', cdBestCritTitle:'Best-catch criterion. Quality multiplies stats and power, so IV × quality reflects real strength better.', cdTargetsHint:'No targets yet: in Total mode, hover a card and click the ★ to mark it', cdTargetsMark:'Mark/unmark as target',
       whTitle:'Discord webhook: paste your server URL to receive alerts', whTest:'Test', whShiny:'Shiny alerts', whSum:'Daily summary', whDay:'📊 Summary of', whCaught:'CAUGHT ✅', whLost:'lost ✕', whTestMsg:'✅ PokeGrid connected! Alerts will arrive here.',
       bkExp:'💾 Export config', bkImp:'📂 Import config', bkExpTitle:'Saves a file with all settings and history (passwords stay out)', bkImpTitle:'Restores settings and history from an exported file', bkConfirm:'Replace the current settings with the file? The app will reload. (Passwords are not affected.)', bkBad:'Invalid file.'
     },
     es: {
-      loginAll:'▶ Iniciar equipo', accounts:'👤 Entrenadores', reloadAll:'⟳ Recargar todo', layout:'▦ Cuadrícula',
+      loginAll:'▶ Iniciar equipo', accounts:'👤 Entrenadores', reloadAll:'⟳ Recargar todo', layout:'▦ Cuadrícula', layoutCol:'▤ Una columna', layoutRow:'▥ Una fila', layoutTitle:'Cómo se organizan los paneles. Clic para alternar: cuadrícula, una columna (apilado) o una fila (lado a lado).',
       sound:'🔊 Sonido', muted:'🔇 Silencio', eco:'⚡ Eco', ecoOff:'⚡ Eco off', sleep:'💤 Dormir', awake:'☕ Despierto',
       chatHidden:'💬 Chat oculto', chatShown:'💬 Chat visible',
       optionsBtn:'☰ Opciones', errlog:'🐞 Errores', errlogTitle:'Abre el informe de errores. Si la app se congela o se cierra sola, envía este archivo al soporte.',
@@ -542,7 +562,7 @@
       sellguard:'🛡 Venta protegida', sellguardTitle:'Pide confirmación antes de vender shiny, Legendaria+ o ítem raro (verde = activado)',
       clean:'🧼 Limpiar juego', cleanTitle:'Oculta el auto-helper, el popup de captura y el HUD de la esquina; la cuenta y el menú del juego aparecen al pasar el mouse (verde = activado)',
       reset:'Reiniciar', resetTitle:'Reinicia las estadísticas de la sesión (todas las cuentas), para monitorear desde ahora', resetConfirm:'¿Reiniciar las estadísticas de sesión de todas las cuentas? Los totales de la cuenta (oro, nivel, shinies de vida) no cambian.',
-      msgShiny:'¡encontró un SHINY! ✨', msgFaint:'tuvo un Pokémon derribado', msgBallsLow:'tiene pocas Pokéballs', msgPotionsLow:'tiene pocas pociones', msgRevivesLow:'tiene pocos revives',
+      msgShiny:'¡encontró un SHINY! ✨', msgShinyCap:'¡CAPTURÓ un SHINY! ✨🎉', spTitle:'¡Shiny capturado!', spClose:'Cerrar el aviso', msgFaint:'tuvo un Pokémon derribado', msgBallsLow:'tiene pocas Pokéballs', msgPotionsLow:'tiene pocas pociones', msgRevivesLow:'tiene pocos revives',
       stAllTitle:'Resumen general', stTotal:'Total', stAcc:'Cuenta', stCompare:'Comparación (hunt anterior)', stPrev:'anterior', stCur:'actual', stMoney:'dólares', stPerAcc:'Por cuenta',
       stShinyFound:'Shiny enc.', stShinyCap:'✨ Shiny capturados', stShinyF:'Shiny enc.', stShinyC:'Shiny capt.', stSupplies:'Suministros', stAssets:'Patrimonio',
       stKpis:'Ritmo (por hora)', stPinned:'Ítems fijados', cfgSections:'Secciones (arrastra para ordenar, marca para mostrar)', cfgBagItems:'Mostrar TODOS los ítems de la bolsa', cfgImportantOnly:'Solo ítems importantes (Ultra Ball, mejor poción/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Buscar ítem, ball, piedra…', cfgNoCat:'Abre el juego para cargar la lista de ítems', cfgBagCats:'Bolsa — categorías (arrastra, marca para mostrar)', cfgBagHideItems:'Bolsa — ocultar ítems específicos',
@@ -561,7 +581,7 @@
       sndOn:'✨🔊 Sonido de shiny', sndOff:'✨🔇 Sonido de shiny', sndTitle:'Reproduce un sonido cuando aparece un shiny (además de la notificación)',
       msgStalled:'parece haber dejado de farmear (10 min sin kills)',
       cdToday:'Hoy', cdWeek:'7 días', cdAllTime:'Total', goalG:'Meta oro/día', goalC:'Meta capturas/día', csvTitle:'Descarga el historial diario en CSV (planilla)', cdLifeHint:'contadores: sesión · lista: histórico',
-      cdTargets:'Objetivos', cdTargetsHint:'Sin objetivos aún: en modo Total, pasa el mouse por un card y haz clic en la ★ para marcarlo', cdTargetsMark:'Marcar/desmarcar como objetivo',
+      cdTargets:'Objetivos', cdCritIvQ:'IV × cal.', cdCritIv:'IV', cdCritQ:'Calidad', cdBestCritTitle:'Criterio del mejor catch. La calidad multiplica los stats y el poder, así que IV × calidad refleja mejor la fuerza real.', cdTargetsHint:'Sin objetivos aún: en modo Total, pasa el mouse por un card y haz clic en la ★ para marcarlo', cdTargetsMark:'Marcar/desmarcar como objetivo',
       whTitle:'Webhook de Discord: pega la URL de tu servidor para recibir avisos', whTest:'Probar', whShiny:'Avisar shiny', whSum:'Resumen diario', whDay:'📊 Resumen de', whCaught:'CAPTURADO ✅', whLost:'perdido ✕', whTestMsg:'✅ ¡PokeGrid conectado! Los avisos llegarán aquí.',
       bkExp:'💾 Exportar config', bkImp:'📂 Importar config', bkExpTitle:'Guarda un archivo con todas las configuraciones y el historial (las contraseñas quedan fuera)', bkImpTitle:'Restaura configuraciones e historial desde un archivo exportado', bkConfirm:'¿Reemplazar las configuraciones actuales por las del archivo? La app se recargará. (Las contraseñas no se ven afectadas.)', bkBad:'Archivo inválido.'
     }
@@ -1182,10 +1202,11 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
   function applySndShiny() { sndBtn.textContent = t(sndShinyOn ? 'sndOn' : 'sndOff'); sndBtn.title = t('sndTitle'); sndBtn.classList.toggle('on', sndShinyOn); localStorage.setItem('sndShiny', sndShinyOn ? '1' : '0'); }
   sndBtn.onclick = () => { sndShinyOn = !sndShinyOn; applySndShiny(); if (sndShinyOn) beepShiny(); };
   let _ac = null;
-  function beepShiny() {
+  function beepShiny(festa) { // festa = captura: acorde mais longo, pra nao confundir com "apareceu"
     try {
       _ac = _ac || new AudioContext();
-      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => { // C5 E5 G5 C6
+      const notas = festa ? [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568] : [523.25, 659.25, 783.99, 1046.5];
+      notas.forEach((f, i) => { // C5 E5 G5 C6 (+ E6 G6 na captura)
         const o = _ac.createOscillator(), g = _ac.createGain();
         o.frequency.value = f; o.type = 'triangle'; o.connect(g); g.connect(_ac.destination);
         const t0 = _ac.currentTime + i * 0.12;
@@ -1193,6 +1214,27 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
         o.start(t0); o.stop(t0 + 0.35);
       });
     } catch {}
+  }
+
+  // ----- Shiny CAPTURADO: aviso na tela que fica ate ser fechado (evento raro, nao pode passar batido) -----
+  function festaShiny(o) {
+    const wrap = document.getElementById('shinyParty');
+    if (!wrap) return;
+    const cor = COR_OK.test(String(o.dot)) ? String(o.dot) : '#8b949e';
+    const el = document.createElement('div');
+    el.className = 'sp';
+    el.innerHTML = '<img class="sp-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/' + (+o.sid || 0) + '.png" alt="" onerror="this.style.visibility=\'hidden\'">'
+      + '<div class="sp-txt"><div class="sp-h">✨ ' + t('spTitle') + ' ✨</div>'
+      + '<div class="sp-n">' + esc(o.n || '?') + '</div>'
+      + '<div class="sp-sub"><span class="sp-acd" style="background:' + cor + ';color:' + cor + '"></span>' + esc(o.acc || '')
+      + (+o.iv ? '<span class="sp-iv">' + (+o.iv || 0) + '/192</span>' : '')
+      + (+o.q ? '<span class="sp-q">×' + (+o.q).toFixed(2) + '</span>' : '')
+      + '<span class="sp-t">' + fmtHM(+o.t || Date.now()) + '</span></div></div>'
+      + '<button class="sp-x" title="' + t('spClose') + '">✕</button>';
+    el.querySelector('.sp-x').onclick = () => el.remove();
+    wrap.appendChild(el);
+    while (wrap.children.length > 3) wrap.firstChild.remove(); // varias capturas: mantem as 3 mais recentes
+    if (sndShinyOn) beepShiny(true);
   }
 
   // ----- Webhook do Discord (opcional): a URL e do proprio usuario, envio via main (CSP nao deixa daqui) -----
@@ -1270,6 +1312,11 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
       if (seenLog[key]) return; seenLog[key] = 1; dirty = true;
       lifeShiny.push({ n: String(x.n || '').slice(0, 40), sid: +x.sid || 0, t: +x.t || 0, cap: x.cap ? 1 : 0, def: x.def ? 1 : 0, p: i, acc, dot });
       if (avisa && whCfg.shiny) webhookSend('✨ ' + acc + ': shiny ' + (x.n || ('#' + (+x.sid || '?'))) + ' ' + (x.cap ? t('whCaught') : t('whLost')));
+      if (avisa && x.cap) { // CAPTUROU: aviso grande na tela, som de festa e notificacao propria
+        const c = (r.catchLog || []).filter(y => y.sh).sort((p, q2) => Math.abs((+p.t || 0) - (+x.t || 0)) - Math.abs((+q2.t || 0) - (+x.t || 0)))[0]; // pega IV/qualidade da captura correspondente
+        festaShiny({ n: x.n || (c && c.n), sid: x.sid, acc, dot, iv: c && c.iv, q: c && c.q, t: x.t });
+        if (alertsOn) alerta(i, 'msgShinyCap');
+      }
     });
     (r.catchLog || []).forEach(x => { const key = kCa(i, x); if (seenLog[key]) return; seenLog[key] = 1; dirty = true; lifeCatch.push({ n: String(x.n || '').slice(0, 40), iv: +x.iv || 0, q: +x.q || 0, sh: !!x.sh, fx: !!x.fx, t: +x.t || 0, p: i, acc, dot }); });
     if (dirty) {
@@ -1328,7 +1375,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     document.getElementById('loginAll').textContent = t('loginAll');
     document.getElementById('accounts').textContent = t('accounts');
     document.getElementById('reloadAll').textContent = t('reloadAll');
-    document.getElementById('layout').textContent = t('layout');
+    applyLayout(); // o rotulo do botao depende do modo atual, nao so do idioma
     document.getElementById('menuBtn').textContent = t('optionsBtn');
     const eb = document.getElementById('errlogBtn'); eb.textContent = t('errlog'); eb.title = t('errlogTitle');
     const be = document.getElementById('bkExp'); be.textContent = t('bkExp'); be.title = t('bkExpTitle');
@@ -1390,6 +1437,10 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     grid.classList.remove('one-col', 'one-row');
     if (layoutMode === 'col') grid.classList.add('one-col');
     else if (layoutMode === 'row') grid.classList.add('one-row');
+    // o rotulo mostra o modo atual: antes dizia "Grade" sempre, e ninguem sabia em que modo estava
+    const lb = document.getElementById('layout');
+    lb.textContent = t(layoutMode === 'col' ? 'layoutCol' : layoutMode === 'row' ? 'layoutRow' : 'layout');
+    lb.title = t('layoutTitle');
     localStorage.setItem('layout', layoutMode);
   }
   document.getElementById('layout').onclick = () => { layoutMode = layoutMode === 'grid' ? 'col' : layoutMode === 'col' ? 'row' : 'grid'; applyLayout(); };
@@ -1940,6 +1991,10 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
   // ----- Cartas modular: cada seção liga/desliga e reordena, salvo no localStorage -----
   const CDSECTS = ['kpis', 'today', 'table', 'hunts', 'catches', 'shinies', 'shinyTried', 'trend', 'shared'];
   const cdLabel = (k) => ({ kpis: t('cdSecKpis'), today: t('cdToday'), table: t('cdByAcc2'), hunts: t('cdHunts'), catches: t('cdCatches'), shinies: t('cdShinies'), shinyTried: t('cdShinyTried'), trend: t('cdTrend'), shared: t('cdShared') }[k] || k);
+  // Melhor catch: por que criterio. Padrao IV x qualidade, porque a qualidade multiplica os
+  // stats e o poder final, entao IV puro sozinho engana (126/192 x1.80 bate 150/192 x0.95).
+  let bestCrit = ['ivq', 'iv', 'q'].includes(localStorage.getItem('bestCrit')) ? localStorage.getItem('bestCrit') : 'ivq';
+  const bestScore = (x) => !x ? -1 : bestCrit === 'iv' ? (+x.iv || 0) : bestCrit === 'q' ? (+x.q || 0) : (+x.iv || 0) * (+x.q || 1);
   // shinies tentados: escopo da lista (total | sessao | alvos marcados com estrela)
   let stMode = ['total', 'sess', 'targets'].includes(localStorage.getItem('shinyTriedMode')) ? localStorage.getItem('shinyTriedMode') : 'total';
   let shinyTargets = {}; try { shinyTargets = JSON.parse(localStorage.getItem('shinyTargets') || '{}'); } catch {}
@@ -2008,7 +2063,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
       ativos++;
       sumG += a.gph || 0; sumX += a.xph || 0; sumK += a.kph || 0; sumC += a.captures || 0; sumSF += a.shinyFound || 0; sumSC += a.shinyCap || 0;
       const cl = d.catchLog || [];
-      const best = cl.length ? cl.reduce((b, x) => (x.iv > b.iv ? x : b)) : null;
+      const best = cl.length ? cl.reduce((b, x) => (bestScore(x) > bestScore(b) ? x : b)) : null;
       const last = cl.length ? cl[cl.length - 1] : null;
       (d.usedList || []).forEach(x => {
         const sid = +x.sid || 0, att = +x.attempts || 0; // dados do jogo: numero ou nada (sid vai pra data-sid)
@@ -2028,7 +2083,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     dhist = dhist.filter(p => p.t > Date.now() - 3600e3);
 
     const valOf = (r, k) => k === 'name' || k === 'hunt' ? String(r[k] || '').toLowerCase()
-      : k === 'best' ? (r.best ? r.best.iv : -1) : k === 'last' ? (r.last ? r.last.t : 0) : k === 'st' ? r.st : (r[k] || 0);
+      : k === 'best' ? bestScore(r.best) : k === 'last' ? (r.last ? r.last.t : 0) : k === 'st' ? r.st : (r[k] || 0);
     const on = rows.filter(r => r.st === 'on');
     on.sort((p, q) => { const a2 = valOf(p, dsort.k), b2 = valOf(q, dsort.k); return (a2 > b2 ? 1 : a2 < b2 ? -1 : 0) * dsort.d; });
     const ordered = on.concat(rows.filter(r => r.st !== 'on'));
@@ -2062,7 +2117,12 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     SB.table = () => {
       const arrow = (k) => dsort.k === k ? (dsort.d < 0 ? ' ▾' : ' ▴') : '';
       const TH = [['name', t('cdConta')], ['hunt', t('cdHunt')], ['secs', '⏱ ' + t('cdTime')], ['gph', 'Gold/h'], ['xph', 'XP/h'], ['kph', 'Kills/h'], ['caps', t('stCaptures')], ['sh', '✨'], ['best', t('cdBest')], ['last', t('cdLast')], ['st', t('cdStatus')]];
-      let s = '<div class="cd-sec"><div class="cd-h" style="display:flex;align-items:center;gap:8px">' + t('cdByAcc') + '<button id="cdReset" style="margin-left:auto" title="' + t('resetTitle') + '">⟲ ' + t('reset') + '</button></div><table class="cd-table"><thead><tr>'
+      let s = '<div class="cd-sec"><div class="cd-h" style="display:flex;align-items:center;gap:8px">' + t('cdByAcc')
+        + '<span style="margin-left:auto;display:flex;align-items:center;gap:6px;text-transform:none">' + t('cdBest') + ':'
+        + '<select id="cdBestCrit" title="' + t('cdBestCritTitle') + '">'
+        + [['ivq', t('cdCritIvQ')], ['iv', t('cdCritIv')], ['q', t('cdCritQ')]].map(o => '<option value="' + o[0] + '"' + (bestCrit === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('')
+        + '</select></span>'
+        + '<button id="cdReset" title="' + t('resetTitle') + '">⟲ ' + t('reset') + '</button></div><table class="cd-table"><thead><tr>'
         + TH.map(x => '<th data-k="' + x[0] + '">' + x[1] + arrow(x[0]) + '</th>').join('') + '</tr></thead><tbody>';
       ordered.forEach(r => {
         const stTxt = r.st === 'off' ? '<span style="color:#6e7681">' + t('cdOff') + '</span>'
@@ -2076,7 +2136,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
           + '<td>' + (r.st === 'on' ? nf(r.kph) : '—') + '</td>'
           + '<td>' + (r.st === 'on' ? nf(r.caps) : '—') + '</td>'
           + '<td style="color:' + ((r.sh || 0) > 0 ? '#f778ba' : '#8b949e') + '">' + (r.st === 'on' ? nf(r.sh) : '—') + '</td>'
-          + '<td>' + (r.best ? '<span style="color:' + (r.best.q ? RARO(+r.best.q)[1] : '#e6edf3') + '">' + esc(r.best.n) + '</span> <span style="color:#55e6d3">' + (+r.best.iv || 0) + '/192</span>' : '—') + '</td>'
+          + '<td>' + (r.best ? '<span style="color:' + (r.best.q ? RARO(+r.best.q)[1] : '#e6edf3') + '">' + esc(r.best.n) + '</span> <span style="color:#55e6d3">' + (+r.best.iv || 0) + '/192</span>' + (+r.best.q ? ' <span style="color:#f2c665">×' + (+r.best.q).toFixed(2) + '</span>' : '') : '—') + '</td>'
           + '<td>' + (r.last ? '<span style="color:' + (r.last.q ? RARO(r.last.q)[1] : '#e6edf3') + '">' + esc(r.last.n) + '</span> <span style="color:#6e7681">' + fmtHM(r.last.t) + '</span>' + (r.since ? ' <span style="color:#f0883e">· ' + nf(r.since) + ' ' + ballIco + '</span>' : '') : '—') + '</td>'
           + '<td>' + stTxt + '</td></tr>';
       });
@@ -2168,9 +2228,15 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     });
     h += '<div class="cd-cols">' + secHtml + '</div>';
 
-    const st0 = cardsEl.scrollTop;
+    // guarda a rolagem antes de reconstruir: a de fora e a de dentro de cada secao (secao com
+    // altura ajustada rola por dentro, e sem isso o refresh de 4s jogava tudo pro topo)
+    const st0 = cardsEl.scrollTop, rolagem = {};
+    cardsEl.querySelectorAll('.cd-it').forEach(it => {
+      const box = it.querySelector('.cd-sec, .cd-kpis');
+      if (box && box.scrollTop) rolagem[it.dataset.s] = box.scrollTop;
+    });
     cardsEl.innerHTML = h;
-    cardsEl.scrollTop = st0; // nao perde a rolagem no refresh
+    cardsEl.scrollTop = st0;
 
     // config: engrenagem, checkboxes e arraste pra reordenar seções
     const gear = cardsEl.querySelector('#cdGear'); if (gear) gear.onclick = () => { cardsCfgOpen = !cardsCfgOpen; refreshCards(); };
@@ -2181,6 +2247,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     const cb = cardsEl.querySelector('#cdCsv'); if (cb) cb.onclick = exportCSV;
     // shinies tentados: escopo (total/sessao/alvos) e estrela de alvo
     const sm2 = cardsEl.querySelector('#cdStMode'); if (sm2) sm2.onchange = () => { stMode = sm2.value; localStorage.setItem('shinyTriedMode', stMode); refreshCards(); };
+    const bc = cardsEl.querySelector('#cdBestCrit'); if (bc) bc.onchange = () => { bestCrit = bc.value; localStorage.setItem('bestCrit', bestCrit); refreshCards(); };
     cardsEl.querySelectorAll('.cd-sh-st').forEach(el => el.onclick = (e) => {
       e.stopPropagation();
       const sid = el.dataset.sid;
@@ -2227,6 +2294,8 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
       const hSet = (px) => { if (box) { box.style.height = px + 'px'; box.style.overflowY = 'auto'; } };
       const hSalva = +cardsCfg.h[it.dataset.s] || 0; // importado do disco: numero com clamp
       if (box && hSalva) hSet(Math.max(90, Math.min(1400, hSalva)));
+      // devolve a rolagem interna que a secao tinha antes do refresh (depois da altura, senao nao rola ainda)
+      if (box && rolagem[it.dataset.s]) box.scrollTop = rolagem[it.dataset.s];
       const rz2 = it.querySelector('.cd-rz2');
       rz2.addEventListener('mousedown', e => {
         if (!box) return; e.preventDefault(); cdBusy = true; it.classList.add('rz-on');
