@@ -15,6 +15,10 @@
 
 <img src="docs/screenshot.png" width="880" alt="PokeGrid running four accounts at once">
 
+<img src="docs/modo-simples.png" width="880" alt="Simple mode: dashboard with the numbers of all four accounts">
+
+<sub>Simple mode: hides the game and shows only the numbers. Every section can be moved and resized.</sub>
+
 </div>
 
 > Playing an idle game with several accounts turns into window chaos: four browsers open, each one logged in by hand, and then guessing which tab belongs to whom. PokeGrid puts them all on one screen, each account kept apart from the others.
