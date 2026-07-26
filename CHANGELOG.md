@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.3
+
+- **Uma calculadora de IV só, no centro da tela e maior.** Antes eram quatro, uma presa dentro de cada painel. Agora o botão IV's abre um card único na janela do app, que você arrasta pra onde quiser: passe o mouse num pokémon em qualquer painel e os dados aparecem nele. Mostra tipos, nível, qualidade, IV total, os 6 atributos com IV por stat e o poder, e todos os campos são editáveis pra recalcular. O cálculo continua sendo feito pela extensão dentro do painel, então o resultado é o mesmo de sempre.
+  *A single IV calculator, centered and bigger. There used to be four, each trapped inside its panel. The IV's button now opens one card in the app window that you can drag anywhere: hover a Pokémon in any panel and the data lands there. It shows types, level, quality, total IV, the 6 stats with per-stat IV and power, and every field is editable to recalculate. The math is still done by the extension inside the panel, so results are unchanged.*
+  - Quem precisa das abas de golpes ou comparar usa o botão ⧉ no cabeçalho do card, que abre a calculadora dentro do painel de origem.
+    *For the moves or compare tabs, use the ⧉ button in the card header to open the calculator inside the source panel.*
+
 ## 1.5.2
 
 - **Aviso claro quando um shiny é CAPTURADO.** Como é o evento mais raro, agora aparece um cartão na tela com o sprite do shiny, o nome, a conta, IV e qualidade, e ele fica até você fechar. O som é mais longo que o de "apareceu" e a notificação é própria.
