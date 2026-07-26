@@ -5555,13 +5555,30 @@
             // mesmo criterio do painel: o IV informado pelo jogo tem prioridade se o nivel nao mudou
             const ivObs = (pk.ivAtual != null && Number(pk.nivel) === nivel) ? Number(pk.ivAtual) : null;
             const usaObs = Number.isFinite(ivObs) && ivObs > 0;
+            const pct = ((usaObs ? ivObs : soma) / CONFIG.maxIVTotal) * 100;
+            const ehShiny = /shiny/i.test(String(pk.nome || ""));
+            // sprite: o id ja fica no apiCache depois do buscarAtributosBase
+            let sprite = null;
+            try { const ci = apiCache[normalizarNomePokemon(pk.nome)]; if (ci && ci.id) sprite = obterUrlsSprite(ci.id, ehShiny); } catch (x) {}
+            // golpes com poder de catalogo + dano observado em batalha (mesma fonte da aba Moves)
+            let golpes = [];
+            try {
+                golpes = (obterMovesDoPokemon(pk) || []).slice(0, 8).map(mv => {
+                    const ch = String(mv.name || "").toLowerCase().trim();
+                    const di = danoPorGolpe.get(ch);
+                    return { nome: mv.name, tipo: mv.type || "", poder: mv.power != null ? +mv.power : null,
+                        dano: di ? (+di.lastDmg || 0) : 0, eff: di && di.eff ? +di.eff : 0, ativo: ultimoGolpeUsado === ch };
+                });
+            } catch (x) {}
             return {
-                nome: pk.nome, tipos: pk.tipos || [], shiny: /shiny/i.test(String(pk.nome || "")),
+                nome: pk.nome, tipos: pk.tipos || [], shiny: ehShiny,
                 nivel, qualidade, qualidadeTexto: pk.qualidade || "",
                 bases, atuais, ivs,
                 ivTotal: usaObs ? ivObs : Math.ceil(soma),
                 ivMax: CONFIG.maxIVTotal, ivMaxInd: CONFIG.maxIVIndividual,
-                percentual: ((usaObs ? ivObs : soma) / CONFIG.maxIVTotal) * 100,
+                percentual: pct,
+                classificacao: classificarPotencial(pct),
+                sprite, golpes,
                 poder: calcularPoderEstimado({ bases, ivs, nivel, qualidade }),
                 poderJogo: pk.poder || 0,
                 pokemon: { nome: pk.nome, nivel: pk.nivel, ivAtual: pk.ivAtual, poder: pk.poder, tipos: pk.tipos || [], qualidade: pk.qualidade || "", multiplicadorQualidade: pk.multiplicadorQualidade || 1, hp: pk.hp, atk: pk.atk, def: pk.def, spa: pk.spa, spd: pk.spd, vel: pk.vel }
