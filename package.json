@@ -1,6 +1,6 @@
 {
   "name": "pokegrid",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "Rode 4 contas de Poke Idle World ao mesmo tempo, em uma janela so / Run 4 Poke Idle World accounts at once, in a single window",
   "main": "main.js",
   "author": "soufoka",
@@ -8,7 +8,12 @@
     "start": "electron .",
     "dist": "electron-builder"
   },
-  "keywords": ["electron", "multi-account", "poke-idle-world", "idle-game"],
+  "keywords": [
+    "electron",
+    "multi-account",
+    "poke-idle-world",
+    "idle-game"
+  ],
   "license": "MIT",
   "devDependencies": {
     "electron": "^43.1.1",
@@ -17,12 +22,54 @@
   "build": {
     "appId": "online.idleworld.pokegrid",
     "productName": "PokeGrid",
-    "files": ["main.js", "preload.js", "index.html", "tray.png", "presets/**/*"],
-    "publish": { "provider": "github", "owner": "soufoka", "repo": "PokeGrid" },
-    "win": { "target": ["nsis", "portable", "zip"], "icon": "build/icon.png" },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "artifactName": "PokeGrid-Setup-${version}.${ext}" },
-    "portable": { "artifactName": "PokeGrid-${version}-portable.${ext}" },
-    "mac": { "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }], "icon": "build/icon.png", "category": "public.app-category.games" },
-    "linux": { "target": ["AppImage"], "icon": "build/icon.png", "category": "Game", "maintainer": "soufoka" }
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "tray.png",
+      "presets/**/*"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "soufoka",
+      "repo": "PokeGrid"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable",
+        "zip"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "PokeGrid-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "PokeGrid-${version}-portable.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.games"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "build/icon.png",
+      "category": "Game",
+      "maintainer": "soufoka"
+    }
   }
 }

@@ -1,5 +1,93 @@
 # Changelog
 
+## 1.5.5
+
+### Leitor de IV
+
+- **Poder do pokémon agora bate com o do jogo.** A estimativa antiga errava bastante: num Jolteon Nv 15 o card mostrava 342 onde o jogo mostra 412. A conta foi trocada pela fórmula que reproduz o valor do jogo, conferida contra quatro pokémon reais (412, 8.017, 8.032 e 2.880) com diferença de 0% a 0,3%. Como o campo de nível é editável, dá pra projetar o poder que o pokémon terá num nível futuro.
+  *Pokémon power now matches the game. The old estimate was off by a lot: a level 15 Jolteon showed 342 where the game shows 412. The math was replaced with the formula that reproduces the games value, checked against four real Pokémon (412, 8,017, 8,032 and 2,880) within 0% to 0.3%. Since the level field is editable, you can project the power at a future level.*
+- **Formas alternativas voltaram a funcionar** (Furious Scyther, Brave Venusaur, Ancient Meganium e outras 45). O card falhava inteiro nelas, porque a base de dados externa não conhece esses nomes. Agora o app usa os dados do próprio jogo, com os atributos da forma e a sprite da espécie original.
+  *Alternate forms work again (Furious Scyther, Brave Venusaur, Ancient Meganium and 45 others). The card used to fail completely on them because the external database does not know those names. The app now uses the games own data, with the forms stats and the original species sprite.*
+
+### Hunts
+
+- **Log automático das hunts + exportação em planilha** (pedido do Thierrye). Toda hunt encerrada é gravada sozinha, com duração, kills, XP, capturas, gold e os drops item a item. O botão na seção Hoje gera dois CSVs: um por hunt e um por item, esse já com drop por kill e a porcentagem calculada, pra montar as contas de % de loot sem transcrever nada à mão.
+  *Automatic hunt log plus spreadsheet export. Every finished hunt is recorded on its own with duration, kills, XP, catches, gold and per-item drops. The button in the Today section generates two CSVs: one per hunt and one per item, the latter already with drops per kill and the percentage, so you can work out loot rates without copying anything by hand.*
+
+### Pokédex
+
+- **Nível necessário de cada golpe**, e os golpes que o pokémon ainda não aprendeu ficam apagados, com o motivo no tooltip.
+  *Required level for each move, with moves the Pokémon has not learned yet dimmed and the reason in the tooltip.*
+- **Coluna Pokémon** na tabela por conta, com nome e nível de quem está em campo, ao lado da Hunt.
+  *Pokémon column in the per-account table, with the name and level of whos on the field, next to Hunt.*
+- **A lupa de IV também funciona no mercado e no histórico**, que antes não alimentavam o card.
+  *The IV magnifier now also works in the market and history, which did not feed the card before.*
+
+### Janelas
+
+- **Imagem sem distorção** em qualquer arranjo, inclusive o vertical com 3 janelas. O jogo tem proporção fixa e era esticado nos dois eixos; agora o painel respeita a proporção, mesmo que sobre uma borda.
+  *Undistorted image in any arrangement, including vertical with 3 windows. The game has a fixed aspect ratio and was being stretched on both axes; the panel now respects it, even if that leaves a border.*
+- **Painel expandido corrigido**: ao maximizar uma tela, o jogo continuava no tamanho antigo em vez de ocupar o espaço.
+  *Expanded panel fixed: maximizing a screen left the game at its old size instead of filling the space.*
+- **Iniciar com o Windows**, opcional e desligada por padrão. Usa um atalho na pasta Inicializar, que fica visível pro usuário e não é tratado como comportamento suspeito por antivírus.
+  *Start with Windows, optional and off by default. It uses a shortcut in the Startup folder, visible to the user and not treated as suspicious behavior by antivirus.*
+
+### Painel
+
+- **Suprimentos por conta no Resumo geral** (pedido do Flory): cada card de conta ganhou uma linha com as pokébolas, potions e revives daquela conta, nas mesmas cores da seção de totais.
+  *Per-account supplies in the overall summary: each account card gained a line with that accounts pokeballs, potions and revives, in the same colors as the totals section.*
+
+### Desempenho
+
+- **Modo Simples ainda mais leve.** O jogo agora fica mudo sozinho (o botão de som continua mandando), o chat do jogo some junto com o resto, o painel só redesenha quando algum número mudou de verdade na tela, e o app parou de perguntar os dados pras 4 contas de 4 em 4 segundos: cada jogo publica a própria leitura a cada 10s e o app só escuta, com o método antigo de reserva. Nada disso toca no farm, que é do servidor.
+  *Simple mode got even lighter. The game now mutes itself (the sound button still wins), the games chat hides along with the rest, the panel only redraws when a number actually changed on screen, and the app stopped asking all 4 accounts for data every 4 seconds: each game publishes its own reading every 10s and the app just listens, with the old method as backup. None of this touches farming, which is server-side.*
+
+### Interface
+
+- **Botão de desligar afastado** dos outros botões do cabeçalho do painel: usuários estavam clicando nele sem querer.
+  *Power button moved away from the other panel-header buttons: users were clicking it by accident.*
+
+### Central (paridade com a versão de teste)
+
+- **Modo foco com o clique direito**: botão direito numa janela do jogo expande ela; de novo (ou Esc) volta pra grade. Clique em campo de texto fica de fora, pra não atrapalhar o colar.
+  *Focus mode on right click: right-click a game window to expand it; again (or Esc) goes back to the grid. Text fields are excluded so pasting still works.*
+- **Capturas com filtros** no modo Simples: conta, nome, período (1h/6h/24h), IV mínimo, qualidade mínima e só shiny, mostrando até 40 resultados.
+  *Catch history filters in Simple mode: account, name, period (1h/6h/24h), minimum IV, minimum quality and shiny only, showing up to 40 results.*
+- **Times & IV**: nova seção com os times das 4 contas lado a lado, cada pokémon com IV total, qualidade e o poder atual e projetado (nível alvo configurável, padrão 500), pela mesma fórmula fiel do card de IV.
+  *Teams & IV: new section with all 4 teams side by side, each Pokémon with total IV, quality and current plus projected power (configurable target level, default 500), using the same game-accurate formula as the IV card.*
+- **Inventário global**: nova seção somando os itens das 4 contas, com o ícone oficial de cada item, busca por nome e o detalhe por conta no tooltip.
+  *Global inventory: new section adding up items across the 4 accounts, with each items official icon, name search and the per-account breakdown in the tooltip.*
+
+### Onde caçar
+
+- **Sugestão de hunt por pokémon** (pedido de usuário): o Ranking de hunts ganhou a ordenação "Sugerido" com um seletor de "caçar com" listando os pokémon dos 4 times. O score usa os golpes que o pokémon já aprendeu (poder e cooldown), a efetividade do tipo do golpe contra os tipos do defensor, e o confronto real de atributos: golpe físico bate na Defesa do defensor e especial na Defesa Especial, então bicho blindado de um lado rende menos daquele lado, e a vida do defensor segura o ritmo. Hunt acima do nível da conta aparece apagada com o nível que falta, e cada linha mostra o melhor golpe, a efetividade e a porcentagem relativa ao melhor lugar. O "Medido: gold/h" continua sendo a régua da verdade onde você já caçou.
+  *Hunt suggestion per Pokémon: the hunt ranking gained a "Suggested" sort with a "hunt with" picker listing all Pokémon from the 4 teams. The score uses moves already learned (power and cooldown), the move types effectiveness against the defenders types, and the real stat matchup: physical moves hit the defenders Defense and special ones its Special Defense, so a wall on one side yields less on that side, and the defenders HP slows the pace. Hunts above the accounts level show dimmed with the missing level, and each row shows the best move, effectiveness and the percentage relative to the best spot. Measured gold/h remains the ground truth where you have already hunted.*
+
+- **Estimativa de kills/h e XP/h nas sugestões**, calibrada pelas SUAS hunts: o app mede a razão entre o kills/h real das hunts que você já caçou e o ritmo calculado, e aplica essa constante (pela mediana) nas hunts que você nunca entrou, mostrando "≈ kills/h · ≈ xp/h" em cada linha. Sem nenhuma hunt medida ainda, a porcentagem relativa fica sozinha: melhor sem estimativa do que com chute. Gold/h segue aparecendo só onde foi medido de verdade, porque as chances de drop não existem nos dados do jogo.
+  *Estimated kills/h and XP/h in suggestions, calibrated by YOUR hunts: the app takes the ratio between real kills/h in hunts you have farmed and the computed pace, and applies that constant (median) to hunts you have never entered, showing kills/h and xp/h estimates per row. With no measured hunt yet, only the relative percentage shows: better no estimate than a guess. Gold/h still only appears where actually measured, since drop chances are not in the game data.*
+
+- **Modo Ditto** (pedido de usuário): escolhendo um Ditto no "caçar com", o ranking vira um quadro com a melhor transformação de cada tipo (fogo, água, lutador...) e o melhor lugar pra farmar com ela, calculado varrendo todas as espécies contra todas as hunts com a mesma conta de golpes, efetividade e defesas. Usa a mecânica oficial do jogo: stats fixos (Shiny: IV 119 e qualidade 2.0; comum: IV 89 e qualidade 1.4), o debuff de transformação (-20% de ataque no Shiny, -25% no comum) e só as transformações permitidas: lendários nunca, e o Shiny só vira espécie com forma shiny. O nível é o do seu Ditto, então o quadro muda sozinho conforme ele sobe.
+  *Ditto mode: pick a Ditto in "hunt with" and the ranking becomes a board with the best transformation per type (fire, water, fighting...) and the best spot to farm with it, computed by sweeping every species against every hunt with the same move, effectiveness and defense math. Uses the games official mechanics: fixed stats (Shiny: IV 119 and quality 2.0; regular: IV 89 and quality 1.4), the transform debuff (-20% attack on Shiny, -25% on regular) and only the allowed transformations: never legendaries, and the Shiny only becomes species with a shiny form. The level is your Dittos, so the board adapts as it levels.*
+- **Modelo do Sugerido mais honesto**: o ritmo agora respeita a cadência do golpe, no máximo 1 acerto por cooldown. Antes, hunts de nível 1 pareciam render infinito e venciam qualquer lugar de verdade.
+  *More honest suggestion model: pace now respects move cadence, at most 1 hit per cooldown. Before, level 1 hunts looked infinitely fast and beat every real spot.*
+
+### Experiência
+
+- **Previsão de estoque na tabela por conta**: quando potions ou bolas vão acabar em menos de 12h no ritmo da sessão, o Status mostra "potions ~6h" (vermelho abaixo de 2h, laranja abaixo de 6h). Dá pra saber antes de dormir se o estoque atravessa a noite.
+  *Supply forecast in the per-account table: when potions or balls will run out within 12h at the sessions pace, Status shows an ETA (red under 2h, orange under 6h). You know before bed whether stock lasts the night.*
+- **Custo dos shinies tentados**: cada card mostra o gold já gasto em bolas naquela espécie (aproximado pelo preço da bola atual).
+  *Cost of attempted shinies: each card shows the gold spent in balls on that species (approximated by the current ball price).*
+- **Aviso de lugar melhor**: se outra hunt sua, medida com 2 ou mais amostras, rende 15% acima da atual, um ↗ discreto aparece ao lado da hunt com o número no tooltip. Se você já está na melhor, silêncio.
+  *Better-spot hint: if another of your measured hunts (2+ samples) yields 15%+ above the current one, a subtle arrow appears next to the hunt with the number in the tooltip. Already at the best? Silence.*
+
+- **Hunt específica no modo Ditto**: um seletor de alvo; escolhida a hunt, o quadro vira o ranking das melhores transformações para ELA, com golpe, efetividade e porcentagem. Alvo acima do nível da conta avisa quanto falta.
+  *Specific hunt in Ditto mode: a target picker; pick a hunt and the board becomes the ranking of best transformations FOR it, with move, effectiveness and percentage. Targets above the accounts level show the missing level.*
+
+### Atalhos
+
+- **Esc sai do foco**: fecha o card de IV; se não tiver card aberto, tira o painel do modo expandido.
+  *Esc leaves focus: closes the IV card; with no card open, it un-expands the panel.*
+
 ## 1.5.4
 
 ### Segurança

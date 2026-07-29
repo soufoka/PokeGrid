@@ -97,6 +97,19 @@ app.on('web-contents-created', (_e, contents) => {
   });
   contents.on('responsive', () => { clearTimeout(hangTimer); logErro('painel', 'painel voltou a responder'); });
   contents.on('destroyed', () => clearTimeout(hangTimer));
+  // Esc com o jogo focado: avisa a interface (fechar card de IV / desexpandir) SEM consumir a
+  // tecla, o jogo usa Esc pra fechar dialogos. Por isso nao e um accelerator de menu, que engoliria.
+  contents.on('before-input-event', (_ev, input) => {
+    if (input.type === 'keyDown' && input.key === 'Escape' && !input.isAutoRepeat) {
+      try { contents.hostWebContents && contents.hostWebContents.send('hotkey', 'collapse'); } catch {}
+    }
+  });
+  // clique direito no jogo: modo foco (expande/volta). Campo editavel fica de fora,
+  // senao o clique de colar num input viraria tela cheia.
+  contents.on('context-menu', (_ev, params) => {
+    if (params && params.isEditable) return;
+    try { contents.hostWebContents && contents.hostWebContents.send('hotkey', 'ctx' + contents.id); } catch {}
+  });
 });
 
 const credFile = () => path.join(app.getPath('userData'), 'accounts.enc');
@@ -156,6 +169,30 @@ ipcMain.handle('awake:set', (_e, on) => {
 // Minimizar: pra bandeja (padrao) ou normal, na barra de tarefas. A interface persiste a escolha.
 let minToTray = true;
 ipcMain.handle('mintray:set', (_e, on) => { minToTray = !!on; return minToTray; });
+
+// ===== Abrir com o Windows (desligado por padrao) =====
+// Feito com um atalho na pasta Inicializar do usuario, e nao escrevendo na chave Run do registro
+// (que e o metodo do setLoginItemSettings). Motivo: gravar em Run e abrir invisivel sao os dois
+// comportamentos que antivirus tratam como persistencia suspeita. O atalho fica num lugar que o
+// usuario ve e pode apagar sozinho (Win+R > shell:startup), e o app abre com a janela visivel.
+const startupDir = () => path.join(app.getPath('appData'), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup');
+const startupLnk = () => path.join(startupDir(), 'PokeGrid.lnk');
+const autoStartOn = () => { try { return process.platform === 'win32' && fs.existsSync(startupLnk()); } catch { return false; } };
+function setAutoStart(on) {
+  if (process.platform !== 'win32') return false;
+  try {
+    if (on) {
+      const opts = { target: process.execPath, description: 'PokeGrid', appUserModelId: 'online.idleworld.pokegrid' };
+      if (!app.isPackaged) opts.args = `"${app.getAppPath()}"`; // rodando pelo codigo: electron + a pasta do app
+      shell.writeShortcutLink(startupLnk(), 'create', opts);
+    } else {
+      try { fs.unlinkSync(startupLnk()); } catch {}
+    }
+  } catch (e) { logErro('autostart', String((e && e.message) || e)); }
+  return autoStartOn();
+}
+ipcMain.handle('autostart:get', () => ({ on: autoStartOn(), suportado: process.platform === 'win32' }));
+ipcMain.handle('autostart:set', (_e, on) => setAutoStart(!!on));
 
 // Webhook do Discord (opcional): o usuario cola a URL do proprio servidor. So aceita o dominio
 // oficial de webhooks; o envio sai daqui porque a CSP do renderer bloqueia rede externa.
@@ -220,26 +257,24 @@ app.whenReady().then(() => {
   }]));
 
   // Bandeja: minimizar esconde da barra de tarefas; clique no icone alterna.
-  // "Iniciar com o Windows" abre ja escondido na bandeja (--hidden).
   // Ao voltar da bandeja, restaura o mesmo estado de antes: hide()+show() no
   // Windows perde o "maximizado", entao rastreamos e reaplicamos.
   let wasMax = true; // nasce maximizado (win.maximize() acima)
   win.on('maximize', () => { wasMax = true; });
   win.on('unmaximize', () => { wasMax = false; });
   const mostrar = () => { const m = wasMax; win.show(); if (m && !win.isMaximized()) win.maximize(); };
-  const liOpts = { path: process.execPath, args: app.isPackaged ? ['--hidden'] : [__dirname, '--hidden'] };
-  // Bandeja e "iniciar com o sistema" nao existem em todo ambiente (Linux sem indicador,
-  // por exemplo). Se falhar, o app segue funcionando sem bandeja em vez de morrer no boot.
+  // versoes antigas registravam o autostart na chave Run; limpa o resquicio (agora e por atalho)
+  try { if (app.getLoginItemSettings().openAtLogin) app.setLoginItemSettings({ openAtLogin: false }); } catch {}
+  // Bandeja nao existe em todo ambiente (Linux sem indicador, por exemplo). Se falhar, o app
+  // segue funcionando sem bandeja em vez de morrer no boot.
   try {
     tray = new Tray(path.join(__dirname, 'tray.png'));
     tray.setToolTip('PokeGrid');
-    let liOn = false;
-    try { liOn = app.getLoginItemSettings(liOpts).openAtLogin; } catch {}
     tray.setContextMenu(Menu.buildFromTemplate([
       { label: 'Mostrar', click: mostrar },
-      { label: 'Iniciar com o Windows', type: 'checkbox',
-        checked: liOn,
-        click: (item) => { try { app.setLoginItemSettings({ openAtLogin: item.checked, ...liOpts }); } catch (e) { logErro('bandeja', 'iniciar com o sistema nao suportado: ' + e.message); } } },
+      { label: 'Abrir com o Windows', type: 'checkbox',
+        checked: autoStartOn(), visible: process.platform === 'win32',
+        click: (item) => { const r = setAutoStart(item.checked); item.checked = r; win.webContents.send('autostart', r); } },
       { label: 'Sair', click: () => app.quit() }
     ]));
     tray.on('click', () => win.isVisible() ? win.hide() : mostrar());

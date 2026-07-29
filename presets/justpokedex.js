@@ -359,7 +359,8 @@
             return nome ? {
                 name: String(nome),
                 power: s.power ?? s.basePower ?? s.damage ?? s.dmg ?? null,
-                type: s.type ? String(s.type) : (s.element ? String(s.element) : null)
+                type: s.type ? String(s.type) : (s.element ? String(s.element) : null),
+                learnLevel: s.learnLevel ?? s.level ?? s.lvl ?? null
             } : null;
         };
 
@@ -1594,6 +1595,7 @@
 
     function carregarPokemonDoHistorico(pokemon) {
         ultimoPokemon = pokemon;
+        try { window.__pgIv && window.__pgIv.reportar(); } catch (x) {} // historico tambem alimenta o card do app
         ultimoTexto = `HIST-${pokemon.nome}-${pokemon.nivel}-${pokemon.poder}`;
         atualizarPainelLeitor(pokemon);
         carregarAnalise(pokemon);
@@ -2068,6 +2070,16 @@
         `;
     }
 
+    // Acha a criatura no creatures.json do jogo pelo nome (mesma busca que o resto do preset usa).
+    function criaturaDoJogo(nome) {
+        try {
+            const b = String(nome || "").toLowerCase().trim();
+            return creaturesMapByName.get(b)
+                || creaturesMapByName.get(normalizarNomePokemon(nome).replace(/-/g, " "))
+                || null;
+        } catch { return null; }
+    }
+
     async function buscarAtributosBase(nome) {
         const nomeNormalizado =
             normalizarNomePokemon(nome);
@@ -2087,27 +2099,53 @@
             return apiCache[nomeBrutoLimpo];
         }
 
-        let resposta = await fetch(
-            `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(nomeNormalizado)}`
-        );
+        // fetch rejeitado (sem internet, PokeAPI fora do ar) nao pode derrubar o card:
+        // vira resposta nula e cai no mesmo caminho do 404, o creatures.json do proprio jogo.
+        let resposta = null;
+        try {
+            resposta = await fetch(
+                `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(nomeNormalizado)}`
+            );
+        } catch {}
 
         // Fallback: Se o nome normalizado falhar (404) e tiver hífen, tenta buscar pelo primeiro termo (nome base da espécie)
-        if (!resposta.ok && nomeNormalizado.includes("-")) {
+        if ((!resposta || !resposta.ok) && nomeNormalizado.includes("-")) {
             const primeiroNome = nomeNormalizado.split("-")[0];
             if (primeiroNome && primeiroNome !== nomeNormalizado) {
-                resposta = await fetch(
-                    `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(primeiroNome)}`
-                );
+                try {
+                    resposta = await fetch(
+                        `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(primeiroNome)}`
+                    );
+                } catch {}
             }
         }
 
-        if (!resposta.ok) {
-            throw new Error(
-                `Pokémon não encontrado: ${nome}`
-            );
+        // Formas alternativas (Furious Scyther, Brave Venusaur, Ancient Meganium...): a PokeAPI
+        // nao conhece nem o nome nem o pokeId do jogo (10506), entao o card inteiro falhava.
+        // O creatures.json traz os stats proprios da forma, e o captureBase e o id da especie
+        // original, que serve pra sprite. Monta o mesmo formato da PokeAPI e segue o fluxo normal.
+        let dados;
+        if (resposta && resposta.ok) dados = await resposta.json();
+        else {
+            const c = criaturaDoJogo(nome);
+            if (!c) {
+                throw new Error(
+                    `Pokémon não encontrado: ${nome}`
+                );
+            }
+            dados = {
+                id: +c.captureBase || +c.pokeId || 0,
+                stats: [
+                    { stat: { name: "hp" }, base_stat: +c.baseHp || 0 },
+                    { stat: { name: "attack" }, base_stat: +c.baseAtk || 0 },
+                    { stat: { name: "defense" }, base_stat: +c.baseDef || 0 },
+                    { stat: { name: "special-attack" }, base_stat: +c.baseSpAtk || 0 },
+                    { stat: { name: "special-defense" }, base_stat: +c.baseSpDef || 0 },
+                    { stat: { name: "speed" }, base_stat: +c.baseSpeed || 0 }
+                ],
+                types: [c.type1, c.type2].filter(Boolean).map(t => ({ type: { name: String(t).toLowerCase() } }))
+            };
         }
-
-        const dados = await resposta.json();
         const mapa = {};
 
         for (const item of dados.stats || []) {
@@ -5344,6 +5382,7 @@
 
         ultimoTexto = `MKT-${nome}-${nivel}-${poder}`; // Evita travamento de repetição idêntica
         ultimoPokemon = pokemon;
+        try { window.__pgIv && window.__pgIv.reportar(); } catch (x) {} // pokemon do mercado tambem alimenta o card do app
 
         const painel = document.getElementById(CONFIG.panelId);
         if (painel) painel.style.display = "flex";
@@ -5567,6 +5606,7 @@
                     const ch = String(mv.name || "").toLowerCase().trim();
                     const di = danoPorGolpe.get(ch);
                     return { nome: mv.name, tipo: mv.type || "", poder: mv.power != null ? +mv.power : null,
+                        nivel: mv.learnLevel != null ? +mv.learnLevel : null,
                         dano: di ? (+di.lastDmg || 0) : 0, eff: di && di.eff ? +di.eff : 0, ativo: ultimoGolpeUsado === ch };
                 });
             } catch (x) {}
