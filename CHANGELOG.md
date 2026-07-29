@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.10
+
+### A versão sem executável voltou a abrir
+
+- **Causa raiz do app que não abria, encontrada com a ajuda do MKL no Discord**: na versão sem executável, o mesmo canal de comunicação interna (o do webhook do Discord) estava registrado duas vezes no arquivo principal. O Electron recusa registro repetido e interrompe o carregamento, então o programa subia como processo e a janela nunca era criada. O bloco duplicado foi removido. Existia desde a 1.5.5, que é exatamente quando os relatos começaram, e afetava só a versão sem executável, por isso não aparecia nos testes com o instalador.
+  *Root cause of the app that would not open, found with MKL from Discord: in the no-executable version the same internal channel (the Discord webhook one) was registered twice in the main file. Electron refuses a repeated registration and aborts loading, so the program started as a process and the window was never created. The duplicated block was removed. It had been there since 1.5.5, exactly when the reports started, and affected only the no-executable version, which is why installer tests never caught it.*
+- **Isso não volta a acontecer sem ser percebido**: os testes agora conferem que nenhum canal está repetido nas quatro cópias do projeto, e o simulador de inicialização passou a recusar registro duplicado igual ao Electron faz.
+  *This cannot silently happen again: the tests now check that no channel is duplicated across the four copies of the project, and the startup simulator rejects duplicate registration just like Electron does.*
+
 ## 1.5.9
 
 ### O app que não abria
