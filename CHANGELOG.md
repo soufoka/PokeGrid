@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.8
+
+### Correção do app que não abria
+
+- **O app não abria mais em algumas máquinas** (processo vivo, nenhuma janela). Eram três falhas somadas, todas corrigidas: com o armazenamento local cheio, a primeira gravação da inicialização derrubava a interface inteira; um dado torto salvo em disco (por exemplo a configuração do painel) fazia o mesmo; e no processo principal, uma falha do sistema ao registrar o app ou ao abrir a sessão de uma conta matava a criação da janela. Agora nenhuma escrita, leitura ou peça do sistema pode impedir o app de abrir, e sobrou uma rede de segurança que mostra a janela mesmo diante de erro não previsto.
+  *The app stopped opening on some machines (process alive, no window). Three separate faults, all fixed: with local storage full, the first write during startup took down the whole interface; a malformed value saved on disk did the same; and in the main process, a system failure while registering the app or opening an account session killed window creation. No write, read or system component can prevent the app from opening now, and a final safety net shows the window even on an unforeseen error.*
+- **O log de hunts ocupa bem menos espaço** (150 hunts com 30 drops, era 400 com 60), e quando o armazenamento enche o app poda os registros antigos sozinho em vez de falhar.
+  *The hunt log takes far less space (150 hunts with 30 drops, was 400 with 60), and when storage fills up the app prunes old records by itself instead of failing.*
+
 ## 1.5.7
 
 - **Modelo do sugestor revisado com dados reais** (bug reportado: Golem sugerido pra Gyarados quando o Magneton rende muito mais). Os kills/h medidos provaram que o cooldown dos golpes não é o relógio da luta, então ele saiu da conta; ficou o dano por acerto contra a vida do defensor, com constante calibrada por observação real e efetividade desempatando. Agora o Magneton (elétrico ×4) lidera o quadro do Gyarados, como na prática.

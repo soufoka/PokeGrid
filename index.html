@@ -514,7 +514,49 @@
   window.addEventListener('error', (e) => { try { window.pokeAPI.logError('interface', ((e.error && e.error.stack) || e.message || '?') + (e.filename ? ' @' + e.filename.split('/').pop() + ':' + e.lineno : '')); } catch {} });
   window.addEventListener('unhandledrejection', (e) => { try { window.pokeAPI.logError('interface-promise', (e.reason && e.reason.stack) || String(e.reason)); } catch {} });
 
-  const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do referral (botao de copiar)
+  // Guarda-chuva do armazenamento local: nenhuma escrita pode derrubar a interface.
+// Quando a cota estoura (os logs de hunt/captura crescem com o uso), poda os logs grandes pela
+// metade e tenta de novo; se ainda assim falhar, desiste em silencio. Antes desta guarda, o
+// primeiro setItem do boot com a cota cheia impedia o app de abrir.
+const LS_PODAVEIS = ['huntLog', 'lifeCatch', 'lifeShiny', 'huntStats2'];
+function lsPoda() {
+  let podou = false;
+  LS_PODAVEIS.forEach(k => {
+    try {
+      const v = lsGet(k);
+      if (!v || v.length < 2000) return;
+      const arr = JSON.parse(v);
+      if (Array.isArray(arr) && arr.length > 1) { localStorage.setItem(k, JSON.stringify(arr.slice(-Math.floor(arr.length / 2)))); podou = true; }
+      else { lsDel(k); podou = true; }
+    } catch { try { lsDel(k); podou = true; } catch {} }
+  });
+  return podou;
+}
+function lsSet(k, v) {
+  try { localStorage.setItem(k, v); return true; }
+  catch (e) {
+    try { if (lsPoda()) { localStorage.setItem(k, v); return true; } } catch {}
+    try { window.pokeAPI && window.pokeAPI.logError && window.pokeAPI.logError('storage', 'sem espaco para ' + k); } catch {}
+    return false;
+  }
+}
+function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
+  // JSON do disco pode ser null, numero ou lixo (JSON.parse("null") NAO lanca): sem estas guardas,
+  // um valor torto em statsCfg/histDay derrubava o boot inteiro e o app nao abria.
+  function lsObj(k) {
+    try {
+      const v = JSON.parse(lsGet(k) || "{}");
+      if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+      // dado do disco pode trazer __proto__/constructor; com Object.assign isso trocaria o
+      // prototipo do destino. Copia so chaves proprias e comuns.
+      const o = {};
+      for (const p in v) { if (p === "__proto__" || p === "constructor" || p === "prototype") continue; if (Object.prototype.hasOwnProperty.call(v, p)) o[p] = v[p]; }
+      return o;
+    } catch { return {}; }
+  }
+  function lsArr(k) { try { const v = JSON.parse(lsGet(k) || "[]"); return Array.isArray(v) ? v : []; } catch { return []; } }
+function lsDel(k) { try { localStorage.removeItem(k); } catch {} }
+const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do referral (botao de copiar)
   const LOGIN_URL = 'https://poke.idleworld.online/login';
   const START_URL = LOGIN_URL + '?ref=CJNKGPB'; // abre na tela de login, mantendo o referral
   const grid = document.getElementById('grid');
@@ -524,8 +566,8 @@
   const off = [false, false, false, false];
   const lastLogin = [0, 0, 0, 0]; // cooldown do auto-login por painel (evita ressubmeter em loop)
   const alertedBalls = [false, false, false, false]; // ja avisou "sem pokebola" nesta falta?
-  let count = Math.min(4, Math.max(1, +localStorage.getItem('count') || 4)); // quantos paineis rodar (1 a 4)
-  let muted = localStorage.getItem('muted') === '1';
+  let count = Math.min(4, Math.max(1, +lsGet('count') || 4)); // quantos paineis rodar (1 a 4)
+  let muted = lsGet('muted') === '1';
 
   // ----- Idioma (interface + jogo) -----
   const I18N = {
@@ -647,7 +689,7 @@
       bkExp:'💾 Exportar config', bkImp:'📂 Importar config', bkExpTitle:'Guarda un archivo con todas las configuraciones y el historial (las contraseñas quedan fuera)', bkImpTitle:'Restaura configuraciones e historial desde un archivo exportado', bkConfirm:'¿Reemplazar las configuraciones actuales por las del archivo? La app se recargará. (Las contraseñas no se ven afectadas.)', bkBad:'Archivo inválido.'
     }
   };
-  let lang = ['en', 'es'].includes(localStorage.getItem('lang')) ? localStorage.getItem('lang') : 'pt';
+  let lang = ['en', 'es'].includes(lsGet('lang')) ? lsGet('lang') : 'pt';
   const t = (k) => (I18N[lang][k] != null ? I18N[lang][k] : I18N.pt[k]);
   const defName = (i) => t('trainer') + ' ' + (i + 1);
 
@@ -702,11 +744,11 @@
         try { ivRecebe(i, JSON.parse(m.slice(8))); } catch {}
       });
       let fails = 0, alertedDown = false; // watchdog: falhas de carga do painel e se ja avisou a queda
-      let zoom = +(localStorage.getItem('zoom' + i) || 1);
+      let zoom = +(lsGet('zoom' + i) || 1);
       const setZoom = (z) => {
         zoom = Math.min(2, Math.max(0.5, Math.round(z * 10) / 10));
         try { wv.setZoomFactor(zoom); } catch {}
-        localStorage.setItem('zoom' + i, zoom);
+        lsSet('zoom' + i, zoom);
       };
       panel.querySelector('.zi').onclick = () => setZoom(zoom + 0.1);
       panel.querySelector('.zo').onclick = () => setZoom(zoom - 0.1);
@@ -779,7 +821,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     grid.classList.remove('count-1', 'count-2', 'count-3', 'count-4');
     grid.classList.add('count-' + count);
     countBtn.textContent = t('count') + ': ' + count;
-    localStorage.setItem('count', count);
+    lsSet('count', count);
   }
   function build() { for (let i = 0; i < count; i++) criarPainel(i); aplicaCountLayout(); }
   function setCount(n) {
@@ -918,7 +960,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     muteBtn.textContent = muted ? t('muted') : t('sound');
     muteBtn.classList.toggle('on', muted);
     webviews.forEach(w => { try { w.setAudioMuted(muted); } catch {} });
-    localStorage.setItem('muted', muted ? '1' : '0');
+    lsSet('muted', muted ? '1' : '0');
   }
   muteBtn.onclick = () => { muted = !muted; applyMute(); };
 
@@ -945,7 +987,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     return d;
   }
   const ecoBtn = document.getElementById('eco');
-  let eco = localStorage.getItem('eco') !== '0'; // ligado por padrao
+  let eco = lsGet('eco') !== '0'; // ligado por padrao
   // ponytail: nao intercepta cancelAnimationFrame; suficiente para game-loops comuns
   const ecoScript = (fps) => `(() => {
     if (!window.__eco) {
@@ -974,7 +1016,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
       if (off[i]) return;
       try { w.executeJavaScript(ecoScript(ecoFps())).catch(() => {}); } catch {}
     });
-    localStorage.setItem('eco', eco ? '1' : '0');
+    lsSet('eco', eco ? '1' : '0');
   }
   ecoBtn.onclick = () => { eco = !eco; applyEco(); };
 
@@ -1117,12 +1159,12 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     if (${esconder}) { window.__chatObs = new MutationObserver(aplica); window.__chatObs.observe(document.documentElement, { childList: true, subtree: true }); }
   })()`;
   const chatBtn = document.getElementById('chat');
-  let chatHidden = localStorage.getItem('chatHidden') !== '0'; // fechado por padrao
+  let chatHidden = lsGet('chatHidden') !== '0'; // fechado por padrao
   function applyChat() {
     chatBtn.textContent = chatHidden ? t('chatHidden') : t('chatShown');
     chatBtn.classList.toggle('on', !chatHidden);
     webviews.forEach((w, i) => { if (off[i]) return; try { w.executeJavaScript(chatScript(chatHidden || cardsOn)).catch(() => {}); } catch {} });
-    localStorage.setItem('chatHidden', chatHidden ? '1' : '0');
+    lsSet('chatHidden', chatHidden ? '1' : '0');
   }
   chatBtn.onclick = () => { chatHidden = !chatHidden; applyChat(); };
 
@@ -1158,13 +1200,13 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
   const dockBtn = document.getElementById('dock');
   // Migracao: a 1a versao escondia o menu do jogo por padrao e alguns usuarios estranharam.
   // Agora ele vem VISIVEL; limpamos a preferencia antiga uma unica vez pra valer pra quem ja usou.
-  if (localStorage.getItem('dockMigrado') !== '1') { localStorage.removeItem('dockHidden'); localStorage.setItem('dockMigrado', '1'); }
-  let dockHidden = localStorage.getItem('dockHidden') === '1'; // visivel por padrao; usuario esconde se quiser
+  if (lsGet('dockMigrado') !== '1') { lsDel('dockHidden'); lsSet('dockMigrado', '1'); }
+  let dockHidden = lsGet('dockHidden') === '1'; // visivel por padrao; usuario esconde se quiser
   function applyDock() {
     dockBtn.textContent = t('dockLabel'); // estado vai pela cor (.on = visível), igual o Eco
     dockBtn.classList.toggle('on', !dockHidden);
     webviews.forEach((w, i) => { if (off[i]) return; try { w.executeJavaScript(dockScript(dockHidden)).catch(() => {}); } catch {} });
-    localStorage.setItem('dockHidden', dockHidden ? '1' : '0');
+    lsSet('dockHidden', dockHidden ? '1' : '0');
   }
   dockBtn.onclick = () => { dockHidden = !dockHidden; applyDock(); };
 
@@ -1179,12 +1221,12 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
       + '.game-hud-tr:hover,nav.game-dock:hover{opacity:1 !important}';
   })()`;
   const cleanBtn = document.getElementById('cleanHud');
-  let cleanOn = localStorage.getItem('cleanHud') !== '0'; // ligado por padrao
+  let cleanOn = lsGet('cleanHud') !== '0'; // ligado por padrao
   function applyClean() {
     cleanBtn.textContent = t('clean'); cleanBtn.title = t('cleanTitle');
     cleanBtn.classList.toggle('on', cleanOn);
     webviews.forEach((w, i) => { if (off[i] || !w) return; try { w.executeJavaScript(cleanScript(cleanOn)).catch(() => {}); } catch {} });
-    localStorage.setItem('cleanHud', cleanOn ? '1' : '0');
+    lsSet('cleanHud', cleanOn ? '1' : '0');
   }
   cleanBtn.onclick = () => { cleanOn = !cleanOn; applyClean(); };
 
@@ -1219,12 +1261,12 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
 
   // ----- Anti-sono: impede o PC de dormir enquanto farma -----
   const awakeBtn = document.getElementById('awake');
-  let awake = localStorage.getItem('awake') === '1';
+  let awake = lsGet('awake') === '1';
   async function applyAwake() {
     awakeBtn.textContent = awake ? t('awake') : t('sleep');
     awakeBtn.classList.toggle('on', awake);
     try { await window.pokeAPI.setAwake(awake); } catch {}
-    localStorage.setItem('awake', awake ? '1' : '0');
+    lsSet('awake', awake ? '1' : '0');
   }
   awakeBtn.onclick = () => { awake = !awake; applyAwake(); };
 
@@ -1252,7 +1294,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
 
   // ----- Proporção original do jogo: sem esticar a imagem (o canvas dele é 1600x832 fixo) -----
   const propBtn = document.getElementById('propNat');
-  let propNat = localStorage.getItem('propNat') !== '0'; // ligado por padrao: imagem correta
+  let propNat = lsGet('propNat') !== '0'; // ligado por padrao: imagem correta
   const PROP_JOGO = 1600 / 832; // o canvas do jogo e fixo nesse tamanho e ele estica pra caber
   // Dimensiona cada painel na proporcao do jogo: escolhe o lado que limita (largura ou altura),
   // que e justamente o que CSS sozinho nao decide. Sobra fundo escuro do painel em volta.
@@ -1280,7 +1322,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     propBtn.textContent = t(propNat ? 'propOn' : 'propOff');
     propBtn.title = t('propTitle');
     propBtn.classList.toggle('on', propNat);
-    localStorage.setItem('propNat', propNat ? '1' : '0');
+    lsSet('propNat', propNat ? '1' : '0');
     ajustaProporcao();
   }
   propBtn.onclick = () => { propNat = !propNat; applyPropNat(); };
@@ -1290,35 +1332,35 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
 
   // ----- Minimizar: pra bandeja (padrao) ou normal, na barra de tarefas -----
   const minTrayBtn = document.getElementById('minTray');
-  let minTray = localStorage.getItem('minTray') !== '0'; // padrao: pra bandeja (comportamento antigo)
+  let minTray = lsGet('minTray') !== '0'; // padrao: pra bandeja (comportamento antigo)
   async function applyMinTray() {
     minTrayBtn.textContent = t(minTray ? 'minTrayOn' : 'minTrayOff');
     minTrayBtn.title = t('minTrayTitle');
     minTrayBtn.classList.toggle('on', minTray);
     try { await window.pokeAPI.setMinToTray(minTray); } catch {}
-    localStorage.setItem('minTray', minTray ? '1' : '0');
+    lsSet('minTray', minTray ? '1' : '0');
   }
   minTrayBtn.onclick = () => { minTray = !minTray; applyMinTray(); };
 
   // ----- Alertas: notifica quando uma conta cai (watchdog) ou fica sem pokebola -----
   const alertBtn = document.getElementById('alerts');
-  let alertsOn = localStorage.getItem('alerts') !== '0'; // ligado por padrao
+  let alertsOn = lsGet('alerts') !== '0'; // ligado por padrao
   function applyAlerts() {
     alertBtn.textContent = t('alerts');
     alertBtn.title = t('alertsTitle');
     alertBtn.classList.toggle('on', alertsOn);
-    localStorage.setItem('alerts', alertsOn ? '1' : '0');
+    lsSet('alerts', alertsOn ? '1' : '0');
   }
   alertBtn.onclick = () => { alertsOn = !alertsOn; applyAlerts(); };
 
   // ----- Proteção de venda (toggle): o guard injetado lê window.__pgSellGuardOn -----
   const sgBtn = document.getElementById('sellguard');
-  let sellGuardOn = localStorage.getItem('sellguard') !== '0'; // ligado por padrao
+  let sellGuardOn = lsGet('sellguard') !== '0'; // ligado por padrao
   function applySellGuard() {
     sgBtn.textContent = t('sellguard');
     sgBtn.title = t('sellguardTitle');
     sgBtn.classList.toggle('on', sellGuardOn);
-    localStorage.setItem('sellguard', sellGuardOn ? '1' : '0');
+    lsSet('sellguard', sellGuardOn ? '1' : '0');
     webviews.forEach((w, i) => { if (off[i] || !w) return; try { w.executeJavaScript('window.__pgSellGuardOn=' + (sellGuardOn ? 'true' : 'false')).catch(() => {}); } catch {} });
   }
   sgBtn.onclick = () => { sellGuardOn = !sellGuardOn; applySellGuard(); };
@@ -1341,9 +1383,9 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   }
 
   // ----- Som do shiny: acorde curto via WebAudio (sem arquivo de audio) -----
-  let sndShinyOn = localStorage.getItem('sndShiny') !== '0'; // ligado por padrao
+  let sndShinyOn = lsGet('sndShiny') !== '0'; // ligado por padrao
   const sndBtn = document.getElementById('sndShiny');
-  function applySndShiny() { sndBtn.textContent = t(sndShinyOn ? 'sndOn' : 'sndOff'); sndBtn.title = t('sndTitle'); sndBtn.classList.toggle('on', sndShinyOn); localStorage.setItem('sndShiny', sndShinyOn ? '1' : '0'); }
+  function applySndShiny() { sndBtn.textContent = t(sndShinyOn ? 'sndOn' : 'sndOff'); sndBtn.title = t('sndTitle'); sndBtn.classList.toggle('on', sndShinyOn); lsSet('sndShiny', sndShinyOn ? '1' : '0'); }
   sndBtn.onclick = () => { sndShinyOn = !sndShinyOn; applySndShiny(); if (sndShinyOn) beepShiny(); };
   let _ac = null;
   function beepShiny(festa) { // festa = captura: acorde mais longo, pra nao confundir com "apareceu"
@@ -1383,13 +1425,13 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
 
   // ----- Webhook do Discord (opcional): a URL e do proprio usuario, envio via main (CSP nao deixa daqui) -----
   let whCfg = { url: '', shiny: true, sum: true };
-  try { Object.assign(whCfg, JSON.parse(localStorage.getItem('webhook') || '{}')); } catch {}
+  try { Object.assign(whCfg, lsObj('webhook')); } catch {}
   whCfg.url = String(whCfg.url || ''); whCfg.shiny = !!whCfg.shiny; whCfg.sum = !!whCfg.sum; // importado do disco
-  const saveWh = () => { try { localStorage.setItem('webhook', JSON.stringify(whCfg)); } catch {} };
+  const saveWh = () => { try { lsSet('webhook', JSON.stringify(whCfg)); } catch {} };
   function webhookSend(text) { if (!whCfg.url) return; try { window.pokeAPI.webhook(whCfg.url, text); } catch {} }
 
   // ----- Historico diario persistente: gold/xp/kills/capturas/shinies por conta e por dia -----
-  let histDay = {}; try { histDay = JSON.parse(localStorage.getItem('histDay') || '{}'); } catch {}
+  let histDay = {}; try { histDay = lsObj('histDay'); } catch {}
   // vindo do disco (inclusive de um arquivo importado): so numero entra, senao a soma vira NaN na tela
   Object.keys(histDay).forEach(k => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !histDay[k] || typeof histDay[k] !== 'object') { delete histDay[k]; return; }
@@ -1412,31 +1454,31 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     b.g += reset ? cur.g : (cur.g - last.g); // saldo tem sinal (gastar bola desconta)
     b.x += dv(cur.x, last.x); b.kl += dv(cur.k, last.k); b.c += dv(cur.c, last.c); b.sf += dv(cur.sf, last.sf); b.sc += dv(cur.sc, last.sc);
     Object.keys(histDay).forEach(dk => { if (dk < dayKey(90)) delete histDay[dk]; }); // ponytail: poda 90 dias; se pesar, debounce no save
-    try { localStorage.setItem('histDay', JSON.stringify(histDay)); } catch {}
+    try { lsSet('histDay', JSON.stringify(histDay)); } catch {}
   }
   function viraODia(k) { // fechou um dia: manda o resumo pro Discord (se configurado)
     if (whCfg.url && whCfg.sum) { const T = totalDia(k); if (T.kl || T.c) webhookSend(t('whDay') + ' ' + k + ': ' + ncs(Math.round(T.g)) + ' gold · ' + nc(T.x) + ' XP · ' + nf(T.kl) + ' kills · ' + nf(T.c) + ' ' + t('stCaptures').toLowerCase() + ' · ✨ ' + T.sf + '/' + T.sc); }
   }
   // metas diarias (barra de progresso na secao Hoje do modo Simples)
-  let goals = { g: 0, c: 0 }; try { Object.assign(goals, JSON.parse(localStorage.getItem('goalsDay') || '{}')); } catch {}
+  let goals = { g: 0, c: 0 }; try { Object.assign(goals, lsObj('goalsDay')); } catch {}
   goals.g = +goals.g || 0; goals.c = +goals.c || 0; // importado do disco: numero ou nada (vai pra atributo value)
-  const saveGoals = () => { try { localStorage.setItem('goalsDay', JSON.stringify(goals)); } catch {} };
+  const saveGoals = () => { try { lsSet('goalsDay', JSON.stringify(goals)); } catch {} };
   // ===== Log de hunts: cada hunt encerrada vira um registro, sem o usuário fazer nada =====
   // O coletor fecha a sessão quando a hunt muda; aqui a gente pesca esse resumo e guarda, pra
   // depois exportar (com drops por item, que é o que permite calcular % de drop por kill).
-  let huntLog = []; try { huntLog = JSON.parse(localStorage.getItem('huntLog') || '[]'); } catch {}
+  let huntLog = []; try { huntLog = lsArr('huntLog'); } catch {}
   if (!Array.isArray(huntLog)) huntLog = [];
   const hlNum = (v) => { const x = +v; return Number.isFinite(x) ? x : 0; };
   const hlTxt = (v, n) => String(v == null ? '' : v).slice(0, n || 40);
   // vem do jogo e do disco: entra com tipo e tamanho conferidos
-  huntLog = huntLog.slice(-400).filter(h => h && typeof h === 'object').map(h => ({
+  huntLog = huntLog.slice(-150).filter(h => h && typeof h === 'object').map(h => ({
     p: hlNum(h.p), acc: hlTxt(h.acc), hunt: hlTxt(h.hunt, 60), start: hlNum(h.start), end: hlNum(h.end),
     kills: hlNum(h.kills), xp: hlNum(h.xp), caps: hlNum(h.caps), sf: hlNum(h.sf), sc: hlNum(h.sc),
     balls: hlNum(h.balls), pots: hlNum(h.pots), loot: hlNum(h.loot), sell: hlNum(h.sell), sup: hlNum(h.sup),
     drops: (Array.isArray(h.drops) ? h.drops : []).slice(0, 60).map(d => ({ id: hlNum(d && d.id), n: hlTxt(d && d.n, 40), q: hlNum(d && d.q), g: hlNum(d && d.g) }))
   }));
   const hlVistos = {}; huntLog.forEach(h => hlVistos[h.p + '_' + h.start] = 1);
-  const salvaHuntLog = () => { try { localStorage.setItem('huntLog', JSON.stringify(huntLog)); } catch {} };
+  const salvaHuntLog = () => { try { lsSet('huntLog', JSON.stringify(huntLog)); } catch {} };
   function registraHunt(i, ph) {
     if (!ph || !ph.start || !(+ph.kills > 0)) return; // hunt vazia (troca rápida) não vira registro
     const key = i + '_' + hlNum(ph.start);
@@ -1447,9 +1489,9 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       start: hlNum(ph.start), end: hlNum(ph.end), kills: hlNum(ph.kills), xp: hlNum(ph.xp), caps: hlNum(ph.caps),
       sf: hlNum(ph.sf), sc: hlNum(ph.sc), balls: hlNum(ph.balls), pots: hlNum(ph.pots),
       loot: hlNum(ph.loot), sell: hlNum(ph.sell), sup: hlNum(ph.sup),
-      drops: (Array.isArray(ph.drops) ? ph.drops : []).slice(0, 60).map(d => ({ id: hlNum(d && d.id), n: hlTxt(d && d.n, 40), q: hlNum(d && d.q), g: hlNum(d && d.g) }))
+      drops: (Array.isArray(ph.drops) ? ph.drops : []).slice(0, 30).map(d => ({ id: hlNum(d && d.id), n: hlTxt(d && d.n, 40), q: hlNum(d && d.q), g: hlNum(d && d.g) }))
     });
-    if (huntLog.length > 400) huntLog = huntLog.slice(-400); // ponytail: 400 hunts basta; se encher, exporta e limpa
+    if (huntLog.length > 150) huntLog = huntLog.slice(-150); // ponytail: 400 hunts basta; se encher, exporta e limpa
     salvaHuntLog();
   }
   // Exporta duas planilhas: uma linha por hunt, e uma linha por item de cada hunt (com drop/kill)
@@ -1492,8 +1534,8 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     extra(e, x); return e;
   }).filter(Boolean);
   let lifeShiny = [], lifeCatch = [];
-  try { lifeShiny = saneiaLog(JSON.parse(localStorage.getItem('lifeShiny') || '[]'), (e, x) => { e.cap = x.cap ? 1 : 0; e.def = x.def ? 1 : 0; }); } catch {}
-  try { lifeCatch = saneiaLog(JSON.parse(localStorage.getItem('lifeCatch') || '[]'), (e, x) => { e.iv = +x.iv || 0; e.q = +x.q || 0; e.sh = !!x.sh; e.fx = !!x.fx; }); } catch {}
+  try { lifeShiny = saneiaLog(lsArr('lifeShiny'), (e, x) => { e.cap = x.cap ? 1 : 0; e.def = x.def ? 1 : 0; }); } catch {}
+  try { lifeCatch = saneiaLog(lsArr('lifeCatch'), (e, x) => { e.iv = +x.iv || 0; e.q = +x.q || 0; e.sh = !!x.sh; e.fx = !!x.fx; }); } catch {}
   // chave de dedupe inclui o painel (indice, nao o nome: o nome comeca padrao e muda ao carregar,
   // o que duplicaria a entrada e o aviso). Assim duas contas com a mesma especie no mesmo ms nao colidem.
   const kSh = (p, x) => 's' + p + '_' + x.t + '_' + (x.sid || x.n);
@@ -1519,7 +1561,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     if (dirty) {
       if (lifeShiny.length > 500) lifeShiny = lifeShiny.slice(-500);
       if (lifeCatch.length > 300) lifeCatch = lifeCatch.slice(-300);
-      try { localStorage.setItem('lifeShiny', JSON.stringify(lifeShiny)); localStorage.setItem('lifeCatch', JSON.stringify(lifeCatch)); } catch {}
+      try { lsSet('lifeShiny', JSON.stringify(lifeShiny)); lsSet('lifeCatch', JSON.stringify(lifeCatch)); } catch {}
     }
   }
 
@@ -1603,7 +1645,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       p.querySelector('.power').title = t('tPower');
     });
     applyMute(); applyEco(); applyChat(); applyDock(); applyAwake(); applyMinTray(); applyPropNat(); applySndShiny(); applyAlerts(); applySellGuard(); applyClean(); aplicaCountLayout();
-    localStorage.setItem('lang', lang);
+    lsSet('lang', lang);
   }
   function applyGameLang() {
     const pl = lang === 'pt' ? 'pt' : 'en'; // es usa en no jogo (so tem pt/en)
@@ -1643,7 +1685,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   };
   document.getElementById('reloadAll').onclick = () => webviews.forEach((w, i) => { if (!off[i]) w.reload(); });
   // Layout dos paineis: grade (2x2) -> coluna (vertical) -> linha (horizontal)
-  let layoutMode = localStorage.getItem('layout') || 'grid';
+  let layoutMode = lsGet('layout') || 'grid';
   function applyLayout() {
     grid.classList.remove('one-col', 'one-row');
     if (layoutMode === 'col') grid.classList.add('one-col');
@@ -1652,7 +1694,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const lb = document.getElementById('layout');
     lb.textContent = t(layoutMode === 'col' ? 'layoutCol' : layoutMode === 'row' ? 'layoutRow' : 'layout');
     lb.title = t('layoutTitle');
-    localStorage.setItem('layout', layoutMode);
+    lsSet('layout', layoutMode);
   }
   document.getElementById('layout').onclick = () => { layoutMode = layoutMode === 'grid' ? 'col' : layoutMode === 'col' ? 'row' : 'grid'; applyLayout(); };
   applyLayout();
@@ -1684,7 +1726,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
           const o = JSON.parse(rd.result);
           if (!o || typeof o !== 'object' || Array.isArray(o)) throw 0;
           if (!window.confirm(t('bkConfirm'))) return;
-          Object.keys(o).forEach(k2 => { if (BK_SKIP.includes(k2)) return; try { localStorage.setItem(k2, String(o[k2])); } catch {} });
+          Object.keys(o).forEach(k2 => { if (BK_SKIP.includes(k2)) return; try { lsSet(k2, String(o[k2])); } catch {} });
           location.reload();
         } catch { window.alert(t('bkBad')); }
       };
@@ -1754,7 +1796,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   document.body.appendChild(statsEl);
   statsEl.style.top = document.getElementById('topbar').offsetHeight + 'px';
   statsEl.style.bottom = '0';
-  statsEl.style.width = (+localStorage.getItem('statsW') || 350) + 'px';
+  statsEl.style.width = (+lsGet('statsW') || 350) + 'px';
   document.body.style.setProperty('--statsw', statsEl.style.width); // o grid acompanha a largura do painel
   const stTabs = statsEl.querySelector('.st-tabs');
   const stBody = statsEl.querySelector('.st-body');
@@ -1762,7 +1804,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   let statsIdx = 0;
   const tabNames = [];
   // na tela de login o painel espera: se estava aberto, so reabre depois que alguma conta logar
-  let statsAutoPend = localStorage.getItem('statsOpen') === '1';
+  let statsAutoPend = lsGet('statsOpen') === '1';
   let statsOpen = false;
   let cfgOpen = false;
   let dragging = false; // arrastando uma seção no painel (pausa o refresh)
@@ -1805,7 +1847,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   const BAGCATS = ['Pokébolas', 'Heal', 'Revive', 'Loot', 'Stones', 'Chaves', 'Outros'];
   const secLabel = (k) => ({ kpis: t('stKpis'), session: t('stSession'), gold: t('stGold'), compare: t('stCompare'), drops: t('stDrops'), bag: 'Bag', pinned: t('stPinned'), target: t('stTargetLabel'), team: t('stTeam') }[k] || k);
   function loadStatsCfg() {
-    let c = {}; try { c = JSON.parse(localStorage.getItem('statsCfg') || '{}'); } catch {}
+    let c = {}; try { c = lsObj('statsCfg'); } catch {}
     c.order = Array.isArray(c.order) ? c.order.filter(x => SECTIONS.includes(x)) : [];
     SECTIONS.forEach(s => { if (!c.order.includes(s)) c.order.push(s); });
     c.bagOrder = Array.isArray(c.bagOrder) ? c.bagOrder.filter(x => BAGCATS.includes(x)) : [];
@@ -1823,10 +1865,10 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   }
   let cfg = loadStatsCfg();
   let lastData = null; // ultimo d valido (pra listar itens da bag na config)
-  const saveStatsCfg = () => { try { localStorage.setItem('statsCfg', JSON.stringify(cfg)); } catch {} };
+  const saveStatsCfg = () => { try { lsSet('statsCfg', JSON.stringify(cfg)); } catch {} };
   // Shinies encontrados na vida da conta (acumulado pelo PokeGrid, por id de personagem)
-  const loadShinyLife = () => { try { return JSON.parse(localStorage.getItem('shinyLife') || '{}'); } catch { return {}; } };
-  const addShinyLife = (cid, n) => { if (!cid || !n) return; const m = loadShinyLife(); m[cid] = (m[cid] || 0) + n; try { localStorage.setItem('shinyLife', JSON.stringify(m)); } catch {} };
+  const loadShinyLife = () => { try { return lsObj('shinyLife'); } catch { return {}; } };
+  const addShinyLife = (cid, n) => { if (!cid || !n) return; const m = loadShinyLife(); m[cid] = (m[cid] || 0) + n; try { lsSet('shinyLife', JSON.stringify(m)); } catch {} };
   // Emblema/nome do clã no header (defensivo: o formato do clã varia; tenta os campos comuns)
   const clanHtml = (clan) => {
     if (!clan) return '';
@@ -2051,7 +2093,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     document.body.classList.toggle('stats-open', statsOpen); // empurra o grid
     statsBtn.classList.toggle('on', statsOpen);
     // statsAutoPend conta como "vai abrir": preserva a preferencia durante o login
-    localStorage.setItem('statsOpen', (statsOpen || statsAutoPend) ? '1' : '0');
+    lsSet('statsOpen', (statsOpen || statsAutoPend) ? '1' : '0');
     if (statsOpen) {
       cfgOpen = false; const c = statsEl.querySelector('.st-cfg'); if (c) c.style.display = 'none';
       stBody.style.display = ''; stTabs.style.display = ''; const g = statsEl.querySelector('.st-gear'); if (g) g.classList.remove('on');
@@ -2065,7 +2107,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const handle = statsEl.querySelector('.st-resize');
     let ov = null;
     const move = (e) => { statsEl.style.width = Math.max(288, Math.min(760, e.clientX)) + 'px'; document.body.style.setProperty('--statsw', statsEl.style.width); };
-    const stop = () => { if (!ov) return; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', stop); ov.remove(); ov = null; localStorage.setItem('statsW', parseInt(statsEl.style.width, 10)); };
+    const stop = () => { if (!ov) return; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', stop); ov.remove(); ov = null; lsSet('statsW', parseInt(statsEl.style.width, 10)); };
     handle.addEventListener('mousedown', (e) => {
       e.preventDefault();
       // overlay por cima de tudo (inclusive dos webviews) pra nao perder o mouse durante o arraste
@@ -2206,7 +2248,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   // fisico bate no DEF e especial no SPD do defensor (defensor grosso naquele lado apanha menos),
   // e a vida do defensor segura o ritmo. Selvagem entra com qualidade 1 e IV mediano (96): isso
   // ordena bem sem fingir que sabe o dano exato do jogo; o "medido" continua sendo a regua.
-  let huntPkSel = String(localStorage.getItem('cdHuntPk') || '');
+  let huntPkSel = String(lsGet('cdHuntPk') || '');
   const sugCalc = (A, x) => {
     const M2 = window.PokeGridIvMath;
     const aB = A && basesByName[A.sp], am = A && movesByName[A.sp];
@@ -2323,34 +2365,34 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     return rows;
   };
   let huntsCache = null, huntsCacheT = 0, huntSort = 'sv', huntAccSel = -1;
-  let huntFavs = {}; try { huntFavs = JSON.parse(localStorage.getItem('huntFavs') || '{}'); } catch {}
-  let huntHidden = {}; try { huntHidden = JSON.parse(localStorage.getItem('huntHidden') || '{}'); } catch {}
-  let huntScope = localStorage.getItem('huntScope') || 'minhas'; // 'minhas' (as que voce farma/favoritou) | 'todas'
+  let huntFavs = {}; try { huntFavs = lsObj('huntFavs'); } catch {}
+  let huntHidden = {}; try { huntHidden = lsObj('huntHidden'); } catch {}
+  let huntScope = lsGet('huntScope') || 'minhas'; // 'minhas' (as que voce farma/favoritou) | 'todas'
   let showHiddenHunts = false; // transitorio: revelar as ocultas pra desfazer
   // ----- Cartas modular: cada seção liga/desliga e reordena, salvo no localStorage -----
   const CDSECTS = ['kpis', 'today', 'table', 'hunts', 'catches', 'shinies', 'shinyTried', 'trend', 'shared', 'team', 'inv'];
   const cdLabel = (k) => ({ kpis: t('cdSecKpis'), today: t('cdToday'), table: t('cdByAcc2'), hunts: t('cdHunts'), catches: t('cdCatches'), shinies: t('cdShinies'), shinyTried: t('cdShinyTried'), trend: t('cdTrend'), shared: t('cdShared'), team: t('cdTeams'), inv: t('cdInv') }[k] || k);
   // Melhor catch: por que criterio. Padrao IV x qualidade, porque a qualidade multiplica os
   // stats e o poder final, entao IV puro sozinho engana (126/192 x1.80 bate 150/192 x0.95).
-  let bestCrit = ['ivq', 'iv', 'q'].includes(localStorage.getItem('bestCrit')) ? localStorage.getItem('bestCrit') : 'ivq';
+  let bestCrit = ['ivq', 'iv', 'q'].includes(lsGet('bestCrit')) ? lsGet('bestCrit') : 'ivq';
   const bestScore = (x) => !x ? -1 : bestCrit === 'iv' ? (+x.iv || 0) : bestCrit === 'q' ? (+x.q || 0) : (+x.iv || 0) * (+x.q || 1);
   // shinies tentados: escopo da lista (total | sessao | alvos marcados com estrela)
-  let stMode = ['total', 'sess', 'targets'].includes(localStorage.getItem('shinyTriedMode')) ? localStorage.getItem('shinyTriedMode') : 'total';
-  let shinyTargets = {}; try { shinyTargets = JSON.parse(localStorage.getItem('shinyTargets') || '{}'); } catch {}
+  let stMode = ['total', 'sess', 'targets'].includes(lsGet('shinyTriedMode')) ? lsGet('shinyTriedMode') : 'total';
+  let shinyTargets = {}; try { shinyTargets = lsObj('shinyTargets'); } catch {}
   const utBase = []; // baseline de tentativas por conta: o que veio antes da sessao nao conta no modo sessao
   let cardsCfg = { order: CDSECTS.slice(), hide: {}, w: {}, h: {} }, cardsCfgOpen = false, cdBusy = false;
   // larguras padrão (colunas de 12): linhas fecham certinho em tela cheia (12 | 12 | 4+4+4 | 6+3+3)
   let cdFC = { p: -1, n: '', sh: 0, q: 0, iv: 0, per: 0 }; // filtros das capturas (conta, nome, shiny, qualidade, IV, periodo)
-  try { const c0 = JSON.parse(localStorage.getItem('cdFC') || '{}'); cdFC = { p: +c0.p >= 0 ? +c0.p : -1, n: String(c0.n || '').slice(0, 30).toLowerCase(), sh: c0.sh ? 1 : 0, q: +c0.q || 0, iv: +c0.iv || 0, per: +c0.per || 0 }; } catch {}
+  try { const c0 = lsObj('cdFC'); cdFC = { p: +c0.p >= 0 ? +c0.p : -1, n: String(c0.n || '').slice(0, 30).toLowerCase(), sh: c0.sh ? 1 : 0, q: +c0.q || 0, iv: +c0.iv || 0, per: +c0.per || 0 }; } catch {}
   const CDW_DEF = { kpis: 12, today: 12, table: 12, hunts: 4, catches: 4, shinies: 4, shinyTried: 6, trend: 3, shared: 3, team: 12, inv: 6 };
   const cdW = (s) => Math.max(3, Math.min(12, +(cardsCfg.w[s]) || CDW_DEF[s] || 6));
-  try { const c = JSON.parse(localStorage.getItem('cardsCfg') || '{}'); if (Array.isArray(c.order)) cardsCfg.order = c.order.filter(x => CDSECTS.includes(x)); CDSECTS.forEach(s => { if (!cardsCfg.order.includes(s)) cardsCfg.order.push(s); }); cardsCfg.hide = c.hide || {}; if (c.w && typeof c.w === 'object') cardsCfg.w = c.w; if (c.h && typeof c.h === 'object') cardsCfg.h = c.h; } catch {}
-  const saveCardsCfg = () => { try { localStorage.setItem('cardsCfg', JSON.stringify(cardsCfg)); } catch {} };
+  try { const c = lsObj('cardsCfg'); if (Array.isArray(c.order)) cardsCfg.order = c.order.filter(x => CDSECTS.includes(x)); CDSECTS.forEach(s => { if (!cardsCfg.order.includes(s)) cardsCfg.order.push(s); }); cardsCfg.hide = c.hide || {}; if (c.w && typeof c.w === 'object') cardsCfg.w = c.w; if (c.h && typeof c.h === 'object') cardsCfg.h = c.h; } catch {}
+  const saveCardsCfg = () => { try { lsSet('cardsCfg', JSON.stringify(cardsCfg)); } catch {} };
   // base medida por conta e hunt: media (EWMA) do que CADA conta realmente fez ali (gold/h, xp/h, capturas/h).
   // amostra a taxa acumulada da sessao (ja e uma media) quando a hunt rodou tempo suficiente pra estabilizar.
   // estrutura: huntStats[cid da conta][hunt normalizada] = { gph, xph, cph, n, t }
   const hkey = s => String(s || '').toLowerCase().replace(/[_-]+/g, ' ').trim();
-  let huntStats = {}; try { huntStats = JSON.parse(localStorage.getItem('huntStats2') || '{}'); } catch {}
+  let huntStats = {}; try { huntStats = lsObj('huntStats2'); } catch {}
   function amostraHunt(acc, nome, a) {
     const ak = String(acc || ''), k = hkey(nome);
     if (!ak || !k || !a || (a.seconds || 0) < 300) return; // 5 min pra a taxa acumulada assentar
@@ -2367,7 +2409,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       if (off[i] || !webviews[i]) continue;
       try { const d = await webviews[i].executeJavaScript(READ_STATE); if (d && d.ok && d.cid && d.hunt && d.a) { amostraHunt(d.cid, d.hunt, d.a); mudou = true; } } catch {}
     }
-    if (mudou) { try { localStorage.setItem('huntStats2', JSON.stringify(huntStats)); } catch {} }
+    if (mudou) { try { lsSet('huntStats2', JSON.stringify(huntStats)); } catch {} }
   }, 30000);
   // junta os marcadores do mapa com o catalogo de criaturas (tudo dado que o jogo ja entrega ao cliente)
   const HUNTS_JS = `(async()=>{try{const [mk,cr]=await Promise.all([fetch('/api/game/map-markers').then(r=>r.json()).catch(()=>null),fetch('/game/creatures.json').then(r=>r.json()).catch(()=>null)]);const cs={};((cr&&cr.creatures)||[]).forEach(c=>{if(c&&c.name)cs[c.name.toLowerCase().trim()]={nm0:c.name.toLowerCase().trim(),t1:c.type1||'',t2:c.type2||'',sv:c.sellValue||c.priceNpc||0,xp:c.experience||c.xp||0,lvl:c.huntLevel||0,loot:(c.loot||[]).map(l=>(l&&l.name)||l).filter(x=>typeof x==='string')};});const limpa=s=>String(s||'').toLowerCase().replace(/\\[.*?\\]/g,'').replace(/\\(.*?\\)/g,'').replace(/[_-]+/g,' ').replace(/\\s+/g,' ').trim();const acha=nm=>{const k=limpa(nm);if(cs[k])return cs[k];const w=k.split(' ');for(let i=0;i<w.length;i++){const suf=w.slice(i).join(' ');if(cs[suf])return cs[suf];}for(let i=0;i<w.length;i++){if(cs[w[i]])return cs[w[i]];}return null;};const byId={},bs={},mv={};((cr&&cr.creatures)||[]).forEach(c=>{if(c&&c.pokeId!=null&&c.name){byId[c.pokeId]=c.name;bs[String(c.name).toLowerCase()]=[+c.baseHp||0,+c.baseAtk||0,+c.baseDef||0,+c.baseSpAtk||0,+c.baseSpDef||0,+c.baseSpeed||0];mv[String(c.name).toLowerCase()]={hl:+c.huntLevel||0,t:[String(c.type1||''),String(c.type2||'')],a:(c.attacks||[]).slice(0,12).map(g=>[String((g&&g.name)||'').slice(0,24),+(g&&g.power)||0,String((g&&g.type)||'').toUpperCase(),String((g&&g.category)||'').toUpperCase()==='PHYSICAL'?'P':'S',+(g&&g.cooldownMs)||0,+(g&&g.learnLevel)||0])};}});const ms=Array.isArray(mk)?mk:((mk&&(mk.markers||mk.hunts))||[]);const out=[];ms.forEach(m2=>{const nm=m2.hunt||m2.name||m2.slug||m2.title||'';if(!nm)return;const c=acha(nm);out.push({name:String(nm).replace(/[_-]+/g,' ').trim(),level:m2.level||m2.lvl||m2.minLevel||(c?c.lvl:0)||0,t1:c?c.t1:'',t2:c?c.t2:'',sv:c?c.sv:0,xp:c?c.xp:0,loot:c?c.loot:[],sp:c?c.nm0:''});});return {h:out,byId:byId,bs:bs,mv:mv};}catch(e){return null}})()`;
@@ -2553,7 +2595,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
         + (catches.length ? catches.map(x => '<div class="cd-row"><span class="cd-dot" style="background:' + x.dot + '"></span><span class="rn">' + (x.fx ? '<span title="' + t('cdFirst') + '">🆕</span> ' : '') + (x.sh ? '✨ ' : '') + esc(x.n) + raroHtml(x.q) + ' <span style="color:#7d8590">· ' + esc(x.acc) + '</span></span><span style="color:#55e6d3">' + (+x.iv || 0) + '/192</span>' + (+x.q ? '<span style="color:#f2c665">×' + (+x.q).toFixed(2) + '</span>' : '') + '<span class="rt">' + fmtDT(x.t) + '</span></div>').join('') : '<div class="cd-empty">' + t('cdNone') + '</div>') + '</div>'; };
     SB.teams = () => {
       const M = window.PokeGridIvMath;
-      const alvo = Math.max(1, Math.min(500, +(localStorage.getItem('cdPjLv') || 500)));
+      const alvo = Math.max(1, Math.min(500, +(lsGet('cdPjLv') || 500)));
       const cols = ordered.filter(r => r.st === 'on' && (r.team || []).length);
       const poder = (p) => { // mesmo modulo do card de IV; sem base/qualidade/IV nao inventa numero
         const b = basesByName[String(p.name || '').toLowerCase()];
@@ -2574,7 +2616,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       return '<div class="cd-sec"><div class="cd-h">' + t('cdTeams') + '</div>'
         + '<div class="cd-cfg-row" style="margin-bottom:6px">' + t('cdProjLv') + ' <input id="cdPjLv" type="number" min="1" max="500" class="cd-inp" style="width:64px" value="' + alvo + '"></div>' + inner + '</div>'; };
     SB.inv = () => {
-      const filtro = String(localStorage.getItem('cdInvF') || '').slice(0, 30).toLowerCase();
+      const filtro = String(lsGet('cdInvF') || '').slice(0, 30).toLowerCase();
       const tot = {}; // id -> total e detalhe por conta (tooltip)
       ordered.forEach(r => { const im = r.inv || {}; for (const id in im) { const q = +im[id] || 0; if (!q) continue; const e = tot[id] || (tot[id] = { q: 0, por: [] }); e.q += q; e.por.push(esc(r.name) + ': ' + nc(q)); } });
       // mesma regra do proprio jogo: URL completa usa direto; caminho /assets/... e do servidor do jogo
@@ -2586,7 +2628,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       const linhas = lista.slice(0, 80).map(x =>
         '<div class="cd-row" title="' + x.por.join(' · ') + '"><span class="rn">' + (icSrc(x.ic) ? '<img src="' + icSrc(x.ic) + '" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:4px" onerror="this.remove()">' : '') + esc(x.n) + '</span><span style="color:#f2c665">' + nc(x.q) + '</span></div>').join('');
       return '<div class="cd-sec"><div class="cd-h">' + t('cdInv') + '</div>'
-        + '<div class="cd-cfg-row" style="margin-bottom:6px"><input id="cdInvF" type="text" class="cd-inp" style="width:110px" placeholder="🔎" value="' + esc(String(localStorage.getItem('cdInvF') || '').slice(0, 30)) + '"></div>'
+        + '<div class="cd-cfg-row" style="margin-bottom:6px"><input id="cdInvF" type="text" class="cd-inp" style="width:110px" placeholder="🔎" value="' + esc(String(lsGet('cdInvF') || '').slice(0, 30)) + '"></div>'
         + (linhas || '<div class="cd-empty">' + t('cdNone') + '</div>') + '</div>'; };
     SB.shinies = () => { const shinies = lifeShiny.slice(-12).reverse(); return '<div class="cd-sec"><div class="cd-h">' + t('cdShinies') + '</div>'
       + '<div style="display:flex;gap:10px;margin-bottom:8px;font-size:11px;flex-wrap:wrap"><span style="color:#3fb950">' + nf(sumSC) + ' ' + t('cdCaught') + '</span><span style="color:#f2c665">' + nf(sumSF) + ' ' + t('cdSeen') + '</span><span style="color:#f85149">' + nf(lost) + ' ' + t('cdLost') + '</span><span style="color:#6e7681;margin-left:auto">' + t('cdLifeHint') + '</span></div>'
@@ -2647,7 +2689,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
         if (K) lista.forEach(x => { if (x.sug && !x.trava) x.est = { kh: K * x.sug.ritmo, xph: K * x.sug.ritmo * (+x.xp || 0) }; });
       }
       if (huntSort === 'sug' && atacante && atacante.sp.indexOf('ditto') >= 0) {
-        const alvoSel = String(localStorage.getItem('cdDitAlvo') || '');
+        const alvoSel = String(lsGet('cdDitAlvo') || '');
         const alvoX = alvoSel ? lista.find(x => x.name === alvoSel) : null;
         const selAlvo = '<div class="cd-cfg-row" style="margin:2px 0 6px"><select id="cdDitAlvo" class="cd-inp"><option value="">' + t('cdDitAll') + '</option>' + lista.slice().sort((p, q) => String(p.name).localeCompare(String(q.name))).map(x => '<option value="' + esc(x.name) + '"' + (alvoSel === x.name ? ' selected' : '') + '>' + esc(x.name) + (+x.level ? ' Lv' + (+x.level) : '') + '</option>').join('') + '</select></div>';
         if (alvoX) {
@@ -2728,28 +2770,28 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const gear = cardsEl.querySelector('#cdGear'); if (gear) gear.onclick = () => { cardsCfgOpen = !cardsCfgOpen; refreshCards(); };
     cardsEl.querySelectorAll('.cd-cfg input[data-sec]').forEach(chk => chk.onchange = () => { cardsCfg.hide[chk.dataset.sec] = !chk.checked; saveCardsCfg(); refreshCards(); });
     // filtros das capturas, nivel de projecao do time e busca do inventario
-    const fcSave = () => { try { localStorage.setItem('cdFC', JSON.stringify(cdFC)); } catch {} cdHtmlAnt = ''; refreshCards(); };
+    const fcSave = () => { try { lsSet('cdFC', JSON.stringify(cdFC)); } catch {} cdHtmlAnt = ''; refreshCards(); };
     const fcP = cardsEl.querySelector('#cdFcP'); if (fcP) fcP.onchange = () => { cdFC.p = +fcP.value; fcP.blur(); fcSave(); };
     const fcN = cardsEl.querySelector('#cdFcN'); if (fcN) fcN.onchange = () => { cdFC.n = String(fcN.value || '').slice(0, 30).toLowerCase(); fcN.blur(); fcSave(); };
     const fcT = cardsEl.querySelector('#cdFcT'); if (fcT) fcT.onchange = () => { cdFC.per = +fcT.value || 0; fcT.blur(); fcSave(); };
     const fcIv = cardsEl.querySelector('#cdFcIv'); if (fcIv) fcIv.onchange = () => { cdFC.iv = Math.max(0, +fcIv.value || 0); fcIv.blur(); fcSave(); };
     const fcQ = cardsEl.querySelector('#cdFcQ'); if (fcQ) fcQ.onchange = () => { cdFC.q = Math.max(0, +fcQ.value || 0); fcQ.blur(); fcSave(); };
     const fcSh = cardsEl.querySelector('#cdFcSh'); if (fcSh) fcSh.onchange = () => { cdFC.sh = fcSh.checked ? 1 : 0; fcSave(); };
-    const pjLv = cardsEl.querySelector('#cdPjLv'); if (pjLv) pjLv.onchange = () => { try { localStorage.setItem('cdPjLv', String(Math.max(1, Math.min(500, +pjLv.value || 500)))); } catch {} pjLv.blur(); cdHtmlAnt = ''; refreshCards(); };
-    const invF = cardsEl.querySelector('#cdInvF'); if (invF) invF.onchange = () => { try { localStorage.setItem('cdInvF', String(invF.value || '').slice(0, 30)); } catch {} invF.blur(); cdHtmlAnt = ''; refreshCards(); };
+    const pjLv = cardsEl.querySelector('#cdPjLv'); if (pjLv) pjLv.onchange = () => { try { lsSet('cdPjLv', String(Math.max(1, Math.min(500, +pjLv.value || 500)))); } catch {} pjLv.blur(); cdHtmlAnt = ''; refreshCards(); };
+    const invF = cardsEl.querySelector('#cdInvF'); if (invF) invF.onchange = () => { try { lsSet('cdInvF', String(invF.value || '').slice(0, 30)); } catch {} invF.blur(); cdHtmlAnt = ''; refreshCards(); };
     // secao Hoje: metas e exportar CSV
     const gg = cardsEl.querySelector('#cdGoalG'); if (gg) gg.onchange = () => { goals.g = Math.max(0, +gg.value || 0); saveGoals(); gg.blur(); refreshCards(); };
     const gc = cardsEl.querySelector('#cdGoalC'); if (gc) gc.onchange = () => { goals.c = Math.max(0, +gc.value || 0); saveGoals(); gc.blur(); refreshCards(); };
     const cb = cardsEl.querySelector('#cdCsv'); if (cb) cb.onclick = exportCSV;
     const cbh = cardsEl.querySelector('#cdCsvHunts'); if (cbh) cbh.onclick = exportHunts;
     // shinies tentados: escopo (total/sessao/alvos) e estrela de alvo
-    const sm2 = cardsEl.querySelector('#cdStMode'); if (sm2) sm2.onchange = () => { stMode = sm2.value; localStorage.setItem('shinyTriedMode', stMode); refreshCards(); };
-    const bc = cardsEl.querySelector('#cdBestCrit'); if (bc) bc.onchange = () => { bestCrit = bc.value; localStorage.setItem('bestCrit', bestCrit); refreshCards(); };
+    const sm2 = cardsEl.querySelector('#cdStMode'); if (sm2) sm2.onchange = () => { stMode = sm2.value; lsSet('shinyTriedMode', stMode); refreshCards(); };
+    const bc = cardsEl.querySelector('#cdBestCrit'); if (bc) bc.onchange = () => { bestCrit = bc.value; lsSet('bestCrit', bestCrit); refreshCards(); };
     cardsEl.querySelectorAll('.cd-sh-st').forEach(el => el.onclick = (e) => {
       e.stopPropagation();
       const sid = el.dataset.sid;
       if (shinyTargets[sid]) delete shinyTargets[sid]; else shinyTargets[sid] = 1;
-      try { localStorage.setItem('shinyTargets', JSON.stringify(shinyTargets)); } catch {}
+      try { lsSet('shinyTargets', JSON.stringify(shinyTargets)); } catch {}
       refreshCards();
     });
     // webhook do Discord (engrenagem)
@@ -2808,19 +2850,19 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     cardsEl.querySelectorAll('tbody tr').forEach(tr => tr.onclick = () => { const i = +tr.dataset.i; cardsOn = false; applyCards(); toggleExpand(i); });
     const rb = cardsEl.querySelector('#cdReset'); if (rb) rb.onclick = resetSessao;
     // ranking
-    const hsc = cardsEl.querySelector('#cdHuntScope'); if (hsc) hsc.onchange = () => { huntScope = hsc.value; localStorage.setItem('huntScope', huntScope); refreshCards(); };
+    const hsc = cardsEl.querySelector('#cdHuntScope'); if (hsc) hsc.onchange = () => { huntScope = hsc.value; lsSet('huntScope', huntScope); refreshCards(); };
     const hs = cardsEl.querySelector('#cdHuntSort'); if (hs) hs.onchange = () => { huntSort = hs.value; refreshCards(); };
     const ha2 = cardsEl.querySelector('#cdHuntAcc'); if (ha2) ha2.onchange = () => { huntAccSel = +ha2.value; refreshCards(); };
-    const hpk = cardsEl.querySelector('#cdHuntPk'); if (hpk) hpk.onchange = () => { huntPkSel = hpk.value; try { localStorage.setItem('cdHuntPk', huntPkSel); } catch {} hpk.blur(); refreshCards(); };
-    const dal = cardsEl.querySelector('#cdDitAlvo'); if (dal) dal.onchange = () => { try { localStorage.setItem('cdDitAlvo', dal.value); } catch {} dal.blur(); cdHtmlAnt = ''; refreshCards(); };
+    const hpk = cardsEl.querySelector('#cdHuntPk'); if (hpk) hpk.onchange = () => { huntPkSel = hpk.value; try { lsSet('cdHuntPk', huntPkSel); } catch {} hpk.blur(); refreshCards(); };
+    const dal = cardsEl.querySelector('#cdDitAlvo'); if (dal) dal.onchange = () => { try { lsSet('cdDitAlvo', dal.value); } catch {} dal.blur(); cdHtmlAnt = ''; refreshCards(); };
     const sh = cardsEl.querySelector('#cdShowHidden'); if (sh) sh.onclick = () => { showHiddenHunts = !showHiddenHunts; refreshCards(); };
-    cardsEl.querySelectorAll('.cd-fav').forEach(f => f.onclick = () => { const k = f.dataset.h; if (huntFavs[k]) delete huntFavs[k]; else huntFavs[k] = 1; try { localStorage.setItem('huntFavs', JSON.stringify(huntFavs)); } catch {} refreshCards(); });
-    cardsEl.querySelectorAll('.cd-hide').forEach(f => f.onclick = () => { const k = f.dataset.h; if (huntHidden[k]) delete huntHidden[k]; else huntHidden[k] = 1; try { localStorage.setItem('huntHidden', JSON.stringify(huntHidden)); } catch {} refreshCards(); });
+    cardsEl.querySelectorAll('.cd-fav').forEach(f => f.onclick = () => { const k = f.dataset.h; if (huntFavs[k]) delete huntFavs[k]; else huntFavs[k] = 1; try { lsSet('huntFavs', JSON.stringify(huntFavs)); } catch {} refreshCards(); });
+    cardsEl.querySelectorAll('.cd-hide').forEach(f => f.onclick = () => { const k = f.dataset.h; if (huntHidden[k]) delete huntHidden[k]; else huntHidden[k] = 1; try { lsSet('huntHidden', JSON.stringify(huntHidden)); } catch {} refreshCards(); });
   }
   function applyCards() {
     document.body.classList.toggle('cards-on', cardsOn);
     cardsBtn.classList.toggle('on', cardsOn);
-    localStorage.setItem('cardsOn', cardsOn ? '1' : '0');
+    lsSet('cardsOn', cardsOn ? '1' : '0');
     webviews.forEach((w, i) => { if (off[i] || !w) return; try { w.setAudioMuted(cardsOn || muted); w.executeJavaScript(ultraScript(cardsOn)).catch(() => {}); w.executeJavaScript(ecoScript(ecoFps())).catch(() => {}); w.executeJavaScript(chatScript(cardsOn || chatHidden)).catch(() => {}); } catch {} });
     if (cardsOn) { cdHtmlAnt = ''; cardsEl.innerHTML = '<div class="cd-empty" style="padding:20px">' + t('cdWaiting') + '</div>'; refreshCards(); }
   }
@@ -2842,9 +2884,9 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
 
   // ===== Gerenciador de scripts / extras (userscripts injetados nos painéis) =====
   const PRESETS = [{ id: 'justpokedex', name: 'JustPokédex — Calculadora de IV', file: 'justpokedex.js', author: 'guilherme-se' }];
-  let scriptsOn = {}; try { scriptsOn = JSON.parse(localStorage.getItem('scriptsOn') || '{}'); } catch {}
-  let userScripts = []; try { userScripts = JSON.parse(localStorage.getItem('userScripts') || '[]'); } catch {}
-  const saveScripts = () => { try { localStorage.setItem('scriptsOn', JSON.stringify(scriptsOn)); localStorage.setItem('userScripts', JSON.stringify(userScripts)); } catch {} };
+  let scriptsOn = {}; try { scriptsOn = lsObj('scriptsOn'); } catch {}
+  let userScripts = []; try { userScripts = lsArr('userScripts'); } catch {}
+  const saveScripts = () => { try { lsSet('scriptsOn', JSON.stringify(scriptsOn)); lsSet('userScripts', JSON.stringify(userScripts)); } catch {} };
   const escH = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const presetCache = {};
   const allScripts = () => PRESETS.concat(userScripts);
@@ -2885,8 +2927,8 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   // mouse num pokémon. O cálculo continua dentro do painel (é lá que estão as fórmulas e a busca
   // dos atributos-base), então aqui é exibição e entrada, sem fórmula duplicada.
   const ivEl = document.getElementById('ivCard');
-  let ivAberto = localStorage.getItem('ivCardOpen') === '1', ivDados = null, ivFonte = -1;
-  let ivPos = null; try { ivPos = JSON.parse(localStorage.getItem('ivCardPos') || 'null'); } catch {}
+  let ivAberto = lsGet('ivCardOpen') === '1', ivDados = null, ivFonte = -1;
+  let ivPos = null; try { ivPos = (() => { const p = lsObj('ivCardPos'); return typeof p.x === 'number' && typeof p.y === 'number' ? p : null; })(); } catch {}
   const TIPO_COR = { normal:'#a8a878', fire:'#f08030', water:'#6890f0', electric:'#f8d030', grass:'#78c850', ice:'#98d8d8', fighting:'#c03028', poison:'#a040a0', ground:'#e0c068', flying:'#a890f0', psychic:'#f85888', bug:'#a8b820', rock:'#b8a038', ghost:'#705898', dragon:'#7038f8', dark:'#705848', steel:'#b8b8d0', fairy:'#ee99ac',
     fogo:'#f08030', agua:'#6890f0', água:'#6890f0', eletrico:'#f8d030', elétrico:'#f8d030', planta:'#78c850', gelo:'#98d8d8', lutador:'#c03028', luta:'#c03028', veneno:'#a040a0', terra:'#e0c068', voador:'#a890f0', psiquico:'#f85888', psíquico:'#f85888', inseto:'#a8b820', pedra:'#b8a038', fantasma:'#705898', dragao:'#7038f8', dragão:'#7038f8', sombrio:'#705848', metal:'#b8b8d0', aco:'#b8b8d0', aço:'#b8b8d0', fada:'#ee99ac' };
   const ivCorTipo = (tp) => TIPO_COR[String(tp || '').toLowerCase().trim()] || '#8b949e';
@@ -2920,7 +2962,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   }
   function ivRender() {
     ivEl.classList.toggle('show', ivAberto);
-    localStorage.setItem('ivCardOpen', ivAberto ? '1' : '0');
+    lsSet('ivCardOpen', ivAberto ? '1' : '0');
     if (!ivAberto) return;
     const d = ivDados;
     if (!d || d.erro) {
@@ -2988,7 +3030,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       const r = ivEl.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
       hd.classList.add('drag');
       const mv = ev => { ivPos = { l: ev.clientX - dx, t: ev.clientY - dy }; ivPosiciona(); };
-      const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); hd.classList.remove('drag'); try { localStorage.setItem('ivCardPos', JSON.stringify(ivPos)); } catch {} };
+      const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); hd.classList.remove('drag'); try { lsSet('ivCardPos', JSON.stringify(ivPos)); } catch {} };
       document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
     });
   }

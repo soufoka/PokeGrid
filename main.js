@@ -52,7 +52,11 @@ function logErro(origem, detalhe) {
     fs.appendFileSync(f, txt);
   } catch {}
 }
-process.on('uncaughtException', (e) => logErro('app', (e && e.stack) || e));
+process.on('uncaughtException', (e) => {
+  logErro('app', (e && e.stack) || e);
+  // erro nao previsto nao pode deixar o usuario com processo vivo e nenhuma janela
+  try { const w = BrowserWindow.getAllWindows()[0]; if (w && !w.isDestroyed() && !w.isVisible()) { w.show(); w.maximize(); } } catch {}
+});
 process.on('unhandledRejection', (e) => logErro('app-promise', (e && e.stack) || e));
 app.on('child-process-gone', (_e, d) => { if (d && d.reason !== 'clean-exit') logErro('processo-' + (d.type || '?'), d.reason + (d.exitCode != null ? ' (exit ' + d.exitCode + ')' : '')); });
 // erros vindos da interface (window.onerror do index.html)
@@ -213,11 +217,14 @@ ipcMain.handle('webhook:send', (_e, url, text) => {
 let tray; // referencia viva para o icone nao sumir (GC)
 
 app.whenReady().then(() => {
-  app.setAppUserModelId('online.idleworld.pokegrid'); // notificacoes do Windows aparecem com o nome certo
+  // Nada aqui pode derrubar a criacao da janela: se qualquer peca do sistema falhar (registro,
+  // particao de sessao corrompida, bandeja), o app tem que abrir assim mesmo. Antes destas
+  // guardas, uma excecao aqui deixava o processo vivo e SEM JANELA, que e o pior sintoma possivel.
+  try { app.setAppUserModelId('online.idleworld.pokegrid'); } catch (e) { logErro('boot', 'appUserModelId: ' + e.message); } // notificacoes do Windows com o nome certo
 
   // Nega pedidos de permissao dos jogos (mic, camera, localizacao, notificacao...).
   for (let i = 1; i <= 4; i++)
-    session.fromPartition('persist:conta' + i).setPermissionRequestHandler((_wc, _p, cb) => cb(false));
+    try { session.fromPartition('persist:conta' + i).setPermissionRequestHandler((_wc, _p, cb) => cb(false)); } catch (e) { logErro('boot', 'sessao conta' + i + ': ' + e.message); }
 
   const win = new BrowserWindow({
     width: 1600,
