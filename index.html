@@ -2227,10 +2227,19 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       const eff = efTipo(g[2], x.t1, x.t2);
       const ofn = (g[3] === 'P' ? aS.atk : aS.spa) * (A.mult || 1);
       const dfn = Math.max(1, g[3] === 'P' ? dS.def : dS.spd);
-      // ritmo do golpe: dano relativo por acerto contra a vida, LIMITADO pela cadencia
-      // (nao se mata mais rapido que 1 acerto por cooldown; sem o teto, hunt Lv1 rendia infinito)
-      const rt = Math.min((p * eff * (ofn / dfn)) / hpDef, 1) * (1000 / cd);
-      if (!best || rt > best.rt) best = { rt, nome: g[0], eff, fis: g[3] === 'P' };
+      // Modelo revisado com dados reais do usuario: kills/h medidos (~700, um kill a cada ~5s)
+      // provam que o cooldownMs de 10-80s do creatures.json NAO e o relogio da luta; a cadencia
+      // real e do motor do jogo e igual pra todos, entao ela CANCELA no ranking e sai da conta.
+      // Fica o que os dados sustentam: dano por acerto contra a vida, com teto de 1 kill por
+      // ciclo (sem ele, hunt Lv1 rendia infinito). K_DANO=0.2 calibrado pela observacao real
+      // (Magneton Lv141 em Gyarados abaixo do teto => nem x4 mata de 1 nessa faixa).
+      // ponytail: constante unica; recalibrar com o dano observado do coletor se divergir
+      const dano = 0.2 * p * eff * (ofn / dfn);
+      if (!(dano > 0)) return; // efetividade zero (ex.: terra em voador) nao conta
+      const rt = Math.min(dano / hpDef, 1);
+      // empate no teto (dois golpes que matam de 1): fica a maior efetividade, que e a robusta
+      // caso a constante de dano esteja otimista
+      if (!best || rt > best.rt || (rt === best.rt && eff > best.eff)) best = { rt, nome: g[0], eff, fis: g[3] === 'P' };
     });
     if (!best) return null;
     const ritmo = best.rt;
@@ -2285,7 +2294,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       const sg = sugCalc({ sp, level: A.level, q: R.fix.q, ivt: R.fix.ivt, tlv: A.tlv, mult: R.fix.mult }, x);
       if (sg) out.push({ sp, sg, sc: sg.xph || sg.ritmo });
     }
-    out.sort((p, q) => q.sc - p.sc);
+    out.sort((p, q) => (q.sc - p.sc) || (q.sg.eff - p.sg.eff)); // empate no teto: efetividade decide
     return out.slice(0, 12);
   };
   const dittoSweep = (A, lista) => {
@@ -2307,7 +2316,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
         if (!best || sc > best.sc) best = { sc, x, sg };
       });
       if (!best) continue;
-      tipos.forEach(ty => { const c2 = porTipo[ty]; if (!c2 || best.sc > c2.sc) porTipo[ty] = { sc: best.sc, sp, x: best.x, sg: best.sg }; });
+      tipos.forEach(ty => { const c2 = porTipo[ty]; if (!c2 || best.sc > c2.sc || (best.sc === c2.sc && best.sg.eff > c2.sg.eff)) porTipo[ty] = { sc: best.sc, sp, x: best.x, sg: best.sg }; });
     }
     const rows = Object.keys(porTipo).map(ty => Object.assign({ ty }, porTipo[ty])).sort((p, q) => q.sc - p.sc);
     dittoCache = { key, rows };

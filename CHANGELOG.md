@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.7
+
+- **Modelo do sugestor revisado com dados reais** (bug reportado: Golem sugerido pra Gyarados quando o Magneton rende muito mais). Os kills/h medidos provaram que o cooldown dos golpes não é o relógio da luta, então ele saiu da conta; ficou o dano por acerto contra a vida do defensor, com constante calibrada por observação real e efetividade desempatando. Agora o Magneton (elétrico ×4) lidera o quadro do Gyarados, como na prática.
+  *Suggestion model revised with real data: measured kills/h proved move cooldowns are not the fight clock, so they left the formula; what remains is damage per hit against defender HP, with a constant calibrated by real observation and effectiveness as tiebreaker. Magneton (electric x4) now tops the Gyarados board, as in practice.*
+
 ## 1.5.6
 
 - **Removido o custo em gold nos shinies tentados** (pedido de usuário): a linha de gold gasto em bolas saiu dos cards.
