@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.6
+
+- **Removido o custo em gold nos shinies tentados** (pedido de usuário): a linha de gold gasto em bolas saiu dos cards.
+  *Removed the gold cost on attempted shinies: the gold-spent line left the cards.*
+
+- **Ditto transformado agora é reconhecido no "caçar com"**: o jogo reporta o nome da forma (ex.: Gyarados) e a detecção por nome falhava; agora vale a flag oficial do jogo, e o seletor mostra "Shiny Ditto → Gyarados" pra ficar claro quem ele é.
+  *Transformed Ditto is now recognized in "hunt with": the game reports the forms name and name-based detection failed; the games official flag now decides, and the picker shows "Shiny Ditto → form".*
+
 ## 1.5.5
 
 ### Leitor de IV
