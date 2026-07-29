@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.5.9
+
+### O app que não abria
+
+- **Causa encontrada: o app consultava o registro do Windows e a pasta Inicializar antes de mostrar a janela.** São chamadas que travam quando um antivírus as intercepta, e com elas travadas o programa ficava vivo sem nunca abrir a tela, exatamente o que foi relatado. Agora a janela aparece primeiro e essas consultas acontecem depois, sem poder segurar a abertura; a limpeza do atalho antigo passou a ser feita uma única vez em vez de a cada abertura.
+  *Root cause found: the app queried the Windows registry and the Startup folder before showing the window. Those calls stall when an antivirus intercepts them, leaving the process alive with no window, exactly as reported. The window now appears first and those queries happen afterwards, unable to hold up startup; cleanup of the legacy shortcut now runs once instead of on every launch.*
+- **O app agora anota o passo a passo da abertura no relatório de erros** (janela criada, conteúdo pronto, bandeja pronta). Se ainda falhar para alguém, o arquivo mostra exatamente onde parou.
+  *The app now records startup milestones in the error report. If it still fails for someone, the file shows exactly where it stopped.*
+- Inclui também as proteções da 1.5.8, que não chegou a ser publicada: nenhuma gravação ou leitura de dados salvos pode mais derrubar a abertura, e o log de hunts ficou bem menor.
+  *Also includes the 1.5.8 protections, which were never published: no saved-data read or write can prevent startup anymore, and the hunt log is much smaller.*
+
 ## 1.5.8
 
 ### Correção do app que não abria

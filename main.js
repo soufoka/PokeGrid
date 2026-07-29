@@ -246,9 +246,10 @@ app.whenReady().then(() => {
   // Mostra a janela quando o conteudo esta pronto. Precisa do show() explicito: no Linux
   // varios gerenciadores de janela ignoram maximize() em janela ainda nao exibida, e o app
   // subia sem abrir nada. --hidden: nasce na bandeja, farmando.
+  logErro('boot', 'janela criada');
   if (!process.argv.includes('--hidden')) {
-    win.once('ready-to-show', () => { win.show(); win.maximize(); });
-    setTimeout(() => { if (!win.isDestroyed() && !win.isVisible()) { win.show(); win.maximize(); } }, 8000); // rede de seguranca se o evento nao vier
+    win.once('ready-to-show', () => { logErro('boot', 'conteudo pronto'); win.show(); win.maximize(); });
+    setTimeout(() => { if (!win.isDestroyed() && !win.isVisible()) { logErro('boot', 'rede de seguranca: mostrando a janela'); win.show(); win.maximize(); } }, 8000); // rede de seguranca se o evento nao vier
   }
 
   // Atalhos (funcionam mesmo com o jogo focado): Ctrl+1..4 expande painel, Ctrl+M mudo.
@@ -270,8 +271,19 @@ app.whenReady().then(() => {
   win.on('maximize', () => { wasMax = true; });
   win.on('unmaximize', () => { wasMax = false; });
   const mostrar = () => { const m = wasMax; win.show(); if (m && !win.isMaximized()) win.maximize(); };
-  // versoes antigas registravam o autostart na chave Run; limpa o resquicio (agora e por atalho)
-  try { if (app.getLoginItemSettings().openAtLogin) app.setLoginItemSettings({ openAtLogin: false }); } catch {}
+  // Bandeja, registro do Windows e pasta Inicializar entram DEPOIS que a janela aparece.
+  // Sao chamadas sincronas ao sistema, e antivirus costumam interceptar justamente essas; se
+  // travarem, o processo principal congela e a janela nunca abre (processo vivo, tela nenhuma).
+  // Foi o que usuarios relataram na 1.5.5-1.5.7. Agora nada disso bloqueia a abertura.
+  const prepararBandeja = () => {
+    // limpeza do autostart antigo (chave Run, que abria com --hidden): uma unica vez na vida
+    try {
+      const marca = path.join(app.getPath('userData'), 'runkey-limpo');
+      if (!fs.existsSync(marca)) {
+        try { if (app.getLoginItemSettings().openAtLogin) app.setLoginItemSettings({ openAtLogin: false }); } catch (e) { logErro('boot', 'runkey: ' + e.message); }
+        try { fs.writeFileSync(marca, '1'); } catch {}
+      }
+    } catch {}
   // Bandeja nao existe em todo ambiente (Linux sem indicador, por exemplo). Se falhar, o app
   // segue funcionando sem bandeja em vez de morrer no boot.
   try {
@@ -289,10 +301,13 @@ app.whenReady().then(() => {
     tray = null;
     logErro('bandeja', 'sem bandeja neste sistema: ' + e.message);
   }
+    // nasceu escondido pra bandeja, mas nao ha bandeja: mostra, senao seria um processo invisivel
+    if (!tray && process.argv.includes('--hidden')) mostrar();
+    logErro('boot', 'bandeja pronta');
+  };
+  setTimeout(prepararBandeja, 1500); // a janela ja esta na tela quando isso roda
   // sem bandeja, esconder ao minimizar deixaria a janela inalcancavel: minimiza normal
   win.on('minimize', () => { if (minToTray && tray) win.hide(); });
-  // nasceu escondido pra bandeja, mas nao ha bandeja: mostra, senao seria um processo invisivel
-  if (!tray && process.argv.includes('--hidden')) mostrar();
   app.on('second-instance', () => mostrar());
 
   // checa atualizacao (nao incomoda quem abriu escondido na bandeja pra farmar)
