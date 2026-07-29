@@ -6,7 +6,8 @@
   "author": "soufoka",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "test": "node test/iv-math.test.js && node test/boot.test.js"
   },
   "keywords": [
     "electron",
