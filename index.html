@@ -79,8 +79,8 @@
   .name { font-weight: 600; cursor: pointer; }
   .status { color: #8b949e; font-size: 11px; margin-right: auto; }
   .panel-header button { padding: 2px 8px; font-size: 11px; }
-  .panel-header .power { margin-left: 14px; } /* afastado: usuarios clicavam sem querer */
-    .panel-header .power.isoff { color: #f0491f; }
+  .zpct { color: #8b949e; font-size: 11px; min-width: 32px; text-align: center; cursor: pointer; }
+  .zpct:hover { color: #e6edf3; }
   webview { flex: 1; border: none; background: #000; }
   /* Proporção do jogo: o canvas dele é fixo em 1600x832 e é esticado por CSS pra preencher o
      container, com fatores x e y separados. Então em painel estreito e alto (3 contas lado a lado,
@@ -466,7 +466,7 @@
         <button id="minTray" title="O que o botão minimizar faz: esconder na bandeja ou minimizar normal na barra de tarefas">📥 Minimiza p/ bandeja</button>
         <button id="autoStart" style="display:none" title="Cria um atalho na pasta Inicializar do Windows pra abrir o PokeGrid junto com o sistema">🚀 Abrir com o Windows</button>
         <button id="sndShiny" title="Toca um som quando um shiny aparece (além da notificação)">✨🔊 Som do shiny</button>
-        <button id="bkExp" title="Salva um arquivo com todas as configurações e o histórico (senhas ficam fora)">💾 Exportar config</button>
+        <button id="faqBtn" title="Perguntas frequentes: abre o FAQ no navegador">❓ FAQ</button> <button id="bkExp" title="Salva um arquivo com todas as configurações e o histórico (senhas ficam fora)">💾 Exportar config</button>
         <button id="bkImp" title="Restaura configurações e histórico de um arquivo exportado">📂 Importar config</button>
         <button id="layout">▦ Grade</button>
         <button id="propNat" title="Mantém a proporção original do jogo, sem esticar a imagem (sobra fundo escuro quando o painel não bate com a proporção)">🖼 Proporção original</button>
@@ -593,10 +593,10 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       stKpis:'Ritmo (por hora)', stPinned:'Itens fixados', cfgSections:'Seções (arraste para ordenar, marque para mostrar)', cfgBagItems:'Mostrar TODOS os itens da bag', cfgImportantOnly:'Só itens importantes (Ultra Ball, melhor potion/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Buscar item, bola, pedra…', cfgNoCat:'Abra o jogo pra carregar a lista de itens', cfgBagCats:'Bag — categorias (arraste, marque pra mostrar)', cfgBagHideItems:'Bag — esconder itens específicos',
       stShinyLife:'Shinies Enc. Total', stShinyLifeAll:'Shinies Enc. Total (todas)',
       cfgCredits:'Créditos', creditSidebar:'Painel lateral inspirado em', creditIV:'Calculadora de IV:',
-      stTargetLabel:'🎯 Alvo shiny', stTargetStatus:'Status', stCaught:'capturado!', stFoundNotCaught:'apareceu, não capturado', stNotAppeared:'ainda não apareceu', stTargetShinyTries:'Tentativas no shiny', stTargetFarm:'Farm na espécie', stTries:'tent.', cfgTarget:'Alvo shiny (acompanhar a caça)', cfgTargetSearch:'Buscar espécie pra caçar…',
+      stTargetLabel:'🎯 Alvo shiny', stTargetStatus:'Status', stCaught:'capturado!', stFoundNotCaught:'apareceu, não capturado', stNotAppeared:'ainda não apareceu', stTargetShinyTries:'Tentativas no shiny', stTargetFarm:'Farm na espécie', stTries:'tent.', cfgTarget:'Alvo shiny (acompanhar a caça)', cfgLock:'\u{1F512} Cadeado de venda', cfgLockHint:'Estes itens pedem confirmação antes de vender. Shiny e qualidade alta já vêm protegidos.', cfgLockSearch:'Buscar item pra proteger…', cfgLockRemove:'Destravar', cfgTargetSearch:'Buscar espécie pra caçar…',
       refTitle:'Referral do criador, copie se quiser ajudar :)', refCopied:'✓ Copiado!',
       stLoading:'carregando…', stOnline:'online', stError:'erro', stOff:'desligada', trainer:'Treinador',
-      tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tPower:'Desligar / ligar', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
+      tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tZoomPct:'Zoom atual (clique volta pra 100%)', faq:'❓ FAQ', faqTitle:'Perguntas frequentes: abre o FAQ no navegador', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
       mH2:'Treinadores salvos', mHint:'Preencha e-mail/usuário e senha de cada painel. As senhas ficam criptografadas neste PC. "Logar equipe" entra automaticamente onde houver dados, e se a sessão cair o painel loga sozinho.',
       mName:'Nome', mEmail:'E-mail ou usuário', mPass:'Senha', mCancel:'Cancelar', mSave:'Salvar',
       awakeTitle:'Impede o PC de dormir enquanto farma (a tela ainda pode desligar)', chatTitle:'Mostra ou esconde o chat do jogo em todos os painéis',
@@ -632,10 +632,10 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       stKpis:'Rate (per hour)', stPinned:'Pinned items', cfgSections:'Sections (drag to reorder, check to show)', cfgBagItems:'Show ALL bag items', cfgImportantOnly:'Only important items (Ultra Ball, best potion/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Search item, ball, stone…', cfgNoCat:'Open the game to load the item list', cfgBagCats:'Bag — categories (drag, check to show)', cfgBagHideItems:'Bag — hide specific items',
       stShinyLife:'Total shinies found', stShinyLifeAll:'Total shinies found (all)',
       cfgCredits:'Credits', creditSidebar:'Sidebar inspired by', creditIV:'IV calculator:',
-      stTargetLabel:'🎯 Shiny target', stTargetStatus:'Status', stCaught:'caught!', stFoundNotCaught:'appeared, not caught', stNotAppeared:'not appeared yet', stTargetShinyTries:'Shiny attempts', stTargetFarm:'Species farm', stTries:'tries', cfgTarget:'Shiny target (track the hunt)', cfgTargetSearch:'Search species to hunt…',
+      stTargetLabel:'🎯 Shiny target', stTargetStatus:'Status', stCaught:'caught!', stFoundNotCaught:'appeared, not caught', stNotAppeared:'not appeared yet', stTargetShinyTries:'Shiny attempts', stTargetFarm:'Species farm', stTries:'tries', cfgTarget:'Shiny target (track the hunt)', cfgLock:'\u{1F512} Sell lock', cfgLockHint:'These items ask for confirmation before selling. Shiny and high quality are already protected.', cfgLockSearch:'Search an item to protect…', cfgLockRemove:'Unlock', cfgTargetSearch:'Search species to hunt…',
       refTitle:"Creator's referral, copy it if you want to help :)", refCopied:'✓ Copied!',
       stLoading:'loading…', stOnline:'online', stError:'error', stOff:'off', trainer:'Trainer',
-      tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tPower:'Turn off / on', tRename:'Double-click to rename', promptRename:'Trainer name:',
+      tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tZoomPct:'Current zoom (click resets to 100%)', faq:'❓ FAQ', faqTitle:'Frequently asked questions: opens the FAQ in your browser', tRename:'Double-click to rename', promptRename:'Trainer name:',
       mH2:'Saved accounts', mHint:'Fill in the e-mail/username and password for each panel. Passwords are encrypted on this PC. "Log in all" signs in automatically where data exists, and if the session drops the panel logs in by itself.',
       mName:'Name', mEmail:'E-mail or username', mPass:'Password', mCancel:'Cancel', mSave:'Save',
       awakeTitle:'Keeps the PC awake while farming (the screen can still turn off)', chatTitle:'Shows or hides the game chat in all panels',
@@ -671,10 +671,10 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       stKpis:'Ritmo (por hora)', stPinned:'Ítems fijados', cfgSections:'Secciones (arrastra para ordenar, marca para mostrar)', cfgBagItems:'Mostrar TODOS los ítems de la bolsa', cfgImportantOnly:'Solo ítems importantes (Ultra Ball, mejor poción/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Buscar ítem, ball, piedra…', cfgNoCat:'Abre el juego para cargar la lista de ítems', cfgBagCats:'Bolsa — categorías (arrastra, marca para mostrar)', cfgBagHideItems:'Bolsa — ocultar ítems específicos',
       stShinyLife:'Shinies enc. total', stShinyLifeAll:'Shinies enc. total (todas)',
       cfgCredits:'Créditos', creditSidebar:'Panel lateral inspirado en', creditIV:'Calculadora de IV:',
-      stTargetLabel:'🎯 Objetivo shiny', stTargetStatus:'Estado', stCaught:'¡capturado!', stFoundNotCaught:'apareció, no capturado', stNotAppeared:'aún no apareció', stTargetShinyTries:'Intentos en el shiny', stTargetFarm:'Farmeo en la especie', stTries:'intentos', cfgTarget:'Objetivo shiny (seguir la caza)', cfgTargetSearch:'Buscar especie para cazar…',
+      stTargetLabel:'🎯 Objetivo shiny', stTargetStatus:'Estado', stCaught:'¡capturado!', stFoundNotCaught:'apareció, no capturado', stNotAppeared:'aún no apareció', stTargetShinyTries:'Intentos en el shiny', stTargetFarm:'Farmeo en la especie', stTries:'intentos', cfgTarget:'Objetivo shiny (seguir la caza)', cfgLock:'\u{1F512} Candado de venta', cfgLockHint:'Estos objetos piden confirmación antes de vender. Shiny y calidad alta ya están protegidos.', cfgLockSearch:'Buscar objeto para proteger…', cfgLockRemove:'Desbloquear', cfgTargetSearch:'Buscar especie para cazar…',
       refTitle:'Referral del creador, cópialo si quieres ayudar :)', refCopied:'✓ ¡Copiado!',
       stLoading:'cargando…', stOnline:'online', stError:'error', stOff:'apagada', trainer:'Entrenador',
-      tZoomOut:'Alejar zoom', tZoomIn:'Acercar zoom', tReload:'Recargar', tExpand:'Expandir (Ctrl+número)', tPower:'Apagar / encender', tRename:'Doble clic para renombrar', promptRename:'Nombre del entrenador:',
+      tZoomOut:'Alejar zoom', tZoomIn:'Acercar zoom', tReload:'Recargar', tExpand:'Expandir (Ctrl+número)', tZoomPct:'Zoom actual (clic vuelve a 100%)', faq:'❓ FAQ', faqTitle:'Preguntas frecuentes: abre el FAQ en el navegador', tRename:'Doble clic para renombrar', promptRename:'Nombre del entrenador:',
       mH2:'Entrenadores guardados', mHint:'Completa el e-mail/usuario y la contraseña de cada panel. Las contraseñas quedan cifradas en este PC. "Iniciar equipo" entra automáticamente donde haya datos, y si la sesión se cae el panel entra solo.',
       mName:'Nombre', mEmail:'E-mail o usuario', mPass:'Contraseña', mCancel:'Cancelar', mSave:'Guardar',
       awakeTitle:'Evita que el PC se duerma mientras farmea (la pantalla aún puede apagarse)', chatTitle:'Muestra u oculta el chat del juego en todos los paneles',
@@ -709,10 +709,10 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
           <span class="name"></span>
           <span class="status"></span>
           <button class="zo">−</button>
+          <span class="zpct"></span>
           <button class="zi">+</button>
           <button class="reload">⟳</button>
           <button class="expand">⛶</button>
-          <button class="power">⏻</button>
         </div>`;
       const wv = document.createElement('webview');
       wv.partition = 'persist:conta' + (i + 1);
@@ -745,11 +745,15 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       });
       let fails = 0, alertedDown = false; // watchdog: falhas de carga do painel e se ja avisou a queda
       let zoom = +(lsGet('zoom' + i) || 1);
+      const zpct = panel.querySelector('.zpct');
       const setZoom = (z) => {
         zoom = Math.min(2, Math.max(0.5, Math.round(z * 10) / 10));
         try { wv.setZoomFactor(zoom); } catch {}
         lsSet('zoom' + i, zoom);
+        zpct.textContent = Math.round(zoom * 100) + '%';
       };
+      zpct.textContent = Math.round(zoom * 100) + '%';
+      zpct.onclick = () => setZoom(1);
       panel.querySelector('.zi').onclick = () => setZoom(zoom + 0.1);
       panel.querySelector('.zo').onclick = () => setZoom(zoom - 0.1);
 
@@ -779,7 +783,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
           wv.executeJavaScript(POPUP_SCRIPT).catch(() => {});
           wv.executeJavaScript(cleanScript(cleanOn)).catch(() => {});
           wv.executeJavaScript(SELLGUARD).catch(() => {});
-          wv.executeJavaScript('window.__pgSellGuardOn=' + (sellGuardOn ? 'true' : 'false')).catch(() => {});
+          wv.executeJavaScript('window.__pgSellGuardOn=' + (sellGuardOn ? 'true' : 'false') + ';window.__pgSellLock=' + JSON.stringify(sellLock)).catch(() => {});
           wv.executeJavaScript(QOL_UI).catch(() => {});
           wv.executeJavaScript(chatScript(chatHidden || cardsOn)).catch(() => {});
           wv.executeJavaScript(dockScript(dockHidden)).catch(() => {});
@@ -808,7 +812,6 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
 
       panel.querySelector('.reload').onclick = () => { if (!off[i]) wv.reload(); };
       panel.querySelector('.expand').onclick = () => toggleExpand(i);
-      panel.querySelector('.power').onclick = () => togglePower(i);
       nameEl.ondblclick = () => {
         const novo = prompt(t('promptRename'), accounts[i].name || defName(i));
         if (novo != null) { accounts[i].name = novo; nameEl.textContent = novo || defName(i); save(); }
@@ -854,10 +857,8 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     const panel = grid.children[i];
     const dot = panel.querySelector('.dot');
     const status = panel.querySelector('.status');
-    const btn = panel.querySelector('.power');
     off[i] = !off[i];
     panel.classList.toggle('off', off[i]);
-    btn.classList.toggle('isoff', off[i]);
     if (off[i]) { webviews[i].src = 'about:blank'; dot.className = 'dot off'; status.textContent = t('stOff'); }
     else { dot.className = 'dot'; status.textContent = t('stLoading'); webviews[i].src = START_URL; }
   }
@@ -1024,7 +1025,9 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
   // Protege sem agir no jogo: shiny e qualidade Lendaria+ (>=1.7), e itens raros nomeados.
   const SELLGUARD = `(() => {
     if (window.__pgSellGuard) return; window.__pgSellGuard = true;
-    const PROT = ['strange pheromone', 'rare pokémon picture', 'rare pokemon picture'];
+    // base sempre protegida + o que o usuario travou na engrenagem (window.__pgSellLock)
+    const BASE = ['strange pheromone', 'rare pokémon picture', 'rare pokemon picture'];
+    const listaProt = () => { const u = Array.isArray(window.__pgSellLock) ? window.__pgSellLock : []; return BASE.concat(u); };
     const nomeItem = (id) => { try { const P = window.__poke; const doc = P && P.api && P.api['/game/items.json']; const it = doc && doc.items && doc.items.find(x => x.id === id); return it ? it.name : ''; } catch (x) { return ''; } };
     const OF2 = window.fetch;
     window.fetch = function(...a) {
@@ -1038,6 +1041,7 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
             ids.forEach(id => { const p = LP.find(x => x.id === id); if (p && (p.shiny || (p.quality || 0) >= 1.7)) { const q = p.quality || 0; const lab = q >= 4 ? 'Divina' : q >= 3 ? 'Anciã' : q >= 2 ? 'Mítica' : q >= 1.7 ? 'Lendária' : q >= 1.5 ? 'Épica' : q >= 1.3 ? 'Rara' : q >= 1.1 ? 'Incomum' : q >= 1 ? 'Comum' : 'Fraca'; avisos.push((p.shiny ? '✨ SHINY ' : '') + (p.name || '?') + ' · Nv ' + (p.level != null ? p.level : '?') + ' · IV ' + (p.ivTotal != null ? p.ivTotal : '?') + '/192 · ' + lab + ' ×' + q.toFixed(2)); } });
           } else if (/\\/api\\/game\\/(shop|flint)\\/sell/.test(u)) {
             const b = JSON.parse(ini.body); const its = b && b.items ? b.items : (b && b.itemId ? [{ itemId: b.itemId, qty: b.qty }] : []);
+            const PROT = listaProt();
             its.forEach(x => { const nm = nomeItem(x.itemId); if (nm && PROT.includes(nm.toLowerCase())) avisos.push(nm + ' x' + (x.qty || 1)); });
           }
           if (avisos.length && window.__pgSellGuardOn !== false) {
@@ -1356,12 +1360,17 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
   // ----- Proteção de venda (toggle): o guard injetado lê window.__pgSellGuardOn -----
   const sgBtn = document.getElementById('sellguard');
   let sellGuardOn = lsGet('sellguard') !== '0'; // ligado por padrao
+  // Itens que o usuario quer proteger, alem dos que ja vem travados. Nome minusculo (o guard
+  // compara pelo nome do items.json), capado e sem duplicata: dado de disco nao entra cru.
+  let sellLock = [];
+  try { sellLock = [...new Set(lsArr('sellLock').map(x => String(x || '').toLowerCase().trim()).filter(x => x && x.length < 60))].slice(0, 80); } catch {}
+  const saveSellLock = () => { try { lsSet('sellLock', JSON.stringify(sellLock)); } catch {} };
   function applySellGuard() {
     sgBtn.textContent = t('sellguard');
     sgBtn.title = t('sellguardTitle');
     sgBtn.classList.toggle('on', sellGuardOn);
     lsSet('sellguard', sellGuardOn ? '1' : '0');
-    webviews.forEach((w, i) => { if (off[i] || !w) return; try { w.executeJavaScript('window.__pgSellGuardOn=' + (sellGuardOn ? 'true' : 'false')).catch(() => {}); } catch {} });
+    webviews.forEach((w, i) => { if (off[i] || !w) return; try { w.executeJavaScript('window.__pgSellGuardOn=' + (sellGuardOn ? 'true' : 'false') + ';window.__pgSellLock=' + JSON.stringify(sellLock)).catch(() => {}); } catch {} });
   }
   sgBtn.onclick = () => { sellGuardOn = !sellGuardOn; applySellGuard(); };
   function alerta(i, chave) {
@@ -1496,32 +1505,44 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   }
   // Exporta duas planilhas: uma linha por hunt, e uma linha por item de cada hunt (com drop/kill)
   const csvCel = (v) => { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
-  const baixa = (nome, txt) => { const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(txt); a.download = nome; a.click(); };
-  const dtISO = (ms) => { const d = new Date(hlNum(ms)); return isNaN(d) ? '' : d.toISOString().slice(0, 19).replace('T', ' '); };
+  // Planilha que abre certo no Excel em portugues: separador ';' (o Excel pt-BR ignora a virgula),
+  // decimal com virgula, e BOM no comeco pra acentuacao nao sair torta. Sem isso, tudo caia numa
+  // coluna so e os numeros com ponto viravam texto.
+  const CSV_SEP = ';';
+  const csvNum = (v, casas) => { const n = +v; if (!Number.isFinite(n)) return '0'; return (casas ? n.toFixed(casas) : String(Math.round(n))).replace('.', ','); };
+  const csvData = (ms) => { const d = new Date(hlNum(ms)); if (isNaN(d)) return ''; const p = (x) => String(x).padStart(2, '0'); return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()); };
+  const csvLinha = (campos) => campos.join(CSV_SEP) + '\n';
+  // \uFEFF (BOM) primeiro: sem ele o Excel abre os acentos como lixo
+  const baixa = (nome, txt) => { const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('\uFEFF' + txt); a.download = nome; a.click(); };
   function exportHunts() {
     const ph = (v, secs) => secs > 0 ? Math.round(v / secs * 3600) : 0;
-    let a = 'inicio,fim,conta,hunt,minutos,kills,kills_h,xp,xp_h,capturas,capturas_h,shiny_enc,shiny_cap,bolas,cura_usada,loot_gold,venda_gold,supply_gold,saldo_gold,gold_h\n';
-    let b = 'inicio,conta,hunt,item,quantidade,gold,kills_da_hunt,drop_por_kill,drop_pct\n';
+    let a = csvLinha(['Início', 'Fim', 'Conta', 'Hunt', 'Duração (min)', 'Kills', 'Kills/h', 'XP', 'XP/h',
+      'Capturas', 'Capturas/h', 'Shiny apareceu', 'Shiny capturado', 'Bolas usadas', 'Cura usada',
+      'Gold de loot', 'Gold de venda', 'Gold gasto', 'Saldo', 'Gold/h']);
+    let b = csvLinha(['Início', 'Conta', 'Hunt', 'Item', 'Quantidade', 'Gold do item', 'Kills da hunt', 'Drop por kill', 'Drop (%)']);
     huntLog.forEach(h => {
       const secs = Math.max(1, Math.round((h.end - h.start) / 1000)), saldo = h.loot + h.sell - h.sup;
-      a += [dtISO(h.start), dtISO(h.end), csvCel(h.acc), csvCel(h.hunt), (secs / 60).toFixed(1), h.kills, ph(h.kills, secs),
-        h.xp, ph(h.xp, secs), h.caps, ph(h.caps, secs), h.sf, h.sc, h.balls, h.pots,
-        Math.round(h.loot), Math.round(h.sell), Math.round(h.sup), Math.round(saldo), ph(saldo, secs)].join(',') + '\n';
+      a += csvLinha([csvData(h.start), csvData(h.end), csvCel(h.acc), csvCel(h.hunt), csvNum(secs / 60, 1),
+        csvNum(h.kills), csvNum(ph(h.kills, secs)), csvNum(h.xp), csvNum(ph(h.xp, secs)),
+        csvNum(h.caps), csvNum(ph(h.caps, secs)), csvNum(h.sf), csvNum(h.sc), csvNum(h.balls), csvNum(h.pots),
+        csvNum(h.loot), csvNum(h.sell), csvNum(h.sup), csvNum(saldo), csvNum(ph(saldo, secs))]);
       h.drops.forEach(d => {
         const porKill = h.kills > 0 ? d.q / h.kills : 0;
-        b += [dtISO(h.start), csvCel(h.acc), csvCel(h.hunt), csvCel(d.n), d.q, Math.round(d.g), h.kills,
-          porKill.toFixed(6), (porKill * 100).toFixed(3)].join(',') + '\n';
+        b += csvLinha([csvData(h.start), csvCel(h.acc), csvCel(h.hunt), csvCel(d.n), csvNum(d.q), csvNum(d.g), csvNum(h.kills),
+          csvNum(porKill, 4), csvNum(porKill * 100, 3)]);
       });
     });
     baixa('pokegrid-hunts.csv', a);
     baixa('pokegrid-drops.csv', b);
   }
   function exportCSV() {
-    let csv = 'date,account,gold,xp,kills,captures,shiny_found,shiny_caught\n';
-    // nome vem do jogo: aspas escapadas e apostrofo na frente de =+-@ (senao o Excel executa como formula)
-    const cel = (v) => { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
-    Object.keys(histDay).sort().forEach(k => Object.keys(histDay[k]).forEach(i2 => { const b = histDay[k][i2]; csv += k + ',' + cel(tabNames[i2] || stName(+i2)) + ',' + Math.round(b.g) + ',' + Math.round(b.x) + ',' + (+b.kl || 0) + ',' + (+b.c || 0) + ',' + (+b.sf || 0) + ',' + (+b.sc || 0) + '\n'; }));
-    const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'pokegrid-historico.csv'; a.click();
+    let csv = csvLinha(['Dia', 'Conta', 'Gold', 'XP', 'Kills', 'Capturas', 'Shiny apareceu', 'Shiny capturado']);
+    const diaBR = (k) => { const p = String(k).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : k; };
+    Object.keys(histDay).sort().forEach(k => Object.keys(histDay[k]).forEach(i2 => {
+      const b = histDay[k][i2];
+      csv += csvLinha([diaBR(k), csvCel(tabNames[i2] || stName(+i2)), csvNum(b.g), csvNum(b.x), csvNum(b.kl), csvNum(b.c), csvNum(b.sf), csvNum(b.sc)]);
+    }));
+    baixa('pokegrid-historico.csv', csv);
   }
 
   // ----- Logs vitalicios: shinies e capturas sobrevivem ao fechar o app -----
@@ -1620,6 +1641,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const eb = document.getElementById('errlogBtn'); eb.textContent = t('errlog'); eb.title = t('errlogTitle');
     const be = document.getElementById('bkExp'); be.textContent = t('bkExp'); be.title = t('bkExpTitle');
     const bi = document.getElementById('bkImp'); bi.textContent = t('bkImp'); bi.title = t('bkImpTitle');
+    const fq = document.getElementById('faqBtn'); fq.textContent = t('faq'); fq.title = t('faqTitle');
     langBtns.forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
     refBtn.title = t('refTitle');
     awakeBtn.title = t('awakeTitle');
@@ -1642,7 +1664,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       p.querySelector('.zi').title = t('tZoomIn');
       p.querySelector('.reload').title = t('tReload');
       p.querySelector('.expand').title = t('tExpand');
-      p.querySelector('.power').title = t('tPower');
+      p.querySelector('.zpct').title = t('tZoomPct');
     });
     applyMute(); applyEco(); applyChat(); applyDock(); applyAwake(); applyMinTray(); applyPropNat(); applySndShiny(); applyAlerts(); applySellGuard(); applyClean(); aplicaCountLayout();
     lsSet('lang', lang);
@@ -1684,6 +1706,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     setTimeout(() => { refBtn.textContent = '🔗'; }, 1500);
   };
   document.getElementById('reloadAll').onclick = () => webviews.forEach((w, i) => { if (!off[i]) w.reload(); });
+  document.getElementById('faqBtn').onclick = () => window.open('https://github.com/soufoka/PokeGrid-source/blob/main/FAQ.md');
   // Layout dos paineis: grade (2x2) -> coluna (vertical) -> linha (horizontal)
   let layoutMode = lsGet('layout') || 'grid';
   function applyLayout() {
@@ -2161,6 +2184,12 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     h += '<div class="cfg-h">' + t('stPinned') + '</div><input class="cfg-search" id="cfgSearch" placeholder="' + t('cfgSearch') + '"><div class="cfg-results" id="cfgResults"></div><div class="cfg-pinned">';
     cfg.pinned.forEach((p, idx) => h += '<div class="cfg-pin"><span>' + esc(p.name) + '</span><button data-rm="' + idx + '" title="Remover">✕</button></div>');
     h += '</div>';
+    // Cadeado de venda: itens que pedem confirmacao ao vender
+    h += '<div class="cfg-h">' + t('cfgLock') + '</div>';
+    h += '<div class="cfg-noc" style="padding:2px 15px">' + t('cfgLockHint') + '</div>';
+    h += '<div class="cfg-pinned">';
+    sellLock.forEach((nm, idx) => h += '<div class="cfg-pin"><span>\u{1F512} ' + esc(nm) + '</span><button data-rmlock="' + idx + '" title="' + t('cfgLockRemove') + '">\u2715</button></div>');
+    h += '</div><input class="cfg-search" id="cfgLockSearch" placeholder="' + t('cfgLockSearch') + '"><div class="cfg-results" id="cfgLockResults"></div>';
     // Alvo shiny
     h += '<div class="cfg-h">' + t('cfgTarget') + '</div>';
     if (cfg.shinyTarget) h += '<div class="cfg-pinned"><div class="cfg-pin"><span>🎯 ' + esc(cfg.shinyTarget.name) + '</span><button data-cleartarget="1" title="Remover">✕</button></div></div>';
@@ -2188,6 +2217,23 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     setupDrag(stCfg.querySelectorAll('.cfg-row[data-sec]'), 'sec', cfg.order);
     setupDrag(stCfg.querySelectorAll('.cfg-row[data-bag]'), 'bag', cfg.bagOrder);
     stCfg.querySelectorAll('.cfg-pin button').forEach(btn => btn.onclick = () => { cfg.pinned.splice(+btn.dataset.rm, 1); saveStatsCfg(); renderSettings(); refreshStats(); });
+    stCfg.querySelectorAll('.cfg-pin button[data-rmlock]').forEach(btn => btn.onclick = () => {
+      sellLock.splice(+btn.dataset.rmlock, 1); saveSellLock(); applySellGuard(); renderSettings();
+    });
+    const lockSearch = stCfg.querySelector('#cfgLockSearch'), lockResults = stCfg.querySelector('#cfgLockResults');
+    if (lockSearch) lockSearch.oninput = async () => {
+      const q = lockSearch.value.trim().toLowerCase();
+      if (q.length < 2) { lockResults.innerHTML = ''; return; }
+      const cat = await loadCatalog();
+      if (!cat) { lockResults.innerHTML = '<div class="cfg-noc">' + t('cfgNoCat') + '</div>'; return; }
+      const achados = cat.items.filter(it => it.name && it.name.toLowerCase().includes(q)).slice(0, 12);
+      lockResults.innerHTML = achados.map(it => '<div class="cfg-res" data-name="' + esc(it.name) + '">' + esc(it.name) + '</div>').join('') || '<div class="cfg-noc">\u2014</div>';
+      lockResults.querySelectorAll('.cfg-res').forEach(r => r.onclick = () => {
+        const nm = String(r.dataset.name || '').toLowerCase().trim();
+        if (nm && !sellLock.includes(nm) && sellLock.length < 80) { sellLock.push(nm); saveSellLock(); applySellGuard(); }
+        lockSearch.value = ''; lockResults.innerHTML = ''; renderSettings();
+      });
+    };
     const search = stCfg.querySelector('#cfgSearch'), results = stCfg.querySelector('#cfgResults');
     if (search) search.oninput = async () => {
       const q = search.value.trim().toLowerCase();
@@ -2466,10 +2512,13 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     if (!best || !(best.gph > alvo)) return '';
     return ' <span title="' + esc(cap(best.k)) + ': ' + ncs(best.gph) + '/h ' + t('cdBetterTip') + '" style="color:#f2c665;cursor:help">\u2197</span>';
   };
-  async function refreshCards() {
+  async function refreshCards(force) {
     if (!cardsOn || cdBusy) return; // cdBusy: nao destruir o DOM enquanto o usuario arrasta/redimensiona
-    const ae = document.activeElement; // digitando num input do painel (meta, webhook): tambem nao recriar
-    if (ae && cardsEl.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;
+    // Guarda do tick: com foco num campo do painel, o redesenho passivo espera (nao apagar o que
+    // o usuario digita). Mudou um select/checkbox, o handler chama com force: sem ele, o foco
+    // que fica no campo segurava o redesenho pra sempre (bug do "filtro nao aplica").
+    const ae = document.activeElement;
+    if (!force && ae && cardsEl.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;
     const rows = []; let sumG = 0, sumX = 0, sumK = 0, sumC = 0, sumSF = 0, sumSC = 0, ativos = 0; const shinyTried = {};
     for (let i = 0; i < count; i++) {
       const nm0 = tabNames[i] || stName(i), dot = ACOR[i] || '#8b949e';
@@ -2767,32 +2816,32 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     cardsEl.scrollTop = st0;
 
     // config: engrenagem, checkboxes e arraste pra reordenar seções
-    const gear = cardsEl.querySelector('#cdGear'); if (gear) gear.onclick = () => { cardsCfgOpen = !cardsCfgOpen; refreshCards(); };
-    cardsEl.querySelectorAll('.cd-cfg input[data-sec]').forEach(chk => chk.onchange = () => { cardsCfg.hide[chk.dataset.sec] = !chk.checked; saveCardsCfg(); refreshCards(); });
+    const gear = cardsEl.querySelector('#cdGear'); if (gear) gear.onclick = () => { cardsCfgOpen = !cardsCfgOpen; refreshCards(true); };
+    cardsEl.querySelectorAll('.cd-cfg input[data-sec]').forEach(chk => chk.onchange = () => { cardsCfg.hide[chk.dataset.sec] = !chk.checked; saveCardsCfg(); refreshCards(true); });
     // filtros das capturas, nivel de projecao do time e busca do inventario
-    const fcSave = () => { try { lsSet('cdFC', JSON.stringify(cdFC)); } catch {} cdHtmlAnt = ''; refreshCards(); };
+    const fcSave = () => { try { lsSet('cdFC', JSON.stringify(cdFC)); } catch {} cdHtmlAnt = ''; refreshCards(true); };
     const fcP = cardsEl.querySelector('#cdFcP'); if (fcP) fcP.onchange = () => { cdFC.p = +fcP.value; fcP.blur(); fcSave(); };
     const fcN = cardsEl.querySelector('#cdFcN'); if (fcN) fcN.onchange = () => { cdFC.n = String(fcN.value || '').slice(0, 30).toLowerCase(); fcN.blur(); fcSave(); };
     const fcT = cardsEl.querySelector('#cdFcT'); if (fcT) fcT.onchange = () => { cdFC.per = +fcT.value || 0; fcT.blur(); fcSave(); };
     const fcIv = cardsEl.querySelector('#cdFcIv'); if (fcIv) fcIv.onchange = () => { cdFC.iv = Math.max(0, +fcIv.value || 0); fcIv.blur(); fcSave(); };
     const fcQ = cardsEl.querySelector('#cdFcQ'); if (fcQ) fcQ.onchange = () => { cdFC.q = Math.max(0, +fcQ.value || 0); fcQ.blur(); fcSave(); };
     const fcSh = cardsEl.querySelector('#cdFcSh'); if (fcSh) fcSh.onchange = () => { cdFC.sh = fcSh.checked ? 1 : 0; fcSave(); };
-    const pjLv = cardsEl.querySelector('#cdPjLv'); if (pjLv) pjLv.onchange = () => { try { lsSet('cdPjLv', String(Math.max(1, Math.min(500, +pjLv.value || 500)))); } catch {} pjLv.blur(); cdHtmlAnt = ''; refreshCards(); };
-    const invF = cardsEl.querySelector('#cdInvF'); if (invF) invF.onchange = () => { try { lsSet('cdInvF', String(invF.value || '').slice(0, 30)); } catch {} invF.blur(); cdHtmlAnt = ''; refreshCards(); };
+    const pjLv = cardsEl.querySelector('#cdPjLv'); if (pjLv) pjLv.onchange = () => { try { lsSet('cdPjLv', String(Math.max(1, Math.min(500, +pjLv.value || 500)))); } catch {} pjLv.blur(); cdHtmlAnt = ''; refreshCards(true); };
+    const invF = cardsEl.querySelector('#cdInvF'); if (invF) invF.onchange = () => { try { lsSet('cdInvF', String(invF.value || '').slice(0, 30)); } catch {} invF.blur(); cdHtmlAnt = ''; refreshCards(true); };
     // secao Hoje: metas e exportar CSV
-    const gg = cardsEl.querySelector('#cdGoalG'); if (gg) gg.onchange = () => { goals.g = Math.max(0, +gg.value || 0); saveGoals(); gg.blur(); refreshCards(); };
-    const gc = cardsEl.querySelector('#cdGoalC'); if (gc) gc.onchange = () => { goals.c = Math.max(0, +gc.value || 0); saveGoals(); gc.blur(); refreshCards(); };
+    const gg = cardsEl.querySelector('#cdGoalG'); if (gg) gg.onchange = () => { goals.g = Math.max(0, +gg.value || 0); saveGoals(); gg.blur(); refreshCards(true); };
+    const gc = cardsEl.querySelector('#cdGoalC'); if (gc) gc.onchange = () => { goals.c = Math.max(0, +gc.value || 0); saveGoals(); gc.blur(); refreshCards(true); };
     const cb = cardsEl.querySelector('#cdCsv'); if (cb) cb.onclick = exportCSV;
     const cbh = cardsEl.querySelector('#cdCsvHunts'); if (cbh) cbh.onclick = exportHunts;
     // shinies tentados: escopo (total/sessao/alvos) e estrela de alvo
-    const sm2 = cardsEl.querySelector('#cdStMode'); if (sm2) sm2.onchange = () => { stMode = sm2.value; lsSet('shinyTriedMode', stMode); refreshCards(); };
-    const bc = cardsEl.querySelector('#cdBestCrit'); if (bc) bc.onchange = () => { bestCrit = bc.value; lsSet('bestCrit', bestCrit); refreshCards(); };
+    const sm2 = cardsEl.querySelector('#cdStMode'); if (sm2) sm2.onchange = () => { stMode = sm2.value; lsSet('shinyTriedMode', stMode); refreshCards(true); };
+    const bc = cardsEl.querySelector('#cdBestCrit'); if (bc) bc.onchange = () => { bestCrit = bc.value; lsSet('bestCrit', bestCrit); refreshCards(true); };
     cardsEl.querySelectorAll('.cd-sh-st').forEach(el => el.onclick = (e) => {
       e.stopPropagation();
       const sid = el.dataset.sid;
       if (shinyTargets[sid]) delete shinyTargets[sid]; else shinyTargets[sid] = 1;
       try { lsSet('shinyTargets', JSON.stringify(shinyTargets)); } catch {}
-      refreshCards();
+      refreshCards(true);
     });
     // webhook do Discord (engrenagem)
     const wu = cardsEl.querySelector('#cdWhUrl'); if (wu) wu.onchange = () => { whCfg.url = wu.value.trim(); saveWh(); wu.blur(); };
@@ -2846,18 +2895,18 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       rz2.addEventListener('dblclick', () => { delete cardsCfg.h[it.dataset.s]; saveCardsCfg(); refreshCards(); });
     });
     // tabela
-    cardsEl.querySelectorAll('th[data-k]').forEach(th => th.onclick = () => { const k = th.dataset.k; if (dsort.k === k) dsort.d *= -1; else dsort = { k, d: -1 }; refreshCards(); });
+    cardsEl.querySelectorAll('th[data-k]').forEach(th => th.onclick = () => { const k = th.dataset.k; if (dsort.k === k) dsort.d *= -1; else dsort = { k, d: -1 }; refreshCards(true); });
     cardsEl.querySelectorAll('tbody tr').forEach(tr => tr.onclick = () => { const i = +tr.dataset.i; cardsOn = false; applyCards(); toggleExpand(i); });
     const rb = cardsEl.querySelector('#cdReset'); if (rb) rb.onclick = resetSessao;
     // ranking
-    const hsc = cardsEl.querySelector('#cdHuntScope'); if (hsc) hsc.onchange = () => { huntScope = hsc.value; lsSet('huntScope', huntScope); refreshCards(); };
-    const hs = cardsEl.querySelector('#cdHuntSort'); if (hs) hs.onchange = () => { huntSort = hs.value; refreshCards(); };
-    const ha2 = cardsEl.querySelector('#cdHuntAcc'); if (ha2) ha2.onchange = () => { huntAccSel = +ha2.value; refreshCards(); };
-    const hpk = cardsEl.querySelector('#cdHuntPk'); if (hpk) hpk.onchange = () => { huntPkSel = hpk.value; try { lsSet('cdHuntPk', huntPkSel); } catch {} hpk.blur(); refreshCards(); };
-    const dal = cardsEl.querySelector('#cdDitAlvo'); if (dal) dal.onchange = () => { try { lsSet('cdDitAlvo', dal.value); } catch {} dal.blur(); cdHtmlAnt = ''; refreshCards(); };
-    const sh = cardsEl.querySelector('#cdShowHidden'); if (sh) sh.onclick = () => { showHiddenHunts = !showHiddenHunts; refreshCards(); };
-    cardsEl.querySelectorAll('.cd-fav').forEach(f => f.onclick = () => { const k = f.dataset.h; if (huntFavs[k]) delete huntFavs[k]; else huntFavs[k] = 1; try { lsSet('huntFavs', JSON.stringify(huntFavs)); } catch {} refreshCards(); });
-    cardsEl.querySelectorAll('.cd-hide').forEach(f => f.onclick = () => { const k = f.dataset.h; if (huntHidden[k]) delete huntHidden[k]; else huntHidden[k] = 1; try { lsSet('huntHidden', JSON.stringify(huntHidden)); } catch {} refreshCards(); });
+    const hsc = cardsEl.querySelector('#cdHuntScope'); if (hsc) hsc.onchange = () => { huntScope = hsc.value; lsSet('huntScope', huntScope); refreshCards(true); };
+    const hs = cardsEl.querySelector('#cdHuntSort'); if (hs) hs.onchange = () => { huntSort = hs.value; refreshCards(true); };
+    const ha2 = cardsEl.querySelector('#cdHuntAcc'); if (ha2) ha2.onchange = () => { huntAccSel = +ha2.value; refreshCards(true); };
+    const hpk = cardsEl.querySelector('#cdHuntPk'); if (hpk) hpk.onchange = () => { huntPkSel = hpk.value; try { lsSet('cdHuntPk', huntPkSel); } catch {} hpk.blur(); refreshCards(true); };
+    const dal = cardsEl.querySelector('#cdDitAlvo'); if (dal) dal.onchange = () => { try { lsSet('cdDitAlvo', dal.value); } catch {} dal.blur(); cdHtmlAnt = ''; refreshCards(true); };
+    const sh = cardsEl.querySelector('#cdShowHidden'); if (sh) sh.onclick = () => { showHiddenHunts = !showHiddenHunts; refreshCards(true); };
+    cardsEl.querySelectorAll('.cd-fav').forEach(f => f.onclick = () => { const k = f.dataset.h; if (huntFavs[k]) delete huntFavs[k]; else huntFavs[k] = 1; try { lsSet('huntFavs', JSON.stringify(huntFavs)); } catch {} refreshCards(true); });
+    cardsEl.querySelectorAll('.cd-hide').forEach(f => f.onclick = () => { const k = f.dataset.h; if (huntHidden[k]) delete huntHidden[k]; else huntHidden[k] = 1; try { lsSet('huntHidden', JSON.stringify(huntHidden)); } catch {} refreshCards(true); });
   }
   function applyCards() {
     document.body.classList.toggle('cards-on', cardsOn);
@@ -2906,8 +2955,8 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const el = document.getElementById('scList');
     el.innerHTML = allScripts().map(s => '<div class="sc-row"><label class="sc-chk"><input type="checkbox" data-sid="' + s.id + '"' + (scriptsOn[s.id] ? ' checked' : '') + '> <b>' + escH(s.name) + '</b></label>'
       + (s.file ? '<span class="sc-tag">preset · ' + escH(s.author || '') + '</span>' : '<button class="sc-del" data-del="' + s.id + '" title="Remover">✕</button>') + '</div>').join('');
-    el.querySelectorAll('.sc-chk input').forEach(chk => chk.onchange = () => { scriptsOn[chk.dataset.sid] = chk.checked; saveScripts(); if (chk.checked) applyScriptToAll(chk.dataset.sid); });
-    el.querySelectorAll('.sc-del').forEach(b => b.onclick = () => { userScripts = userScripts.filter(u => u.id !== b.dataset.del); delete scriptsOn[b.dataset.del]; saveScripts(); renderScriptsList(); });
+    el.querySelectorAll('.sc-chk input').forEach(chk => chk.onchange = () => { scriptsOn[chk.dataset.sid] = chk.checked; saveScripts(); if (chk.checked) applyScriptToAll(chk.dataset.sid); else webviews.forEach((w, wi) => { if (!off[wi]) try { w.reload(); } catch {} }); });
+    el.querySelectorAll('.sc-del').forEach(b => b.onclick = () => { const ativo = !!scriptsOn[b.dataset.del]; userScripts = userScripts.filter(u => u.id !== b.dataset.del); delete scriptsOn[b.dataset.del]; if (ativo) webviews.forEach((w, wi) => { if (!off[wi]) try { w.reload(); } catch {} }); saveScripts(); renderScriptsList(); });
   }
   const scOverlay = document.getElementById('scOverlay');
   document.getElementById('scriptsBtn').onclick = () => { renderScriptsList(); scOverlay.classList.add('show'); };

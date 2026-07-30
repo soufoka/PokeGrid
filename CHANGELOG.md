@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.5.11
+
+- **FAQ novo**: as perguntas mais comuns da comunidade estão em FAQ.md no GitHub e num botão **❓ FAQ** dentro de Opções, que abre direto no navegador. Inclui o clássico "não consigo mudar a pokébola" (é o 🧼 Limpar jogo escondendo o Auto-Helper).
+  *New FAQ: the communitys most common questions live in FAQ.md on GitHub and behind a ❓ FAQ button in Options that opens it in your browser.*
+- **Filtros e seletores do Simples aplicam na hora** (obrigado xllD3an pelo aviso): mudar o critério IV × Qualidade, a ordenação de hunts ou qualquer outro seletor segurava a atualização enquanto o foco ficasse no campo, e o painel parecia congelado. Agora a mudança redesenha imediatamente; a proteção de quem está digitando continua valendo pro tique automático.
+  *Simples-mode filters and selectors now apply instantly (thanks xllD3an): changing IV × Quality or any selector used to hold the refresh while the field kept focus, freezing the panel. User changes now repaint immediately; the typing protection still applies to the automatic tick.*
+- **Desmarcar um script agora para o script de verdade** (obrigado FellipeLuis): um script injetado só morre quando a página recarrega, então desmarcar (ou excluir) um script ativo recarrega as contas ligadas automaticamente.
+  *Unchecking a script now actually stops it (thanks FellipeLuis): injected code only dies on reload, so unchecking or deleting an active script now reloads the powered-on accounts automatically.*
+- **FAQ.md novo no repositório**, com as dúvidas mais comuns da comunidade: atualização sem perder configurações, onde ficam os dados, sugestão de hunts, scripts, planilhas, captcha e como contribuir.
+  *New FAQ.md in the repo covering the communitys most common questions.*
+- **Zoom com porcentagem no cabeçalho de cada conta**, no estilo da barra do próprio jogo: o valor aparece entre o − e o +, e clicar nele volta pra 100%. O botão de desligar a conta foi removido (ficava colado nos outros e causava cliques acidentais; o Logar equipe continua religando tudo sozinho).
+  *Zoom percentage in each accounts header, styled after the games own bar: the value sits between − and +, click it to reset to 100%. The power-off button was removed (it sat next to the other buttons and caused accidental clicks; Team login still re-enables everything automatically).*
+- **As planilhas agora abrem certo no Excel em português.** Antes tudo caía numa coluna só, porque o Excel em português usa ponto e vírgula como separador e não vírgula, e os números com ponto viravam texto. Agora o arquivo sai com ponto e vírgula, decimal com vírgula, data no formato dd/mm/aaaa, acentuação correta e cabeçalho em português com a unidade de cada coluna (Kills/h, Gold/h, Drop (%)). Vale para as três planilhas: hunts, drops e o histórico do dia.
+  *Spreadsheets now open correctly in Portuguese Excel. Everything used to land in a single column because Portuguese Excel expects semicolons as the separator, and dot decimals were read as text. Files now use semicolons, comma decimals, dd/mm/yyyy dates, correct accents and Portuguese headers with each columns unit. Applies to all three exports.*
+- **Cadeado de venda configurável** (ideia inspirada no PIW-QOL, do Desjunior): na engrenagem do painel dá pra escolher os itens que pedem confirmação antes de vender, buscando pelo nome no catálogo do próprio jogo. Shiny e qualidade alta continuam protegidos sem precisar configurar nada, e o feromônio e a foto rara seguem travados de fábrica.
+  *Configurable sell lock: in the panel settings you can pick which items ask for confirmation before selling, searching by name in the games own catalog. Shiny and high quality remain protected with no setup, and the pheromone and rare picture stay locked by default.*
+
 ## 1.5.10
 
 ### A versão sem executável voltou a abrir
