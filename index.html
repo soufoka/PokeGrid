@@ -744,7 +744,7 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
         try { ivRecebe(i, JSON.parse(m.slice(8))); } catch {}
       });
       let fails = 0, alertedDown = false; // watchdog: falhas de carga do painel e se ja avisou a queda
-      let zoom = +(lsGet('zoom' + i) || 1);
+      let zoom = +(lsGet('zoom' + i) || 1); if (!Number.isFinite(zoom) || zoom < 0.5 || zoom > 2) zoom = 1;
       const zpct = panel.querySelector('.zpct');
       const setZoom = (z) => {
         zoom = Math.min(2, Math.max(0.5, Math.round(z * 10) / 10));
@@ -2230,7 +2230,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       lockResults.innerHTML = achados.map(it => '<div class="cfg-res" data-name="' + esc(it.name) + '">' + esc(it.name) + '</div>').join('') || '<div class="cfg-noc">\u2014</div>';
       lockResults.querySelectorAll('.cfg-res').forEach(r => r.onclick = () => {
         const nm = String(r.dataset.name || '').toLowerCase().trim();
-        if (nm && !sellLock.includes(nm) && sellLock.length < 80) { sellLock.push(nm); saveSellLock(); applySellGuard(); }
+        if (nm && nm.length < 60 && !sellLock.includes(nm) && sellLock.length < 80) { sellLock.push(nm); saveSellLock(); applySellGuard(); }
         lockSearch.value = ''; lockResults.innerHTML = ''; renderSettings();
       });
     };

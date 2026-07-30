@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.12
+
+- Bughunt: o nome de item adicionado ao cadeado de venda agora respeita o teto de 60 caracteres também na hora de adicionar (antes só na carga), e o zoom lido do disco é validado (um valor corrompido mostrava NaN% no visor novo do cabeçalho).
+  *Bughunt: sell-lock item names are now capped at 60 chars on add too, and zoom read from disk is validated (a corrupted value showed NaN% in the new header display).*
+
 ## 1.5.11
 
 - **FAQ novo**: as perguntas mais comuns da comunidade estão em FAQ.md no GitHub e num botão **❓ FAQ** dentro de Opções, que abre direto no navegador. Inclui o clássico "não consigo mudar a pokébola" (é o 🧼 Limpar jogo escondendo o Auto-Helper).
