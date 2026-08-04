@@ -69,6 +69,39 @@ ipcMain.handle('errlog:open', () => {
   } catch {}
 });
 
+
+// Backups automaticos (config semanal e hunts que sairiam do limite de 150): grava em
+// userData/backups sem dialogo. Nome vem do renderer, entao e tratado como hostil: so o
+// basename, charset restrito, teto de 2MB, e no maximo 12 arquivos por prefixo.
+ipcMain.handle('backup:save', (_e, nome, conteudo, cabecalho) => {
+  try {
+    if (typeof nome !== 'string' || typeof conteudo !== 'string') return false;
+    nome = path.basename(nome);
+    if (!/^[\w.-]{1,60}$/.test(nome) || conteudo.length > 2e6) return false;
+    const dir = path.join(app.getPath('userData'), 'backups');
+    fs.mkdirSync(dir, { recursive: true });
+    const alvo = path.join(dir, nome);
+    if (fs.existsSync(alvo)) fs.appendFileSync(alvo, conteudo);
+    else fs.writeFileSync(alvo, (typeof cabecalho === 'string' ? cabecalho : '') + conteudo);
+    const prefixo = nome.replace(/[\d-]+\.\w+$/, '');
+    const irmaos = fs.readdirSync(dir).filter((f) => f.startsWith(prefixo)).sort();
+    while (irmaos.length > 12) { try { fs.unlinkSync(path.join(dir, irmaos.shift())); } catch { break; } }
+    return true;
+  } catch (e) { try { logErro('backup', String(e && e.message).slice(0, 200)); } catch {} return false; }
+});
+
+// Limpa os dados do jogo de UMA conta (cookies, storage e cache da particao dela). Resolve conta
+// "bugada" sem mexer nas outras; a senha salva do treinador nao mora ai e sobrevive.
+ipcMain.handle('conta:limpar', async (_e, i) => {
+  i = Math.trunc(+i);
+  if (!(i >= 0 && i <= 3)) return false;
+  try {
+    const ses = session.fromPartition('persist:conta' + i);
+    await ses.clearStorageData();
+    await ses.clearCache();
+    return true;
+  } catch (e) { try { logErro('conta', 'limpar conta' + i + ': ' + String(e && e.message).slice(0, 150)); } catch {} return false; }
+});
 // Instancia unica: abrir o app de novo so foca a janela ja aberta.
 if (!app.requestSingleInstanceLock()) app.quit();
 

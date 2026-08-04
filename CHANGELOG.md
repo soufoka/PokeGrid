@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.5.13
+
+- Bughunt: a cor de tipo agora passa por um resolvedor com tipo garantido em todos os pontos (tierlist, ditto e calculadora de IV); um nome de tipo estranho vindo do jogo cai no cinza padrão em vez de vazar pro estilo.
+  *Bughunt: type colors now go through a type-guarded resolver everywhere; a weird type name from the game falls back to gray instead of leaking into the style attribute.*
+- **🏆 Tierlist por elemento** (botão novo em Opções): rankeia todas as espécies do jogo (Orre incluso) pela melhor hunt que cada uma alcança, usando o mesmo modelo do sugestor: golpe físico enfrenta a defesa física de cada hunt e especial enfrenta a especial, então dois pokémon de golpe igual rankeiam diferente conforme as hunts disponíveis favorecem um lado ou o outro. Nível de referência ajustável, qualidade 1 e IV 96 fixos (compara espécies, não exemplares), tiers S/A/B/C/D relativos ao topo do elemento, resumo com top 3 de cada elemento e lista completa por elemento com sprite, golpe, efetividade e a hunt onde o pico acontece.
+  *New Tierlist button: ranks every species (Orre included) by its best achievable hunt using the suggesters model, so physical vs special attackers rank according to which defenses the available hunts actually expose. Adjustable reference level, S-D tiers relative to each elements top, summary plus full per-element lists.*
+- **Time completo no Painel** (pedido do FellipeLuis): a seção Time agora mostra cada pokémon com sprite, barra de HP colorida, barra de EXP e a estrela do líder, no estilo do painel do próprio jogo. **Clicar num pokémon coloca ele na frente** (vira o líder que caça), então dá pra deixar o 🧼 Limpar jogo escondendo o HUD e gerenciar o time só pelo app. A troca aciona a linha correspondente do painel do próprio jogo, sem mexer na comunicação interna dele.
+  *Full team in the Panel: each pokémon shows sprite, colored HP bar, EXP bar and the leader star; clicking one makes it the hunting leader, so you can keep Clean game hiding the games HUD and manage the team from the app.*
+- Bughunt final: a confirmação da compra de bolas mostra o saldo da conta onde a compra vai rodar (o fallback podia exibir o de outra conta), e a coleta do depot tolera configuração corrompida no disco.
+  *Final bughunt: the bulk-buy confirmation shows the balance of the account the purchase runs on, and depot collection tolerates corrupted on-disk config.*
+- **Região Orre integrada**: as hunts novas entram na lista, no ranking Sugerido e no modo Ditto/Shiny Ditto, com selo ORRE e o detalhe que muda tudo: o XP mostrado e rankeado já aplica o **multiplicador de XP da região** (orreXpMul, que vai de 1.9× a 145×; um Treecko de 248 XP rende na verdade ~13.000). Lucro usa o valor de venda normal. Conta abaixo do nível da hunt (470 a 550) vê a trava de nível em vez de recomendação errada.
+  *Orre region integrated: new hunts join the list, the Suggested ranking and the Ditto mode, with an ORRE badge; shown and ranked XP already applies the regions XP multiplier (1.9x to 145x). Accounts below the hunt level see the level lock.*
+- **Inventário global agora soma o depot** (pergunta do Semai): a seção Inventário do Simples passa a incluir o depósito das 4 contas, com a origem separada no tooltip (conta e conta (depot)). A busca é leve: só com o painel aberto, no máximo a cada 2 minutos por conta.
+  *Global inventory now includes the depot across the 4 accounts, with per-account origin in the tooltip.*
+- **🧹 Limpar os dados do jogo de uma conta** (pedido do FellipeLuis): botão novo na linha de cada treinador limpa cookies e cache só daquela conta, pra resolver conta bugada (mapa sem pokémon, filtros sumidos) sem mexer nas outras. A senha salva fica; a conta recarrega e loga de novo.
+  *Per-account game-data clear: a new button on each trainer row clears only that accounts cookies and cache to fix a glitched account without touching the others.*
+- **Menção no alerta de shiny do webhook** (sugestão do LeMadness): campo opcional de ID do Discord na configuração do webhook; o alerta de shiny chega com o <@menção>. O resumo diário segue sem ping.
+  *Optional Discord user ID in the webhook config; the shiny alert now pings that user. The daily summary stays ping-free.*
+- **🧺 Comprar pokébolas em massa**: na engrenagem do painel, +1.000 ou +10.000 de uma vez, direto na loja do jogo, sempre com confirmação mostrando custo, saldo e conta. Formato da compra aprendido com o PIW-QOL do Desjunior.
+  *Bulk Poké Ball buying from the panel gear, +1,000 or +10,000 at once, always confirming cost, balance and account.*
+- **A pokébola voltou a ser fácil de trocar**: com o 🧼 Limpar jogo ligado, o Auto-Helper agora aparece ao passar o mouse (como a conta e o menu) em vez de sumir de vez. Era a dúvida mais comum do FAQ.
+  *With Clean game on, the Auto-Helper now appears on hover instead of vanishing, so switching pokéballs is easy again.*
+- **Aviso de versão nova**: o número da versão ao lado do logo checa o GitHub uma vez por dia e mostra "→ v1.5.14" clicável quando sai atualização. Nasceu do incidente 1.5.5, quando usuários da versão sem executável ficaram presos numa versão quebrada sem saber. A conexão de rede do app continua fechada pra todo o resto.
+  *The version number next to the logo checks GitHub once a day and shows a clickable "new version" hint. The apps network stays closed to everything else.*
+- **Backup automático**: uma vez por semana as configurações são salvas sozinhas em  (12 cópias mais recentes), e as hunts que saem do limite de 150 são anexadas num CSV histórico em vez de descartadas.
+  *Weekly automatic config backup and pruned hunts appended to a history CSV instead of discarded.*
+- **Tendência de 30 dias**: a seção Tendência do Simples ganhou gráficos de gold/dia e XP/dia usando o histórico diário que o app já guardava.
+  *30-day gold/day and XP/day charts in the Trend section.*
+- **Previsão de meta**: com meta de gold definida e caça andando, o Hoje mostra a que horas a meta bate no ritmo atual.
+  *With a gold goal set, Today shows the ETA at the current pace.*
+- Número da versão aberta ao lado do logo, pequeno e discreto (lido da própria assinatura do app, sem canal novo de comunicação interna).
+  *Running version number next to the logo, small and unobtrusive (read from the apps own user agent, no new internal channel).*
+
 ## 1.5.12
 
 - Bughunt: o nome de item adicionado ao cadeado de venda agora respeita o teto de 60 caracteres também na hora de adicionar (antes só na carga), e o zoom lido do disco é validado (um valor corrompido mostrava NaN% no visor novo do cabeçalho).

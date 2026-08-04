@@ -23,7 +23,7 @@ Electron (Chromium, o motor do Chrome). Cada conta roda numa sessão separada.
 Bug corrigido na **1.5.11**: o painel segurava a atualização enquanto o foco ficava no seletor. Fora isso, o Simples atualiza a cada 10s de propósito, pra pesar menos.
 
 ### Não consigo mudar a pokébola!
-É o "sabonete": o botão **🧼 Limpar jogo** (ligado por padrão) esconde o Auto-Helper do jogo, que é onde fica o seletor de pokébola. Clique no 🧼 na barra do topo pra desligar, troque a bola no Auto-Helper e ligue de novo.
+É o "sabonete": o botão **🧼 Limpar jogo** esconde o Auto-Helper do jogo, que é onde fica o seletor de pokébola. Desde a 1.5.13 basta **passar o mouse** no canto onde ele fica que ele aparece; em versões antigas, desligue o 🧼 na barra do topo, troque a bola e ligue de novo.
 
 ### Como desabilito um script?
 **Opções → Scripts**, desmarque a caixinha. Desde a 1.5.11 isso recarrega as contas e o script para na hora. Antes: desmarque e clique em **⟳ Atualizar tudo**.
