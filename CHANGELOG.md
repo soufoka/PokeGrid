@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.15
+
+- O botão **Ajude o projeto** mudou do fim do Painel pro topo do app, ao lado do logo, bem visível (verde, sem emoji).
+  *The support button moved from the end of the Panel to the top bar, next to the logo.*
+
 ## 1.5.14
 
 - **💚 Ajude o projeto**: card discreto no fim do Painel com o link oficial de apoio (https://link.mercadopago.com.br/pokegrid, Pix e cartão). Opcional, não desbloqueia nada; o app segue gratuito. E a lista do time agora mostra a **EXP %** de cada pokémon junto do HP, como no card do jogo.

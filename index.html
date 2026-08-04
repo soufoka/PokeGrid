@@ -17,7 +17,7 @@
     display: flex; align-items: center; gap: 8px;
     padding: 8px 14px; background: #161b22; border-bottom: 1px solid #21262d; flex-shrink: 0;
   }
-  #topbar .logo { display: flex; align-items: center; gap: 8px; font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 2.5px; margin-right: auto; }
+  #topbar .logo { display: flex; align-items: center; gap: 8px; font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 2.5px; }
   #topbar .logo svg { display: block; }
   #topbar .logo .ver { font-size: 10px; font-weight: 400; letter-spacing: 0; color: #6e7681; align-self: flex-end; padding-bottom: 1px; }
   button {
@@ -29,11 +29,8 @@
   button.primary:hover { background: #f0491f; }
   button.on { background: #238636; border-color: #238636; }
   #refBtn { margin-left: 14px; }
-  .don-card { margin: 10px 15px 0; padding: 10px 12px; background: #0f1a13; border: 1px solid #1f4429; border-radius: 8px; }
-  .don-t { font-size: 12.5px; font-weight: 600; color: #7ee0a0; margin-bottom: 3px; }
-  .don-x { font-size: 11px; color: #8b949e; line-height: 1.45; margin-bottom: 7px; }
-  .don-card button { width: 100%; padding: 6px 0; font-size: 12px; background: #1b3a2a; border: 1px solid #2ea043; color: #7ee0a0; }
-  .don-card button:hover { background: #234d36; }
+  #donTop { margin-right: auto; margin-left: 12px; padding: 4px 12px; font-size: 12px; font-weight: 600; background: #1f6f3d; border: 1px solid #2ea043; color: #fff; }
+  #donTop:hover { background: #278a4b; border-color: #3fb950; }
   /* pílula IV's: mesmo visual do botão da extensão dentro do jogo */
   #ivsBtn { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #e3350d, #b91c1c); border-color: #8f1408; border-radius: 999px; color: #fff; font-weight: 700; }
   #ivsBtn:hover { background: linear-gradient(135deg, #f0491f, #d42020); border-color: #e3350d; }
@@ -481,6 +478,7 @@
       POKEGRID
       <span class="ver" id="appVer"></span>
     </span>
+    <button id="donTop">Ajude o projeto</button>
     <button id="loginAll" class="primary">▶ Logar equipe</button>
     <button id="accounts">👤 Treinadores</button>
     <button id="reloadAll">⟳ Atualizar tudo</button>
@@ -1747,6 +1745,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const be = document.getElementById('bkExp'); be.textContent = t('bkExp'); be.title = t('bkExpTitle');
     const bi = document.getElementById('bkImp'); bi.textContent = t('bkImp'); bi.title = t('bkImpTitle');
     const fq = document.getElementById('faqBtn'); fq.textContent = t('faq'); fq.title = t('faqTitle');
+    donTop.textContent = t('donTitle'); donTop.title = t('donText');
     langBtns.forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
     refBtn.title = t('refTitle');
     awakeBtn.title = t('awakeTitle');
@@ -1813,6 +1812,8 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   };
   document.getElementById('reloadAll').onclick = () => webviews.forEach((w, i) => { if (!off[i]) w.reload(); });
   document.getElementById('faqBtn').onclick = () => window.open('https://github.com/soufoka/PokeGrid-source/blob/main/FAQ.md');
+  const donTop = document.getElementById('donTop');
+  donTop.onclick = () => window.open('https://link.mercadopago.com.br/pokegrid');
   // versao aberta, lida da propria UA (o Electron poe PokeGrid/x.y.z nela; zero IPC)
   try {
     const vAtual = (navigator.userAgent.match(/PokeGrid\/([\d.]+)/) || [])[1];
@@ -2251,13 +2252,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     h += sec('#2bb0a8', t('stSupplies')) + sgrid(3, a4c('Pokébolas', nc(balls), '#e3350d') + a4c('Potions', nc(pot), '#f778ba') + a4c('Revives', nc(rev), '#58a6ff'));
     h += sec('#f2c665', t('stAssets')) + sgrid(2, a4c('$ total', '$' + nc(money), '#f2c665') + a4c('💎 total', nf(dia), '#8ab4ff'));
     h += sec('#e3350d', t('stPerAcc')) + cards;
-    stBody.innerHTML = h
-      + '<div class="don-card"><div class="don-t">\u{1F49A} ' + t('donTitle') + '</div>'
-      + '<div class="don-x">' + t('donText') + '</div>'
-      + '<button id="donBtn">' + t('donBtn') + '</button></div>'
-      + '<div style="height:12px;"></div>';
-    const db = document.getElementById('donBtn');
-    if (db) db.onclick = () => window.open('https://link.mercadopago.com.br/pokegrid');
+    stBody.innerHTML = h + '<div style="height:12px;"></div>';
   }
 
   async function refreshStats() {
