@@ -156,6 +156,8 @@
     }
 
     function obterUrlsSprite(id, shiny) {
+        // o jogo desloca os ids de Orre em +13000 (Treecko = 13252); sprites usam a dex nacional
+        id = (+id >= 13000 && +id < 14000) ? +id - 13000 : +id;
         const pastaShiny = shiny ? "shiny/" : "";
         const baseUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
         return {
@@ -5630,9 +5632,30 @@
         }
     };
 
+    // Deposito da familia (e qualquer lista com linhas "Nome · Nv N · IV N · Q N.NN"): essas
+    // janelas nao abrem o tooltip do jogo, entao o card ficava mudo nelas. No hover da linha,
+    // monta-se o texto no formato do tooltip e alimenta o MESMO pipeline (parse, card, report).
+    // Sem stats por atributo na linha, o card mostra nivel, qualidade, IV total e poder estimado.
+    function observarDepositoFamilia() {
+        document.addEventListener('mouseover', (e) => {
+            try {
+                if (!mouseTrackingEnabled) return;
+                const alvo = e.target && e.target.closest ? e.target.closest('div,li,button,article') : null;
+                if (!alvo) return;
+                if (alvo.childElementCount > 6) return; // container grande: nem le o texto (custa caro no mousemove)
+                const tx = (alvo.textContent || '').trim();
+                if (!tx || tx.length > 140) return;
+                const m = tx.match(/^(.{2,40}?)\s*\u00b7\s*(?:Nv|Lv)\s*(\d+)\s*\u00b7\s*IV\s*(\d+)\s*\u00b7\s*Q\s*([\d.,]+)/i);
+                if (!m) return;
+                const texto = m[1].trim() + '\nNv ' + m[2] + '\nIV ' + m[3] + '/192\nQualidade \u00d7' + m[4].replace(',', '.') + '\nPoder 0';
+                processarTooltip({ innerText: texto });
+            } catch (x) {}
+        }, true);
+    }
     carregarCreatures();
     criarPainel();
     observarTooltips();
     iniciarEscutasEventos();
     observarLogDeCapturas();
+    observarDepositoFamilia();
 })();

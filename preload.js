@@ -15,5 +15,6 @@ contextBridge.exposeInMainWorld('pokeAPI', {
   logError: (origem, msg) => ipcRenderer.invoke('errlog:write', origem, msg),
   openErrorLog: () => ipcRenderer.invoke('errlog:open'),
   saveBackup: (nome, conteudo, cabecalho) => ipcRenderer.invoke('backup:save', nome, conteudo, cabecalho),
-  clearAccount: (i) => ipcRenderer.invoke('conta:limpar', i)
+  clearAccount: (i) => ipcRenderer.invoke('conta:limpar', i),
+  fetchUserScript: (url) => ipcRenderer.invoke('userscript:fetch', url)
 });

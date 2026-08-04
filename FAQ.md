@@ -39,5 +39,9 @@ Com o escudo ligado, o app pede confirmação antes de vender shiny, qualidade L
 
 ## Projeto
 
+### Como apoio o projeto?
+Pelo botão **💚 Ajude o projeto** no fim do 📊 Painel, ou direto em https://link.mercadopago.com.br/pokegrid (Pix e cartão). Apoio é opcional e não desbloqueia nada; o app é e continua gratuito. **Esse é o único link oficial**: desconfie de qualquer outro.
+
+
 ### Como contribuo?
 Fork de https://github.com/soufoka/PokeGrid-source, rode `npm test` e abra o PR. A `main` é protegida, tudo entra por PR.

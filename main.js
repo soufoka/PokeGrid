@@ -102,6 +102,51 @@ ipcMain.handle('conta:limpar', async (_e, i) => {
     return true;
   } catch (e) { try { logErro('conta', 'limpar conta' + i + ': ' + String(e && e.message).slice(0, 150)); } catch {} return false; }
 });
+
+// Baixa userscript do GitHub (base: PR #4 do JulianoCLI). Guardas: so https, so github.com e
+// raw.githubusercontent.com, redirect revalidado pela mesma funcao, no maximo 3 saltos, 2MB e
+// timeouts. Conserto proprio: link /blob/ (o que se copia do navegador) vira raw, senao o app
+// instalava a PAGINA HTML como se fosse o script.
+const US_HOSTS = new Set(['github.com', 'raw.githubusercontent.com']);
+function urlRaw(u) {
+  if (u.hostname === 'github.com') {
+    const p = u.pathname.split('/').filter(Boolean); // owner/repo/blob/branch/caminho...
+    const i = p.indexOf('blob');
+    if (i >= 2 && p.length > i + 2) return new URL('https://raw.githubusercontent.com/' + p[0] + '/' + p[1] + '/' + p.slice(i + 1).join('/'));
+  }
+  return u;
+}
+function baixaUserScript(url, saltos = 0) {
+  return new Promise((resolve) => {
+    let u;
+    try { u = urlRaw(new URL(String(url))); } catch { resolve({ ok: false, error: 'Link invalido.' }); return; }
+    if (u.protocol !== 'https:' || !US_HOSTS.has(u.hostname) || !/\.js$/i.test(u.pathname)) {
+      resolve({ ok: false, error: 'Use um link https do GitHub para um arquivo .js' }); return;
+    }
+    const req = https.get(u, { headers: { 'User-Agent': 'PokeGrid/' + app.getVersion(), Accept: 'text/plain' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume();
+        if (saltos >= 3) { resolve({ ok: false, error: 'Redirecionamentos demais.' }); return; }
+        let prox; try { prox = new URL(res.headers.location, u).toString(); } catch { resolve({ ok: false, error: 'Redirecionamento invalido.' }); return; }
+        baixaUserScript(prox, saltos + 1).then(resolve); return;
+      }
+      if (res.statusCode !== 200) { res.resume(); resolve({ ok: false, error: 'GitHub respondeu HTTP ' + res.statusCode }); return; }
+      let tam = 0, corpo = '', parou = false;
+      res.setEncoding('utf8');
+      res.on('data', (c) => {
+        if (parou) return;
+        tam += Buffer.byteLength(c);
+        if (tam > 2 * 1024 * 1024) { parou = true; req.destroy(); resolve({ ok: false, error: 'O script passa de 2 MB.' }); }
+        else corpo += c;
+      });
+      res.on('end', () => { if (!parou) resolve({ ok: true, url: u.toString(), code: corpo }); });
+      res.on('error', () => { if (!parou) { parou = true; resolve({ ok: false, error: 'Falha ao ler o script.' }); } });
+    });
+    req.setTimeout(12000, () => req.destroy(new Error('timeout')));
+    req.on('error', () => resolve({ ok: false, error: 'Nao foi possivel acessar o GitHub.' }));
+  });
+}
+ipcMain.handle('userscript:fetch', (_e, url) => baixaUserScript(url));
 // Instancia unica: abrir o app de novo so foca a janela ja aberta.
 if (!app.requestSingleInstanceLock()) app.quit();
 
