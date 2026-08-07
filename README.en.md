@@ -6,12 +6,11 @@
 
 **Four Poke Idle World accounts in a single window.**
 
-[![Download](https://img.shields.io/badge/Download-latest%20version-e3350d)](https://github.com/soufoka/PokeGrid/releases/latest)
 ![Platform](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-0078D6)
 ![Electron](https://img.shields.io/badge/Electron-43-47848F)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-[**Download**](https://github.com/soufoka/PokeGrid/releases/latest) · [Português](README.md)
+[Português](README.md)
 
 <img src="docs/modo-simples.png" width="880" alt="Simple mode: dashboard with the numbers of all four accounts">
 
@@ -19,60 +18,69 @@
 
 </div>
 
-> Playing an idle game with several accounts turns into window chaos: four browsers open, each one logged in by hand, and then guessing which tab belongs to whom. PokeGrid puts them all on one screen, each account kept apart from the others.
+> This is the run-from-source version. There is no ready-made executable to download: you grab the code, look at what it does and run it yourself. That way the trust is on you, not on me.
 
 > ### 🔒 Your login data stays only on your computer
-> E-mail and password are encrypted on your own PC and never leave the machine. They go to no server, not to this repository, not to me. The code is open precisely so you can check.
+> Login and password are encrypted on your own PC and never leave it. No server, no repository. The whole code is here for you to check.
 
 ## What it is
 
-Four accounts running at once, each in its own quadrant with a separate session. You save the e-mail and password once and the app signs in on its own from then on. If a session drops mid farm, it logs back in without you being around.
+Four accounts running at once, each in its own quadrant with a separate session. You save the login once and the app signs in on its own from then on. If a session drops mid farm, it logs back in without you being around. It does not automate the game or touch the captcha, it only organizes the accounts you already have.
 
-Regular browser tabs do not cut it, since they all share the same cookies: logging into the second account kicks out the first. An incognito window isolates them but loses your login every time you close it. Here the four coexist just fine and stay in view.
+## How to run
+
+You need Node.js installed once. After that it is quick.
+
+**1. Install Node.js**
+Download the LTS version at [nodejs.org](https://nodejs.org) and install it (just next, next, finish).
+
+**2. Download this code**
+Click the green **Code** button above, then **Download ZIP**. Extract the folder wherever you want. If you use Git, clone it:
+
+```bash
+git clone https://github.com/soufoka/PokeGrid-source.git
+```
+
+**3. Open the app**
+On Windows, double click the **iniciar.bat** file in the folder. The first time it installs what it needs and opens on its own; after that it opens right away.
+
+On macOS or Linux, open a terminal in the folder and run:
+
+```bash
+bash iniciar.sh
+```
+
+That is it. Log in or create an account in each panel and, under "Treinadores" (Accounts), save the login. Next time it signs in on its own.
+
+## Documentation
+
+| | |
+|---|---|
+| **[Manual](MANUAL.md)** | What every button and panel section does (Portuguese) |
+| **[FAQ](FAQ.md)** | Common questions: updating without losing anything, the missing pokéball, scripts, spreadsheets |
+| **[Tutorial](TUTORIAL.md)** | Step by step for the no-installer version |
+| **[Changelog](CHANGELOG.md)** | What landed in each version |
 
 ## What it does
 
 - Run 2, 3 or 4 accounts, you choose how many panels to open.
 - Auto login, even when the session expires in the middle of a farm.
-- Eco mode: holds the games at 15 fps and cuts CPU use without hurting progress.
-- Turn each panel on or off to give memory back when you are not using it.
-- Hides the game icon menu (F2 key) and the chat, which only eat space.
-- Closes that promo popup that shows up on every login by itself.
-- Hunt button: opens and closes the Hunt Analyzer in all four at once.
-- Keeps Windows awake while you farm overnight.
-- Goes to the tray near the clock and can start with Windows, already farming.
-- Portuguese and English in one click, in the app and in the game.
-- Per panel zoom, full screen and keyboard shortcuts.
-
-## How to use
-
-Grab the [latest release](https://github.com/soufoka/PokeGrid/releases/latest) and pick the format:
-
-- Windows: installer (`Setup.exe`), portable (`portable.exe`) or archive (`win.zip`).
-- macOS: `arm64.dmg` (Apple Silicon) or `.dmg` (Intel).
-- Linux: `.AppImage`.
-
-Open it, log in or create an account in each panel and, under "Treinadores" (Accounts), save the e-mail and password. Next time it signs in on its own.
-
-Running from source:
-
-```bash
-git clone https://github.com/soufoka/PokeGrid.git
-cd PokeGrid
-npm install
-npm start
-```
-
-## Under the hood
-
-Each panel is an Electron `<webview>` with its own partition (`persist:conta1` to `conta4`), and that is what keeps the accounts isolated and logged in between launches. Whatever the game does not offer, the app injects into each panel: Eco swaps `requestAnimationFrame` for a slower version, the login fills through the input's native setter (otherwise the game's React ignores it), and the menu and chat disappear via CSS with a `MutationObserver` that reapplies when the game repaints.
+- Eco mode that keeps CPU use down without hurting progress.
+- Hides the chat and the game icon menu to free up screen.
+- Notifies you when an account drops or runs out of Pokéballs.
+- Turn each panel on or off, zoom, full screen and keyboard shortcuts.
+- Tray, start with Windows, and Portuguese or English.
 
 ## Security
 
 - Passwords are encrypted by Electron's `safeStorage`, which uses the OS API (DPAPI on Windows). They never leave the PC.
 - Panels are locked to the game's domain. An external link opens in your real browser, and the password is only typed into the official login page.
-- Camera, microphone, location and notifications are blocked.
+- The game's camera, microphone, location and notifications are blocked.
 - You always solve the captcha. The app fills the fields and presses Enter when you tick the box, but it never touches the "Confirm you are human" widget. Beating bot detection is not the point.
+
+## Under the hood
+
+Each panel is an Electron `<webview>` with its own partition (`persist:conta1` to `conta4`), and that is what keeps the accounts isolated and logged in between launches. Whatever the game does not offer, the app injects into each panel: Eco swaps `requestAnimationFrame` for a slower version, the login fills through the input's native setter, and the menu and chat disappear via CSS with a `MutationObserver`. It is all in `main.js`, `preload.js` and `index.html`, nothing hidden.
 
 ## License
 

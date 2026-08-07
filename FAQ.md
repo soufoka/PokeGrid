@@ -31,6 +31,9 @@ Bug corrigido na **1.5.11**: o painel segurava a atualização enquanto o foco f
 ### Como exporto os logs de hunt?
 **Simples → Hoje → "⬇ Hunts (N)"**. Baixa duas planilhas (hunts e drops) que abrem direto no Excel. O app guarda as últimas 150 hunts.
 
+### O ouro da sessão não bate com o Hunt Analyzer do jogo
+A partir da 1.5.16 bate: o app passou a usar os números do próprio servidor do jogo, os mesmos que o Hunt Analyzer mostra. Antes ele refazia a conta por fora e errava em coisas que só o servidor sabe (qual pokébola foi usada em cada arremesso, se o pokémon novo veio de captura ou do mercado, se a poção saiu por uso ou por venda). Se ainda houver diferença, lembre que o relógio do Hunt Analyzer zera ao trocar de hunt e no 🗑 dele, e nenhum dos dois mede o ouro real da carteira: os dois mostram o valor do que caiu, a preço de NPC.
+
 ### E o captcha?
 O app nunca resolve captcha. É sempre você, na janela da conta. Proposital, não vai mudar.
 

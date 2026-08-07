@@ -81,7 +81,10 @@ ipcMain.handle('backup:save', (_e, nome, conteudo, cabecalho) => {
     const dir = path.join(app.getPath('userData'), 'backups');
     fs.mkdirSync(dir, { recursive: true });
     const alvo = path.join(dir, nome);
-    if (fs.existsSync(alvo)) fs.appendFileSync(alvo, conteudo);
+    // anexar so faz sentido em log/csv; num .json anexado o arquivo deixa de ser JSON valido e o
+    // backup nao volta mais na hora que o usuario precisa
+    const anexavel = /\.(csv|log|txt)$/i.test(nome);
+    if (anexavel && fs.existsSync(alvo)) fs.appendFileSync(alvo, conteudo);
     else fs.writeFileSync(alvo, (typeof cabecalho === 'string' ? cabecalho : '') + conteudo);
     const prefixo = nome.replace(/[\d-]+\.\w+$/, '');
     const irmaos = fs.readdirSync(dir).filter((f) => f.startsWith(prefixo)).sort();
@@ -96,7 +99,8 @@ ipcMain.handle('conta:limpar', async (_e, i) => {
   i = Math.trunc(+i);
   if (!(i >= 0 && i <= 3)) return false;
   try {
-    const ses = session.fromPartition('persist:conta' + i);
+    // os paineis usam persist:conta1..4 (i + 1); sem o +1 aqui limpava a conta do lado
+    const ses = session.fromPartition('persist:conta' + (i + 1));
     await ses.clearStorageData();
     await ses.clearCache();
     return true;
@@ -157,8 +161,11 @@ const abreFora = (url) => { if (/^https?:\/\//i.test(url)) shell.openExternal(ur
 app.on('web-contents-created', (_e, contents) => {
   if (contents.getType() !== 'webview') return;
   contents.setWindowOpenHandler(({ url }) => { abreFora(url); return { action: 'deny' }; });
+  // compara a ORIGEM, nao o prefixo: 'https://poke.idleworld.online.evil.com' comeca igual e
+  // passaria, levando a sessao logada pra um site clonado sem barra de endereco
+  const mesmoJogo = (u) => { try { return new URL(u).origin === new URL(GAME).origin; } catch { return false; } };
   const guarda = (e, url) => {
-    if (!url.startsWith(GAME) && url !== 'about:blank') { e.preventDefault(); abreFora(url); }
+    if (!mesmoJogo(url) && url !== 'about:blank') { e.preventDefault(); abreFora(url); }
   };
   contents.on('will-navigate', guarda);
   contents.on('will-redirect', guarda);
@@ -227,6 +234,9 @@ ipcMain.handle('creds:save', (_e, accounts) => {
 // Deriva da versão real do Chromium, então acompanha upgrades do Electron sozinho.
 app.userAgentFallback = app.userAgentFallback
   .replace(/ Electron\/[\d.]+/, '')
+  // tira tambem o token do proprio app (pokegrid/1.5.x): a UA nao precisa entregar quem usa o
+  // PokeGrid pro servidor do jogo
+  .replace(/ [\w.-]+\/[\d.]+ (?=Chrome\/)/i, ' ')
   .replace(/(Chrome\/\d+)[\d.]+/, '$1.0.0.0');
 
 // Notificacao do SO (alertas de queda e de sem pokebola).
@@ -282,8 +292,10 @@ ipcMain.handle('webhook:send', (_e, url, text) => {
   try {
     const u = new URL(String(url));
     if (u.protocol !== 'https:' || !/^(discord\.com|discordapp\.com)$/.test(u.hostname) || !u.pathname.startsWith('/api/webhooks/')) return false;
-    // allowed_mentions vazio: nome de conta/pokemon vem do jogo, nao pode virar ping de @everyone
-    const body = JSON.stringify({ content: String(text).slice(0, 1900), allowed_mentions: { parse: [] } });
+    // Mencao: so os IDs de usuario que JA estao no texto (o app so poe o que voce configurou).
+    // parse: [] segue barrando @everyone/@here e cargos, mesmo se o nome de uma conta tentar.
+    const ids = (String(text).match(/<@(\d{5,20})>/g) || []).map(x => x.replace(/\D/g, '')).slice(0, 5);
+    const body = JSON.stringify({ content: String(text).slice(0, 1900), allowed_mentions: { parse: [], users: ids } });
     const req = https.request(u, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => res.resume());
     req.on('error', () => {});
     req.setTimeout(8000, () => req.destroy());
@@ -310,7 +322,7 @@ app.whenReady().then(() => {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#0d1117',
-    webPreferences: { webviewTag: true, preload: path.join(__dirname, 'preload.js') }
+    webPreferences: { webviewTag: true, preload: path.join(__dirname, 'preload.js'), backgroundThrottling: false }
   });
   win.loadFile(path.join(__dirname, 'index.html')); // caminho absoluto: robusto no build empacotado (asar)
   // a janela principal so mostra index.html: bloqueia qualquer navegacao dela (canal de exfiltracao se houver XSS)

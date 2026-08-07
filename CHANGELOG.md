@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.5.16
+
+- **O ouro da sessão agora bate com o Hunt Analyzer** (relato do FellipeLuis): o app refazia a conta por fora e errava nas parcelas que só o servidor conhece (qual pokébola foi jogada em cada arremesso, se o pokémon novo veio de captura ou do mercado, se a poção saiu por uso ou por venda, e a foto rara a preço de mercado), ainda por cima com um relógio próprio. Agora ele pede os números ao próprio jogo e mostra os mesmos do Hunt Analyzer; sem resposta do servidor, cai na conta antiga. Efeito colateral bom: trocar a pokébola do auto-catch não reescreve mais o gasto da sessão inteira.
+  *Session gold now matches the games Hunt Analyzer: the app used to recompute it from raw events and got the server-only parts wrong (which ball each throw used, whether a new pokémon came from a catch or the market, whether a potion was used or sold). It now asks the game for the numbers and falls back to the old math if the server does not answer.*
+- **O Painel agora se explica** (feedback do FellipeLuis, que perguntou pra que servia a opção "Alvo shiny" porque ela não mudava nada): as seções **Alvo shiny** e **Itens fixados** sumiam da tela quando ainda não estavam configuradas, então marcar a caixa parecia não fazer efeito. Agora elas aparecem dizendo pra que servem e onde escolher a espécie ou o item.
+  *The Panel explains itself now: the Shiny target and Pinned items sections used to render nothing until configured, so ticking their checkbox looked broken. They now show what they do and where to set them up.*
+- **📖 Manual novo**, em Opções e no GitHub: o que cada botão e cada seção faz, em linguagem simples. O README passou a linkar manual, FAQ, tutorial e changelog.
+  *New Manual, in Options and on GitHub, explaining every button and section in plain language; the README now links manual, FAQ, tutorial and changelog.*
+- **Caçada profunda de bugs e vulnerabilidades** (12 auditores em paralelo, cada achado verificado por execução). Corrigido:
+  - **Falha de segurança séria**: um userscript rodando na página do jogo conseguia executar código na janela do PokeGrid (bastava um item com categoria maliciosa) e dali chegar nas senhas salvas das 4 contas. Agora o texto vindo do jogo é escapado e a categoria só aceita rótulo conhecido.
+  - **A URL do seu webhook saía dentro do Exportar config** e do backup automático: era a credencial do seu canal viajando em texto puro. Saiu do backup.
+  - **O botão 🧹 Limpar dados da conta não funcionava** (erro de programação) e, se funcionasse, apagaria a conta vizinha. Os dois consertados.
+  - **A trava que impede o painel de sair do site do jogo** aceitava domínio que apenas começa igual (poke.idleworld.online.algumacoisa.com); agora compara a origem inteira.
+  - **O app se identificava pro servidor do jogo** com nome e versão no cabeçalho de rede; agora a assinatura é a de um Chrome comum.
+  - **A janela do app congelava na bandeja** depois de 5 minutos, junto com o vigia que recarrega painel travado.
+  - Backup em .json era anexado e virava arquivo inválido; a poda por falta de espaço apagava todo o histórico medido de gold/h; um dado torto no disco travava o modo Simples para sempre; desmarcar Avisar shiny não parava os avisos; e o webhook podia disparar em rajada e levar bloqueio do Discord (agora sai enfileirado).
+  *Deep bug and vulnerability hunt with 12 parallel auditors, each finding verified by execution: renderer XSS reachable from the game page (credential exposure), webhook URL leaking into config exports, dead and off-by-one account wipe, prefix-based navigation lock, app fingerprint in the User-Agent, main window freezing in the tray, invalid JSON backups, quota pruning wiping measured history, corrupted disk data freezing Simples, shiny alert toggle ignored, and webhook burst rate limiting.*
+- **Contas travando com o PC sozinho, corrigido** (relatos do Moura, RMayrink e Abel): o Chromium congela páginas em segundo plano, e as janelas do jogo nasciam sem essa trava desligada. Com o app minimizado (ou no modo Simples, onde as janelas ficam de 4 pixels), o jogo parava no meio do combate e a conta ficava com o popup preso até alguém voltar ao PC. Agora as janelas do jogo nunca são congeladas por estar em segundo plano, e um toque leve a cada 30 segundos mantém os painéis vivos mesmo com a janela do app escondida.
+  *Fixed accounts freezing while the PC is unattended: Chromium freezes background pages and the game views were created without disabling it, so with the app minimized (or in Simples, where the views are 4 pixels wide) the game stalled mid-combat. Background throttling is now disabled for the game views, plus a light 30s keepalive that runs even when the app window is hidden.*
+- Bughunt: a menção do webhook (entregue na 1.5.13) aparecia como texto mas **nunca notificava de verdade**, porque o app mandava a mensagem proibindo toda e qualquer menção. Agora a menção funciona: o app libera só o ID que você configurou e que já está na mensagem, e @everyone, @here e cargos continuam barrados.
+  *Bughunt: the webhook mention shipped in 1.5.13 never actually pinged, because every mention was disallowed. It works now, allowing only the user ID you configured while @everyone, @here and roles stay blocked.*
+- **Aviso no Discord quando uma conta cai ou para de farmar** (sugestão do Arthur): os alertas que já existiam (queda, 10 minutos sem kills, sem pokébola) agora também vão pro webhook, com menção opcional, então a notificação chega no celular e dá pra voltar no PC e reconectar. Dá pra desligar na configuração do webhook.
+  *Discord alerts when an account drops or stops farming (suggested by Arthur): the existing alerts now also go to the webhook with optional mention, so the notification reaches your phone.*
+
 ## 1.5.15
 
 - O botão **Ajude o projeto** mudou do fim do Painel pro topo do app, ao lado do logo, bem visível (verde, sem emoji).

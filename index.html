@@ -391,6 +391,7 @@
   .cd-row.cd-dim { opacity: .45; }
   .cd-hide { flex: none; font-size: 11px; padding: 0 2px; }
   .cd-fav { flex: none; font-size: 13px; }
+  #stats .st-vazio { padding: 3px 15px 7px; font-size: 10.5px; color: #6e7681; line-height: 1.5; }
   #stats .team { display: flex; flex-direction: column; gap: 3px; padding: 4px 15px 6px; }
   #stats .tm-row { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 6px; cursor: pointer; }
   #stats .tm-row:hover { background: #161b22; }
@@ -503,7 +504,7 @@
         <button id="minTray" title="O que o botão minimizar faz: esconder na bandeja ou minimizar normal na barra de tarefas">📥 Minimiza p/ bandeja</button>
         <button id="autoStart" style="display:none" title="Cria um atalho na pasta Inicializar do Windows pra abrir o PokeGrid junto com o sistema">🚀 Abrir com o Windows</button>
         <button id="sndShiny" title="Toca um som quando um shiny aparece (além da notificação)">✨🔊 Som do shiny</button>
-        <button id="faqBtn" title="Perguntas frequentes: abre o FAQ no navegador">❓ FAQ</button> <button id="bkExp" title="Salva um arquivo com todas as configurações e o histórico (senhas ficam fora)">💾 Exportar config</button>
+        <button id="manBtn" title="Manual: o que cada parte do app faz">📖 Manual</button> <button id="faqBtn" title="Perguntas frequentes: abre o FAQ no navegador">❓ FAQ</button> <button id="bkExp" title="Salva um arquivo com todas as configurações e o histórico (senhas ficam fora)">💾 Exportar config</button>
         <button id="bkImp" title="Restaura configurações e histórico de um arquivo exportado">📂 Importar config</button>
         <button id="layout">▦ Grade</button>
         <button id="propNat" title="Mantém a proporção original do jogo, sem esticar a imagem (sobra fundo escuro quando o painel não bate com a proporção)">🖼 Proporção original</button>
@@ -580,6 +581,13 @@ function lsPoda() {
       if (!v || v.length < 2000) return;
       const arr = JSON.parse(v);
       if (Array.isArray(arr) && arr.length > 1) { localStorage.setItem(k, JSON.stringify(arr.slice(-Math.floor(arr.length / 2)))); podou = true; }
+      // huntStats2 e OBJETO (hunt -> medicao): sem este ramo ele era apagado inteiro e o usuario
+      // perdia toda a media medida de gold/h numa unica falha de cota
+      else if (arr && typeof arr === 'object') {
+        const ks = Object.keys(arr);
+        if (ks.length > 1) { ks.slice(0, Math.floor(ks.length / 2)).forEach(k2 => { delete arr[k2]; }); localStorage.setItem(k, JSON.stringify(arr)); podou = true; }
+        else { lsDel(k); podou = true; }
+      }
       else { lsDel(k); podou = true; }
     } catch { try { lsDel(k); podou = true; } catch {} }
   });
@@ -646,10 +654,10 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       stKpis:'Ritmo (por hora)', stPinned:'Itens fixados', cfgSections:'Seções (arraste para ordenar, marque para mostrar)', cfgBagItems:'Mostrar TODOS os itens da bag', cfgImportantOnly:'Só itens importantes (Ultra Ball, melhor potion/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Buscar item, bola, pedra…', cfgNoCat:'Abra o jogo pra carregar a lista de itens', cfgBagCats:'Bag — categorias (arraste, marque pra mostrar)', cfgBagHideItems:'Bag — esconder itens específicos',
       stShinyLife:'Shinies Enc. Total', stShinyLifeAll:'Shinies Enc. Total (todas)',
       cfgCredits:'Créditos', creditSidebar:'Painel lateral inspirado em', creditIV:'Calculadora de IV:',
-      stTargetLabel:'🎯 Alvo shiny', stTargetStatus:'Status', stCaught:'capturado!', stFoundNotCaught:'apareceu, não capturado', stNotAppeared:'ainda não apareceu', stTargetShinyTries:'Tentativas no shiny', stTargetFarm:'Farm na espécie', stTries:'tent.', cfgTarget:'Alvo shiny (acompanhar a caça)', cfgBalls:'\u{1F9FA} Comprar pokébolas', cfgBallsHint:'Compra na conta exibida no painel, direto na loja do jogo. Sempre pede confirmação com o custo.', cfgBallsConfirm:'Comprar {q} × {b} por {c} gold na conta {a}?\\nVocê tem {g} gold.', cfgBallsOk:'{q} bolas compradas!', cfgBallsErr:'A compra falhou', cfgBallsOff:'Nenhuma conta ligada.', cfgLock:'\u{1F512} Cadeado de venda', cfgLockHint:'Estes itens pedem confirmação antes de vender. Shiny e qualidade alta já vêm protegidos.', cfgLockSearch:'Buscar item pra proteger…', cfgLockRemove:'Destravar', cfgTargetSearch:'Buscar espécie pra caçar…',
+      stTargetLabel:'🎯 Alvo shiny', stTargetHow:'Escolha uma espécie na engrenagem ⚙ acima, em "Alvo shiny". O painel passa a mostrar se ele já apareceu, se foi capturado e quantas bolas você gastou nele.', stPinnedHow:'Nada fixado ainda. Na engrenagem ⚙ acima, busque um item ou pokébola em "Itens fixados" pra ver a quantidade dele aqui, em todas as contas.', stTargetStatus:'Status', stCaught:'capturado!', stFoundNotCaught:'apareceu, não capturado', stNotAppeared:'ainda não apareceu', stTargetShinyTries:'Tentativas no shiny', stTargetFarm:'Farm na espécie', stTries:'tent.', cfgTarget:'Alvo shiny (acompanhar a caça)', cfgBalls:'\u{1F9FA} Comprar pokébolas', cfgBallsHint:'Compra na conta exibida no painel, direto na loja do jogo. Sempre pede confirmação com o custo.', cfgBallsConfirm:'Comprar {q} × {b} por {c} gold na conta {a}?\\nVocê tem {g} gold.', cfgBallsOk:'{q} bolas compradas!', cfgBallsErr:'A compra falhou', cfgBallsOff:'Nenhuma conta ligada.', cfgLock:'\u{1F512} Cadeado de venda', cfgLockHint:'Estes itens pedem confirmação antes de vender. Shiny e qualidade alta já vêm protegidos.', cfgLockSearch:'Buscar item pra proteger…', cfgLockRemove:'Destravar', cfgTargetSearch:'Buscar espécie pra caçar…',
       refTitle:'Referral do criador, copie se quiser ajudar :)', refCopied:'✓ Copiado!',
       stLoading:'carregando…', stOnline:'online', stError:'erro', stOff:'desligada', trainer:'Treinador',
-      tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tZoomPct:'Zoom atual (clique volta pra 100%)', faq:'❓ FAQ', faqTitle:'Perguntas frequentes: abre o FAQ no navegador', verNova:'Nova versão disponível. Clique pra abrir a página de download.', goalEta:'no ritmo atual, meta às', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
+      tZoomOut:'Diminuir zoom', tZoomIn:'Aumentar zoom', tReload:'Recarregar', tExpand:'Expandir (Ctrl+número)', tZoomPct:'Zoom atual (clique volta pra 100%)', faq:'❓ FAQ', faqTitle:'Perguntas frequentes: abre o FAQ no navegador', manual:'📖 Manual', manualTitle:'Manual: o que cada botão e cada seção do app faz', verNova:'Nova versão disponível. Clique pra abrir a página de download.', goalEta:'no ritmo atual, meta às', tRename:'Clique duplo para renomear', promptRename:'Nome do treinador:',
       mH2:'Treinadores salvos', mHint:'Preencha e-mail/usuário e senha de cada painel. As senhas ficam criptografadas neste PC. "Logar equipe" entra automaticamente onde houver dados, e se a sessão cair o painel loga sozinho.',
       mName:'Nome', mEmail:'E-mail ou usuário', mPass:'Senha', mCancel:'Cancelar', mSave:'Salvar',
       awakeTitle:'Impede o PC de dormir enquanto farma (a tela ainda pode desligar)', chatTitle:'Mostra ou esconde o chat do jogo em todos os painéis',
@@ -660,7 +668,7 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       msgStalled:'parece ter parado de farmar (10 min sem kills)',
       cdToday:'Hoje', cdWeek:'7 dias', cdAllTime:'Total', goalG:'Meta gold/dia', goalC:'Meta capturas/dia', csvTitle:'Baixa o resumo por dia em CSV (planilha)', csvDia:'Dia', csvHunts:'Hunts', csvHuntsTitle:'Baixa duas planilhas: uma linha por hunt (tempo, kills/h, XP/h, capturas, gold) e uma linha por item dropado, com drop por kill pra calcular a porcentagem. O registro é automático: cada vez que você troca de hunt, a anterior entra no log.', cdLifeHint:'contadores: sessão · lista: histórico',
       cdTargets:'Alvos', cdCritIvQ:'IV × qual.', cdCritIv:'IV', cdCritQ:'Qualidade', cdBestCritTitle:'Critério do melhor catch. A qualidade multiplica os stats e o poder, então IV × qualidade reflete melhor a força real.', cdTargetsHint:'Sem alvos ainda: no modo Total, passe o mouse num card e clique na ★ para marcar', cdTargetsMark:'Marcar/desmarcar como alvo',
-      whTitle:'Webhook do Discord: cole a URL do seu servidor pra receber avisos', whTest:'Testar', whShiny:'Avisar shiny', whSum:'Resumo diário', whDay:'📊 Resumo de', whCaught:'CAPTURADO ✅', whLost:'perdido ✕', whTestMsg:'✅ PokeGrid conectado! Os avisos vão chegar aqui.',
+      whTitle:'Webhook do Discord: cole a URL do seu servidor pra receber avisos', whTest:'Testar', whShiny:'Avisar shiny', whProb:'Avisar problema (conta caiu, parou de farmar, sem bola)', whSum:'Resumo diário', whDay:'📊 Resumo de', whCaught:'CAPTURADO ✅', whLost:'perdido ✕', whTestMsg:'✅ PokeGrid conectado! Os avisos vão chegar aqui.',
       bkExp:'💾 Exportar config', bkImp:'📂 Importar config', bkExpTitle:'Salva um arquivo com todas as configurações e o histórico (senhas ficam fora)', bkImpTitle:'Restaura configurações e histórico de um arquivo exportado', bkConfirm:'Substituir as configurações atuais pelas do arquivo? O app vai recarregar. (Senhas não são afetadas.)', bkBad:'Arquivo inválido.'
     },
     en: {
@@ -685,10 +693,10 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       stKpis:'Rate (per hour)', stPinned:'Pinned items', cfgSections:'Sections (drag to reorder, check to show)', cfgBagItems:'Show ALL bag items', cfgImportantOnly:'Only important items (Ultra Ball, best potion/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Search item, ball, stone…', cfgNoCat:'Open the game to load the item list', cfgBagCats:'Bag — categories (drag, check to show)', cfgBagHideItems:'Bag — hide specific items',
       stShinyLife:'Total shinies found', stShinyLifeAll:'Total shinies found (all)',
       cfgCredits:'Credits', creditSidebar:'Sidebar inspired by', creditIV:'IV calculator:',
-      stTargetLabel:'🎯 Shiny target', stTargetStatus:'Status', stCaught:'caught!', stFoundNotCaught:'appeared, not caught', stNotAppeared:'not appeared yet', stTargetShinyTries:'Shiny attempts', stTargetFarm:'Species farm', stTries:'tries', cfgTarget:'Shiny target (track the hunt)', cfgBalls:'\u{1F9FA} Buy Poké Balls', cfgBallsHint:'Buys on the account shown in the panel, straight from the game shop. Always asks for confirmation with the cost.', cfgBallsConfirm:'Buy {q} × {b} for {c} gold on account {a}?\\nYou have {g} gold.', cfgBallsOk:'{q} balls bought!', cfgBallsErr:'Purchase failed', cfgBallsOff:'No account is on.', cfgLock:'\u{1F512} Sell lock', cfgLockHint:'These items ask for confirmation before selling. Shiny and high quality are already protected.', cfgLockSearch:'Search an item to protect…', cfgLockRemove:'Unlock', cfgTargetSearch:'Search species to hunt…',
+      stTargetLabel:'🎯 Shiny target', stTargetHow:'Pick a species in the gear ⚙ above, under "Shiny target". The panel then shows whether it appeared, whether it was caught and how many balls you spent on it.', stPinnedHow:'Nothing pinned yet. In the gear ⚙ above, search an item or ball under "Pinned items" to see its count here, across every account.', stTargetStatus:'Status', stCaught:'caught!', stFoundNotCaught:'appeared, not caught', stNotAppeared:'not appeared yet', stTargetShinyTries:'Shiny attempts', stTargetFarm:'Species farm', stTries:'tries', cfgTarget:'Shiny target (track the hunt)', cfgBalls:'\u{1F9FA} Buy Poké Balls', cfgBallsHint:'Buys on the account shown in the panel, straight from the game shop. Always asks for confirmation with the cost.', cfgBallsConfirm:'Buy {q} × {b} for {c} gold on account {a}?\\nYou have {g} gold.', cfgBallsOk:'{q} balls bought!', cfgBallsErr:'Purchase failed', cfgBallsOff:'No account is on.', cfgLock:'\u{1F512} Sell lock', cfgLockHint:'These items ask for confirmation before selling. Shiny and high quality are already protected.', cfgLockSearch:'Search an item to protect…', cfgLockRemove:'Unlock', cfgTargetSearch:'Search species to hunt…',
       refTitle:"Creator's referral, copy it if you want to help :)", refCopied:'✓ Copied!',
       stLoading:'loading…', stOnline:'online', stError:'error', stOff:'off', trainer:'Trainer',
-      tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tZoomPct:'Current zoom (click resets to 100%)', faq:'❓ FAQ', faqTitle:'Frequently asked questions: opens the FAQ in your browser', verNova:'New version available. Click to open the download page.', goalEta:'at this pace, goal at', tRename:'Double-click to rename', promptRename:'Trainer name:',
+      tZoomOut:'Zoom out', tZoomIn:'Zoom in', tReload:'Reload', tExpand:'Expand (Ctrl+number)', tZoomPct:'Current zoom (click resets to 100%)', faq:'❓ FAQ', faqTitle:'Frequently asked questions: opens the FAQ in your browser', manual:'📖 Manual', manualTitle:'Manual: what every button and section does', verNova:'New version available. Click to open the download page.', goalEta:'at this pace, goal at', tRename:'Double-click to rename', promptRename:'Trainer name:',
       mH2:'Saved accounts', mHint:'Fill in the e-mail/username and password for each panel. Passwords are encrypted on this PC. "Log in all" signs in automatically where data exists, and if the session drops the panel logs in by itself.',
       mName:'Name', mEmail:'E-mail or username', mPass:'Password', mCancel:'Cancel', mSave:'Save',
       awakeTitle:'Keeps the PC awake while farming (the screen can still turn off)', chatTitle:'Shows or hides the game chat in all panels',
@@ -699,7 +707,7 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       msgStalled:'seems to have stopped farming (10 min without kills)',
       cdToday:'Today', cdWeek:'7 days', cdAllTime:'All time', goalG:'Gold goal/day', goalC:'Catch goal/day', csvTitle:'Downloads the daily summary as a CSV (spreadsheet)', csvDia:'Day', csvHunts:'Hunts', csvHuntsTitle:'Downloads two spreadsheets: one row per hunt (time, kills/h, XP/h, captures, gold) and one row per dropped item, with drop per kill so you can work out the percentage. Logging is automatic: every time you switch hunts, the previous one is recorded.', cdLifeHint:'counters: session · list: all-time',
       cdTargets:'Targets', cdCritIvQ:'IV × qual.', cdCritIv:'IV', cdCritQ:'Quality', cdBestCritTitle:'Best-catch criterion. Quality multiplies stats and power, so IV × quality reflects real strength better.', cdTargetsHint:'No targets yet: in Total mode, hover a card and click the ★ to mark it', cdTargetsMark:'Mark/unmark as target',
-      whTitle:'Discord webhook: paste your server URL to receive alerts', whTest:'Test', whShiny:'Shiny alerts', whSum:'Daily summary', whDay:'📊 Summary of', whCaught:'CAUGHT ✅', whLost:'lost ✕', whTestMsg:'✅ PokeGrid connected! Alerts will arrive here.',
+      whTitle:'Discord webhook: paste your server URL to receive alerts', whTest:'Test', whShiny:'Shiny alerts', whProb:'Problem alerts (dropped, stopped farming, out of balls)', whSum:'Daily summary', whDay:'📊 Summary of', whCaught:'CAUGHT ✅', whLost:'lost ✕', whTestMsg:'✅ PokeGrid connected! Alerts will arrive here.',
       bkExp:'💾 Export config', bkImp:'📂 Import config', bkExpTitle:'Saves a file with all settings and history (passwords stay out)', bkImpTitle:'Restores settings and history from an exported file', bkConfirm:'Replace the current settings with the file? The app will reload. (Passwords are not affected.)', bkBad:'Invalid file.'
     },
     es: {
@@ -724,10 +732,10 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       stKpis:'Ritmo (por hora)', stPinned:'Ítems fijados', cfgSections:'Secciones (arrastra para ordenar, marca para mostrar)', cfgBagItems:'Mostrar TODOS los ítems de la bolsa', cfgImportantOnly:'Solo ítems importantes (Ultra Ball, mejor poción/revive, Rare Picture, Strange Pheromone)', cfgSearch:'Buscar ítem, ball, piedra…', cfgNoCat:'Abre el juego para cargar la lista de ítems', cfgBagCats:'Bolsa — categorías (arrastra, marca para mostrar)', cfgBagHideItems:'Bolsa — ocultar ítems específicos',
       stShinyLife:'Shinies enc. total', stShinyLifeAll:'Shinies enc. total (todas)',
       cfgCredits:'Créditos', creditSidebar:'Panel lateral inspirado en', creditIV:'Calculadora de IV:',
-      stTargetLabel:'🎯 Objetivo shiny', stTargetStatus:'Estado', stCaught:'¡capturado!', stFoundNotCaught:'apareció, no capturado', stNotAppeared:'aún no apareció', stTargetShinyTries:'Intentos en el shiny', stTargetFarm:'Farmeo en la especie', stTries:'intentos', cfgTarget:'Objetivo shiny (seguir la caza)', cfgBalls:'\u{1F9FA} Comprar pokébolas', cfgBallsHint:'Compra en la cuenta mostrada en el panel, directo en la tienda del juego. Siempre pide confirmación con el costo.', cfgBallsConfirm:'\u00bfComprar {q} × {b} por {c} gold en la cuenta {a}?\\nTienes {g} gold.', cfgBallsOk:'\u00a1{q} bolas compradas!', cfgBallsErr:'La compra falló', cfgBallsOff:'Ninguna cuenta encendida.', cfgLock:'\u{1F512} Candado de venta', cfgLockHint:'Estos objetos piden confirmación antes de vender. Shiny y calidad alta ya están protegidos.', cfgLockSearch:'Buscar objeto para proteger…', cfgLockRemove:'Desbloquear', cfgTargetSearch:'Buscar especie para cazar…',
+      stTargetLabel:'🎯 Objetivo shiny', stTargetHow:'Elige una especie en el engranaje ⚙ de arriba, en "Objetivo shiny". El panel pasa a mostrar si ya apareció, si fue capturado y cuántas bolas gastaste en él.', stPinnedHow:'Nada fijado aún. En el engranaje ⚙ de arriba, busca un objeto o poké ball en "Objetos fijados" para ver la cantidad aquí, en todas las cuentas.', stTargetStatus:'Estado', stCaught:'¡capturado!', stFoundNotCaught:'apareció, no capturado', stNotAppeared:'aún no apareció', stTargetShinyTries:'Intentos en el shiny', stTargetFarm:'Farmeo en la especie', stTries:'intentos', cfgTarget:'Objetivo shiny (seguir la caza)', cfgBalls:'\u{1F9FA} Comprar pokébolas', cfgBallsHint:'Compra en la cuenta mostrada en el panel, directo en la tienda del juego. Siempre pide confirmación con el costo.', cfgBallsConfirm:'\u00bfComprar {q} × {b} por {c} gold en la cuenta {a}?\\nTienes {g} gold.', cfgBallsOk:'\u00a1{q} bolas compradas!', cfgBallsErr:'La compra falló', cfgBallsOff:'Ninguna cuenta encendida.', cfgLock:'\u{1F512} Candado de venta', cfgLockHint:'Estos objetos piden confirmación antes de vender. Shiny y calidad alta ya están protegidos.', cfgLockSearch:'Buscar objeto para proteger…', cfgLockRemove:'Desbloquear', cfgTargetSearch:'Buscar especie para cazar…',
       refTitle:'Referral del creador, cópialo si quieres ayudar :)', refCopied:'✓ ¡Copiado!',
       stLoading:'cargando…', stOnline:'online', stError:'error', stOff:'apagada', trainer:'Entrenador',
-      tZoomOut:'Alejar zoom', tZoomIn:'Acercar zoom', tReload:'Recargar', tExpand:'Expandir (Ctrl+número)', tZoomPct:'Zoom actual (clic vuelve a 100%)', faq:'❓ FAQ', faqTitle:'Preguntas frecuentes: abre el FAQ en el navegador', verNova:'Nueva versión disponible. Clic para abrir la página de descarga.', goalEta:'a este ritmo, meta a las', tRename:'Doble clic para renombrar', promptRename:'Nombre del entrenador:',
+      tZoomOut:'Alejar zoom', tZoomIn:'Acercar zoom', tReload:'Recargar', tExpand:'Expandir (Ctrl+número)', tZoomPct:'Zoom actual (clic vuelve a 100%)', faq:'❓ FAQ', faqTitle:'Preguntas frecuentes: abre el FAQ en el navegador', manual:'📖 Manual', manualTitle:'Manual: qué hace cada botón y cada sección', verNova:'Nueva versión disponible. Clic para abrir la página de descarga.', goalEta:'a este ritmo, meta a las', tRename:'Doble clic para renombrar', promptRename:'Nombre del entrenador:',
       mH2:'Entrenadores guardados', mHint:'Completa el e-mail/usuario y la contraseña de cada panel. Las contraseñas quedan cifradas en este PC. "Iniciar equipo" entra automáticamente donde haya datos, y si la sesión se cae el panel entra solo.',
       mName:'Nombre', mEmail:'E-mail o usuario', mPass:'Contraseña', mCancel:'Cancelar', mSave:'Guardar',
       awakeTitle:'Evita que el PC se duerma mientras farmea (la pantalla aún puede apagarse)', chatTitle:'Muestra u oculta el chat del juego en todos los paneles',
@@ -738,7 +746,7 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       msgStalled:'parece haber dejado de farmear (10 min sin kills)',
       cdToday:'Hoy', cdWeek:'7 días', cdAllTime:'Total', goalG:'Meta oro/día', goalC:'Meta capturas/día', csvTitle:'Descarga el resumen por día en CSV (planilla)', csvDia:'Día', csvHunts:'Hunts', csvHuntsTitle:'Descarga dos planillas: una fila por hunt (tiempo, kills/h, XP/h, capturas, oro) y una fila por ítem dropeado, con drop por kill para calcular el porcentaje. El registro es automático: cada vez que cambias de hunt, la anterior queda guardada.', cdLifeHint:'contadores: sesión · lista: histórico',
       cdTargets:'Objetivos', cdCritIvQ:'IV × cal.', cdCritIv:'IV', cdCritQ:'Calidad', cdBestCritTitle:'Criterio del mejor catch. La calidad multiplica los stats y el poder, así que IV × calidad refleja mejor la fuerza real.', cdTargetsHint:'Sin objetivos aún: en modo Total, pasa el mouse por un card y haz clic en la ★ para marcarlo', cdTargetsMark:'Marcar/desmarcar como objetivo',
-      whTitle:'Webhook de Discord: pega la URL de tu servidor para recibir avisos', whTest:'Probar', whShiny:'Avisar shiny', whSum:'Resumen diario', whDay:'📊 Resumen de', whCaught:'CAPTURADO ✅', whLost:'perdido ✕', whTestMsg:'✅ ¡PokeGrid conectado! Los avisos llegarán aquí.',
+      whTitle:'Webhook de Discord: pega la URL de tu servidor para recibir avisos', whTest:'Probar', whShiny:'Avisar shiny', whProb:'Avisar problema (cuenta caída, dejó de farmear, sin bolas)', whSum:'Resumen diario', whDay:'📊 Resumen de', whCaught:'CAPTURADO ✅', whLost:'perdido ✕', whTestMsg:'✅ ¡PokeGrid conectado! Los avisos llegarán aquí.',
       bkExp:'💾 Exportar config', bkImp:'📂 Importar config', bkExpTitle:'Guarda un archivo con todas las configuraciones y el historial (las contraseñas quedan fuera)', bkImpTitle:'Restaura configuraciones e historial desde un archivo exportado', bkConfirm:'¿Reemplazar las configuraciones actuales por las del archivo? La app se recargará. (Las contraseñas no se ven afectadas.)', bkBad:'Archivo inválido.'
     }
   };
@@ -768,6 +776,9 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
           <button class="expand">⛶</button>
         </div>`;
       const wv = document.createElement('webview');
+      // sem isto o Chromium estrangula (e depois congela) a pagina em segundo plano: com o app
+      // minimizado ou no modo Simples o jogo parava no meio do combate ate alguem voltar ao PC
+      wv.setAttribute('webpreferences', 'backgroundThrottling=no');
       wv.partition = 'persist:conta' + (i + 1);
       wv.src = START_URL;
       panel.appendChild(wv);
@@ -827,7 +838,7 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
    entao item usado e reposto no intervalo passa batido, e vender potion no mercado conta como consumo.
    E estimativa, nao extrato. Upgrade: rastrear pelo evento de uso do item, se o jogo expor um. */
 if(S.supBase){for(const id in S.supBase){const antes=S.supBase[id]||0,agora=(cur[id]!=null?cur[id]:0),d=antes-agora;if(d>0){const it=cat0[id]||{};S.supGold=(S.supGold||0)+d*(it.priceGold||it.npcPrice||0);S.supN=(S.supN||0)+d;}}}
-S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const doc=P.api['/game/items.json'];const it=doc&&doc.items&&doc.items.find(x=>x.id===59195);const d=S.drops[59195]||(S.drops[59195]={name:(it&&it.name)||'Rare Pokémon Picture',qty:0});d.qty+=(now-S.picBase);}S.picBase=now;}}else if(m.type==='chat'||m.type==='history'){const chS=(mm)=>{try{if(!mm||!mm.body)return;const re=/\\[poke!([A-Za-z0-9_-]+)\\]/g;let mt;while((mt=re.exec(mm.body))){try{const j=JSON.parse(atob(mt[1].replace(/-/g,'+').replace(/_/g,'/')));if(j&&j.k==='poke'){const CS=P.chatShares=P.chatShares||[];const N=(v)=>{v=Number(v);return isFinite(v)?v:0;};const cn=String(j.n||'?').slice(0,40),cf=String(mm.fromName||'').slice(0,40);if(!CS.some(c=>c.n===cn&&c.iv===N(j.iv)&&c.lv===N(j.lv)&&c.fr===cf)){CS.push({fr:cf,n:cn,sh:!!j.sh,lv:N(j.lv),q:N(j.q),iv:N(j.iv),pw:N(j.pw),t:Date.now()});if(CS.length>15)CS.shift();}}}catch(x){}}}catch(x){}};if(m.type==='chat')chS(m.msg);else['world','trade','help'].forEach(c2=>(m[c2]||[]).forEach(chS));}}}}catch(x){}});return s;};window.WebSocket.prototype=OW.prototype;['CONNECTING','OPEN','CLOSING','CLOSED'].forEach(k=>{try{window.WebSocket[k]=OW[k]}catch(x){}});const OF=window.fetch;window.fetch=function(...a){try{let H;const r0=a[0],ini=a[1];if(ini&&ini.headers)H=ini.headers;else if(r0&&typeof r0==='object'&&r0.headers)H=r0.headers;if(H){let au;if(typeof H.get==='function')au=H.get('authorization');else au=H.Authorization||H.authorization;if(au)auth=au;}}catch(x){}const p=OF.apply(this,a);try{let u=(a[0]&&a[0].url)||a[0];if(typeof u==='string'&&/\\/api\\/|items\\.json/.test(u)){p.then(r=>{const c=r.clone();c.json().then(j=>{const key=u.split('?')[0];if(key==='/api/game/used-balls'){if(j&&j.pokemons){P.shinyEnc=j.pokemons.reduce((s,p)=>s+(p.shiny?(p.attempts||0):0),0);P.usedList=j.pokemons.map(p=>({sid:p.speciesId,name:p.name,shiny:!!p.shiny,attempts:p.attempts||0,total:p.total||0,caught:!!p.caught}));}return;}if(key==='/api/characters/me'&&(!j||!j.character))return;P.api[key]=j}).catch(()=>{})}).catch(()=>{})}}catch(x){}return p;};const poll=()=>{try{const o=auth?{headers:{Authorization:auth}}:undefined;fetch('/api/characters/me',o).catch(()=>{});fetch('/api/game/used-balls',o).catch(()=>{});try{if(P.sock&&P.sock.readyState===1)P.sock.send(JSON.stringify({type:'inv-get'}));}catch(x){}}catch(x){}};setInterval(poll,30000);setTimeout(poll,9000);})()`).catch(() => {}); // coletor de estado + sessao (refetch autenticado de gold/nivel a cada 30s)
+S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const doc=P.api['/game/items.json'];const it=doc&&doc.items&&doc.items.find(x=>x.id===59195);const d=S.drops[59195]||(S.drops[59195]={name:(it&&it.name)||'Rare Pokémon Picture',qty:0});d.qty+=(now-S.picBase);}S.picBase=now;}}else if(m.type==='chat'||m.type==='history'){const chS=(mm)=>{try{if(!mm||!mm.body)return;const re=/\\[poke!([A-Za-z0-9_-]+)\\]/g;let mt;while((mt=re.exec(mm.body))){try{const j=JSON.parse(atob(mt[1].replace(/-/g,'+').replace(/_/g,'/')));if(j&&j.k==='poke'){const CS=P.chatShares=P.chatShares||[];const N=(v)=>{v=Number(v);return isFinite(v)?v:0;};const cn=String(j.n||'?').slice(0,40),cf=String(mm.fromName||'').slice(0,40);if(!CS.some(c=>c.n===cn&&c.iv===N(j.iv)&&c.lv===N(j.lv)&&c.fr===cf)){CS.push({fr:cf,n:cn,sh:!!j.sh,lv:N(j.lv),q:N(j.q),iv:N(j.iv),pw:N(j.pw),t:Date.now()});if(CS.length>15)CS.shift();}}}catch(x){}}}catch(x){}};if(m.type==='chat')chS(m.msg);else['world','trade','help'].forEach(c2=>(m[c2]||[]).forEach(chS));}}}}catch(x){}});return s;};window.WebSocket.prototype=OW.prototype;['CONNECTING','OPEN','CLOSING','CLOSED'].forEach(k=>{try{window.WebSocket[k]=OW[k]}catch(x){}});const OF=window.fetch;window.fetch=function(...a){try{let H;const r0=a[0],ini=a[1];if(ini&&ini.headers)H=ini.headers;else if(r0&&typeof r0==='object'&&r0.headers)H=r0.headers;if(H){let au;if(typeof H.get==='function')au=H.get('authorization');else au=H.Authorization||H.authorization;if(au)auth=au;}}catch(x){}const p=OF.apply(this,a);try{let u=(a[0]&&a[0].url)||a[0];if(typeof u==='string'&&/\\/api\\/|items\\.json/.test(u)){p.then(r=>{const c=r.clone();c.json().then(j=>{const key=u.split('?')[0];if(key==='/api/game/used-balls'){if(j&&j.pokemons){P.shinyEnc=j.pokemons.reduce((s,p)=>s+(p.shiny?(p.attempts||0):0),0);P.usedList=j.pokemons.map(p=>({sid:p.speciesId,name:p.name,shiny:!!p.shiny,attempts:p.attempts||0,total:p.total||0,caught:!!p.caught}));}return;}if(key==='/api/characters/me'&&(!j||!j.character))return;P.api[key]=j}).catch(()=>{})}).catch(()=>{})}}catch(x){}return p;};const poll=()=>{try{const o=auth?{headers:{Authorization:auth}}:undefined;fetch('/api/characters/me',o).catch(()=>{});fetch('/api/game/used-balls',o).catch(()=>{});try{if(P.sock&&P.sock.readyState===1){P.sock.send(JSON.stringify({type:'inv-get'}));P.sock.send(JSON.stringify({type:'analyzer-get'}));}}catch(x){}}catch(x){}};setInterval(poll,30000);setTimeout(poll,9000);})()`).catch(() => {}); // coletor de estado + sessao (refetch autenticado de gold/nivel a cada 30s)
           wv.executeJavaScript(ecoScript(ecoFps())).catch(() => {});
           wv.executeJavaScript(PUSH_STATE()).catch(() => {}); // painel Simples le daqui sem perguntar
           // jogo congelado com pagina viva: WebGL perdeu o contexto e nao restaurou em 4s -> recarrega
@@ -993,10 +1004,10 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
       vn.value = c.name || ''; ve.value = c.email || ''; vs.value = c.senha || '';
       row.querySelector('.acc-del').onclick = () => { vn.value = ''; ve.value = ''; vs.value = ''; vn.focus(); };
   row.querySelector('.acc-wipe').onclick = async () => {
-    if (!window.confirm(t('accWipeConfirm').replace('{n}', tabNames[idx] || stName(idx)))) return;
+    if (!window.confirm(t('accWipeConfirm').replace('{n}', tabNames[i] || stName(i)))) return;
     let okL = false;
-    try { okL = await window.pokeAPI.clearAccount(idx); } catch {}
-    if (okL && !off[idx] && webviews[idx]) try { webviews[idx].reload(); } catch {}
+    try { okL = await window.pokeAPI.clearAccount(i); } catch {}
+    if (okL && !off[i] && webviews[i]) try { webviews[i].reload(); } catch {}
     window.alert(okL ? t('accWipeOk') : t('accWipeErr'));
   };
       rows.appendChild(row);
@@ -1458,6 +1469,14 @@ S.supBase=cur;if(S.picBase==null){S.picBase=now;}else{if(now>S.picBase){const do
     if (!alertsOn) return;
     const nome = (accounts[i] && accounts[i].name) || defName(i);
     try { window.pokeAPI.notify('PokeGrid', nome + ' ' + t(chave)); } catch {}
+    // pedido do Arthur: o mesmo aviso vai pro Discord, pra chegar no celular quando uma conta
+    // cai ou para de farmar e voce nao esta no PC (shiny e resumo tem as chaves proprias deles)
+    // shiny tem preferencia propria (whCfg.shiny) e caminho proprio; aqui so avisos de PROBLEMA
+    const ehShiny = chave === 'msgShiny' || chave === 'msgShinyCap';
+    if (whCfg.url && !ehShiny && whCfg.prob !== false) {
+      const ic = chave === 'msgDown' ? '\u{1F534}' : chave === 'msgStalled' ? '\u{1F7E0}' : '\u26a0\uFE0F';
+      webhookSend((whCfg.mention ? '<@' + whCfg.mention + '> ' : '') + ic + ' ' + nome + ' ' + t(chave));
+    }
   }
   // Alertas via coletor: shiny, pokemon derrubado e inventario baixo (contagem exata do jogo).
   const READ_ALERTS = `(()=>{const P=window.__poke;if(!P||!P.ws)return null;const ws=P.ws,api=P.api||{};const cat={};const doc=api['/game/items.json'];if(doc&&doc.items)doc.items.forEach(it=>cat[it.id]=it);let balls=0;const bm=ws.balls;if(bm&&bm.counts)for(const k in bm.counts)balls+=bm.counts[k];let potions=0,revives=0;const inv=(ws.inventory&&ws.inventory.items)||[];inv.forEach(it=>{const c=(cat[it.itemId]||{}).category;if(c==='heal'||c==='potion')potions+=it.quantity;else if(c==='revive')revives+=it.quantity;});const S=P.sess||{};const ch=(api['/api/characters/me']&&api['/api/characters/me'].character)||{};let ballPrice=0;if(bm&&bm.catalog){const abid=ch.autoCatchBallId||(ws['catch-result']&&ws['catch-result'].ballId);const bb=bm.catalog.find(x=>x.id===abid);ballPrice=bb?bb.priceGold:0;}let lootGold=0;for(const id in (S.drops||{})){const dd=S.drops[id];lootGold+=(dd.qty||0)*((cat[id]||{}).npcPrice||0);}const hasBalls=!!(bm&&bm.counts),hasInv=!!(ws.inventory&&ws.inventory.items),live=!!(ch.id||hasBalls||hasInv);
@@ -1518,8 +1537,28 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   try { Object.assign(whCfg, lsObj('webhook')); } catch {}
   whCfg.url = String(whCfg.url || ''); whCfg.shiny = !!whCfg.shiny; whCfg.sum = !!whCfg.sum; // importado do disco
   whCfg.mention = String(whCfg.mention || '').replace(/\D/g, '').slice(0, 20); // ID do Discord: so digitos
+  whCfg.prob = whCfg.prob !== false; // avisos de problema (conta caiu, parou de farmar, sem bola)
   const saveWh = () => { try { lsSet('webhook', JSON.stringify(whCfg)); } catch {} };
-  function webhookSend(text) { if (!whCfg.url) return; try { window.pokeAPI.webhook(whCfg.url, text); } catch {} }
+  // Fila do webhook: o Discord corta em ~5 mensagens a cada 2s por webhook e devolve 429. Com 4
+  // contas caindo juntas dava pra estourar e perder aviso; aqui sai no maximo 1 a cada 700ms.
+  const whFila = [];
+  let whUltimo = 0, whTimer = null;
+  function whBombeia() {
+    whTimer = null;
+    if (!whFila.length) return;
+    const agora = Date.now(), espera = Math.max(0, 700 - (agora - whUltimo));
+    if (espera > 0) { whTimer = setTimeout(whBombeia, espera); return; }
+    const txt = whFila.shift();
+    whUltimo = Date.now();
+    try { window.pokeAPI.webhook(whCfg.url, txt); } catch {}
+    if (whFila.length) whTimer = setTimeout(whBombeia, 700);
+  }
+  function webhookSend(text) {
+    if (!whCfg.url) return;
+    if (whFila.length >= 20) return; // enchente: descarta o excedente em vez de empilhar pra sempre
+    whFila.push(String(text));
+    if (!whTimer) whBombeia();
+  }
 
   // ----- Historico diario persistente: gold/xp/kills/capturas/shinies por conta e por dia -----
   let histDay = {}; try { histDay = lsObj('histDay'); } catch {}
@@ -1745,6 +1784,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const be = document.getElementById('bkExp'); be.textContent = t('bkExp'); be.title = t('bkExpTitle');
     const bi = document.getElementById('bkImp'); bi.textContent = t('bkImp'); bi.title = t('bkImpTitle');
     const fq = document.getElementById('faqBtn'); fq.textContent = t('faq'); fq.title = t('faqTitle');
+    const mb = document.getElementById('manBtn'); mb.textContent = t('manual'); mb.title = t('manualTitle');
     donTop.textContent = t('donTitle'); donTop.title = t('donText');
     langBtns.forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
     refBtn.title = t('refTitle');
@@ -1812,6 +1852,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   };
   document.getElementById('reloadAll').onclick = () => webviews.forEach((w, i) => { if (!off[i]) w.reload(); });
   document.getElementById('faqBtn').onclick = () => window.open('https://github.com/soufoka/PokeGrid-source/blob/main/FAQ.md');
+  document.getElementById('manBtn').onclick = () => window.open('https://github.com/soufoka/PokeGrid-source/blob/main/MANUAL.md');
   const donTop = document.getElementById('donTop');
   donTop.onclick = () => window.open('https://link.mercadopago.com.br/pokegrid');
   // versao aberta, lida da propria UA (o Electron poe PokeGrid/x.y.z nela; zero IPC)
@@ -1867,7 +1908,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   // backup/restore: configuracoes e historico do localStorage (senhas nao: ficam criptografadas no main).
   // userScripts/scriptsOn NUNCA entram: sao codigo injetado nos paineis logados, e um arquivo de
   // config vindo de outra pessoa viraria execucao de codigo na conta de quem importa.
-  const BK_SKIP = ['userScripts', 'scriptsOn'];
+  const BK_SKIP = ['userScripts', 'scriptsOn', 'webhook']; // webhook: a URL e credencial, quem tem posta no seu canal
   const coletaConfig = () => { const o = {}; Object.entries(localStorage).forEach(([k2, v]) => { if (!BK_SKIP.includes(k2)) o[k2] = v; }); return o; };
   // Backup automatico semanal em userData/backups: protege config e historico de um perfil
   // corrompido, a classe de problema mais vista nos bughunts. Mantem os 12 mais recentes.
@@ -1927,6 +1968,23 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       dr.sort((x, y) => y.gold - x.gold);
       // supply = bolas jogadas + itens de cura consumidos (ambos ao preco em gold do catalogo)
       const capGold = S.sellG || 0, supplyGold = S.balls * ballPrice + (S.supGold || 0), balance = lootGold + capGold - supplyGold, ph = v => Math.round(v / secs * 3600);
+      // O servidor manda o Hunt Analyzer pronto (ws.analyzer). Quando ele existe e e da sessao
+      // ATUAL (nao serve pra hunt encerrada, que o app fecha por conta propria), os numeros dele
+      // mandam: o cliente nao tem como saber qual bola foi jogada em cada arremesso, se o pokemon
+      // novo veio de captura ou do mercado, nem se a pocao saiu por uso ou por venda.
+      const AN = (S === P.sess && ws.analyzer && typeof ws.analyzer === 'object') ? ws.analyzer : null;
+      if (AN && +AN.seconds > 0) {
+        const nS = (v) => { const n2 = +v; return Number.isFinite(n2) ? n2 : 0; };
+        const segs = Math.max(1, nS(AN.seconds));
+        const pha = (v) => Math.round(nS(v) / segs * 3600);
+        const drA = Array.isArray(AN.drops) ? AN.drops.slice(0, 60).map(x => ({ name: String((x && x.name) || ''), qty: nS(x && x.qty), gold: nS(x && x.gold) })).sort((x, y) => y.gold - x.gold) : dr;
+        const bal = nS(AN.balance);
+        return { kills: nS(AN.kills), seconds: segs, captures: nS(AN.captures), shinyFound: S.shinyN || 0,
+          shinyCap: nS(AN.shinyCaptures) || S.shinyCapN || 0, xpg: nS(AN.xpGained), lootGold: nS(AN.lootGold),
+          capturesGold: nS(AN.capturesGold), supplyGold: nS(AN.supplyGold), ballsUsed: nS(AN.ballsUsed),
+          potsUsed: nS(AN.potionsUsed), balance: bal, gph: pha(bal), xph: pha(AN.xpGained), kph: pha(AN.kills),
+          lastCatchT: S.lastCatchT || 0, sinceCatch: S.sinceCatch || 0, drops: drA, srv: 1 };
+      }
       return { kills: S.kills, seconds: secs, captures: S.captures, shinyFound: S.shinyN || 0, shinyCap: S.shinyCapN || 0, xpg: S.xp, lootGold, capturesGold: capGold, supplyGold, ballsUsed: S.balls || 0, potsUsed: S.supN || 0, balance, gph: ph(balance), xph: ph(S.xp), kph: ph(S.kills), lastCatchT: S.lastCatchT || 0, sinceCatch: S.sinceCatch || 0, drops: dr };
     };
     const a = calc(P.sess, Date.now());
@@ -1945,7 +2003,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const LABELS = { potion:'Heal', heal:'Heal', revive:'Revive', loot:'Loot', stone:'Stones', key:'Chaves', outros:'Outros' };
     const ORDER = ['potion','heal','revive','loot','stone','key','outros'];
     const done = {};
-    const pushGrp = c => { const items = groups[c].sort((x,y)=>y.qty-x.qty); bag.push({ label: LABELS[c]||c, total: items.reduce((s,x)=>s+x.qty,0), items }); done[c]=1; };
+    const pushGrp = c => { const items = groups[c].sort((x,y)=>y.qty-x.qty); bag.push({ label: LABELS[c]||'Outros', total: items.reduce((s,x)=>s+x.qty,0), items }); done[c]=1; };
     ORDER.forEach(c => { if (groups[c]) pushGrp(c); });
     Object.keys(groups).forEach(c => { if (!done[c]) pushGrp(c); });
     const team = ((ws.pokes && ws.pokes.list)||[]).filter(p=>p.team).sort((x,y)=>(x.slot||0)-(y.slot||0)).map(p=>({name:p.name,level:p.level,shiny:!!p.shiny,t1:p.type1||'',t2:p.type2||'',ld:!!p.leader,q:nL(p.quality),ivt:p.ivTotal!=null?nL(p.ivTotal):null,dt:!!p.isDitto,sid:+p.speciesId||+p.pokeId||0,hp:+p.hp||0,hm:+p.maxHp||+p.hpMax||+p.totalHp||0,xpp:(p.expPercent!=null?+p.expPercent:(p.expPct!=null?+p.expPct:(p.exp!=null&&+p.expToNext>0?Math.round(+p.exp/+p.expToNext*100):null)))}));
@@ -2095,7 +2153,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       const vis = order.filter(l => !cfg.bagHide[l]).map(l => { const g = byLabel[l]; const items = (g.items || []).filter(it => !cfg.itemHide[it.id]); return { label: l, items, total: items.reduce((s, x) => s + x.qty, 0) }; }).filter(g => g.items.length);
       if (!vis.length) return '';
       let s = sec('#2bb0a8', 'Bag') + '<div class="baggrid">';
-      vis.forEach(g => { const cc = BAGCOR[g.label] || '#7d8590'; s += '<div class="bg"><span class="bcd" style="background:' + cc + ';color:' + cc + ';"></span><span class="bn">' + g.label + '</span><span class="bt">' + nf(g.total) + '</span></div>'; });
+      vis.forEach(g => { const cc = BAGCOR[g.label] || '#7d8590'; s += '<div class="bg"><span class="bcd" style="background:' + cc + ';color:' + cc + ';"></span><span class="bn">' + esc(g.label) + '</span><span class="bt">' + nf(g.total) + '</span></div>'; });
       s += '</div>';
       const showAll = cfg.bagItems, impMode = !showAll && cfg.bagImportantOnly;
       if (showAll || impMode) {
@@ -2111,7 +2169,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
           const items = imp ? g.items.filter(it => imp.has(it.id)) : g.items;
           if (!items.length) return;
           const cc = BAGCOR[g.label] || '#7d8590';
-          s += '<div class="cat"><span class="cd" style="background:' + cc + ';color:' + cc + '"></span><span class="cn">' + g.label + '</span></div>';
+          s += '<div class="cat"><span class="cd" style="background:' + cc + ';color:' + cc + '"></span><span class="cn">' + esc(g.label) + '</span></div>';
           items.slice(0, 8).forEach(it => s += '<div class="it"><span>' + esc(it.name) + '</span><span class="q">' + nf(it.qty) + '</span></div>');
         });
         s += '</div>';
@@ -2119,13 +2177,14 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       return s;
     },
     pinned: (d) => {
-      if (!cfg.pinned.length) return '';
+      if (!cfg.pinned.length) return sec('#f2c665', t('stPinned')) + '<div class="st-vazio">' + t('stPinnedHow') + '</div>';
       let s = sec('#f2c665', t('stPinned')) + '<div class="pb">';
       cfg.pinned.forEach(p => { const qty = p.t === 'ball' ? ((d.ballMap && d.ballMap[p.id]) || 0) : ((d.invMap && d.invMap[p.id]) || 0); s += '<div class="drop"><span class="dn"><b>' + esc(p.name) + '</b></span><span class="dg" style="color:#c9d1d9">' + nf(qty) + '</span></div>'; });
       return s + '</div>';
     },
     target: (d) => {
-      if (!cfg.shinyTarget) return '';
+      // sem alvo escolhido a secao sumia por completo e a caixa parecia morta (feedback do FellipeLuis)
+      if (!cfg.shinyTarget) return sec('#f778ba', '\u{1F3AF} ' + t('stTargetLabel')) + '<div class="st-vazio">' + t('stTargetHow') + '</div>';
       const tg = cfg.shinyTarget, list = d.usedList || [];
       const shiny = list.find(x => x.sid === tg.id && x.shiny);
       const norm = list.find(x => x.sid === tg.id && !x.shiny);
@@ -2853,7 +2912,8 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const M2 = huntStats[r.cid]; if (!M2 || !r.hunt || !(r.secs > 600)) return ''; // sessao curta: gold/h ainda oscila
     const atual = hkey(r.hunt);
     let best = null;
-    for (const k2 in M2) { const e2 = M2[k2]; if (k2 === atual || !((e2.n || 0) >= 2)) continue; if (!best || e2.gph > best.gph) best = { k: k2, gph: e2.gph }; }
+    // entrada nula/torta vinda do disco nao pode derrubar o refreshCards (travava o Simples pra sempre)
+    for (const k2 in M2) { const e2 = M2[k2]; if (!e2 || typeof e2 !== 'object' || k2 === atual || !((+e2.n || 0) >= 2)) continue; if (!best || +e2.gph > best.gph) best = { k: k2, gph: +e2.gph || 0 }; }
     // no prejuizo, qualquer alternativa medida no lucro ja vale o aviso; no lucro, so 15%+ acima
     const alvo = r.gph > 0 ? r.gph * 1.15 : 0;
     if (!best || !(best.gph > alvo)) return '';
@@ -3154,6 +3214,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
       + '<div class="cd-cfg-h" style="margin-top:10px">' + t('whTitle') + '</div>'
       + '<div class="cd-cfg-row"><input id="cdWhUrl" type="text" class="cd-inp" style="flex:1" placeholder="https://discord.com/api/webhooks/…" value="' + esc(whCfg.url) + '"><button id="cdWhTest" class="cd-inp" style="cursor:pointer">' + t('whTest') + '</button></div>'
       + '<div class="cd-cfg-row"><input id="cdWhMention" type="text" class="cd-inp" style="flex:1" placeholder="' + t('whMention') + '" value="' + esc(whCfg.mention) + '"></div>'
+      + '<div class="cd-cfg-row"><label><input type="checkbox" id="cdWhProb"' + (whCfg.prob ? ' checked' : '') + '> ' + t('whProb') + '</label></div>'
       + '<div class="cd-cfg-row"><label><input type="checkbox" id="cdWhShiny"' + (whCfg.shiny ? ' checked' : '') + '> ' + t('whShiny') + '</label><label><input type="checkbox" id="cdWhSum"' + (whCfg.sum ? ' checked' : '') + '> ' + t('whSum') + '</label></div>'
       + '</div>';
     let secHtml = '';
@@ -3208,6 +3269,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const wt = cardsEl.querySelector('#cdWhTest'); if (wt) wt.onclick = () => { const u = cardsEl.querySelector('#cdWhUrl'); if (u) { whCfg.url = u.value.trim(); saveWh(); } webhookSend(t('whTestMsg')); };
     const ws2 = cardsEl.querySelector('#cdWhShiny'); if (ws2) ws2.onchange = () => { whCfg.shiny = ws2.checked; saveWh(); };
     const wm = cardsEl.querySelector('#cdWhSum'); if (wm) wm.onchange = () => { whCfg.sum = wm.checked; saveWh(); };
+  const wp = cardsEl.querySelector('#cdWhProb'); if (wp) wp.onchange = () => { whCfg.prob = wp.checked; saveWh(); };
   const wmn = cardsEl.querySelector('#cdWhMention'); if (wmn) wmn.onchange = () => { whCfg.mention = String(wmn.value || '').replace(/\D/g, '').slice(0, 20); wmn.value = whCfg.mention; wmn.blur(); saveWh(); };
     let dragS = null;
     cardsEl.querySelectorAll('.cd-cfg-row').forEach(row => {
@@ -3277,6 +3339,15 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     if (cardsOn) { cdHtmlAnt = ''; cardsEl.innerHTML = '<div class="cd-empty" style="padding:20px">' + t('cdWaiting') + '</div>'; refreshCards(); }
   }
   cardsBtn.onclick = () => { cardsOn = !cardsOn; applyCards(); };
+  // Keepalive: um toque barato em cada painel ligado, de 30 em 30s, MESMO com a janela
+  // escondida. Sozinho o backgroundThrottling=no ja resolve; isto e a rede de seguranca pra
+  // quem deixa o PC de lado (e serve de pulso pro watchdog perceber painel travado).
+  setInterval(() => {
+    webviews.forEach((w, i) => {
+      if (off[i] || !w) return;
+      try { w.executeJavaScript('void 0').catch(() => {}); } catch {}
+    });
+  }, 30000);
   setInterval(() => { if (cardsOn && !document.hidden) refreshCards(); }, 10000); // compasso do Simples: os dados chegam por push; isso so redesenha (e e a reserva se o push faltar)
 
   // Zerar a sessao: nossos numeros vem de P.sess (acumulador proprio), que so reseta na troca de hunt.
