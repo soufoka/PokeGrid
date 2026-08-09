@@ -16,5 +16,8 @@ contextBridge.exposeInMainWorld('pokeAPI', {
   openErrorLog: () => ipcRenderer.invoke('errlog:open'),
   saveBackup: (nome, conteudo, cabecalho) => ipcRenderer.invoke('backup:save', nome, conteudo, cabecalho),
   clearAccount: (i) => ipcRenderer.invoke('conta:limpar', i),
-  fetchUserScript: (url) => ipcRenderer.invoke('userscript:fetch', url)
+  fetchUserScript: (url) => ipcRenderer.invoke('userscript:fetch', url),
+  // versao do app: vem do processo principal (a UA nao carrega mais o token pokegrid/x, e o
+  // preload roda em sandbox, entao require de arquivo local nao e confiavel)
+  appVersion: (() => { try { return ipcRenderer.sendSync('app:version'); } catch { return ''; } })()
 });

@@ -40,7 +40,7 @@ O jogo some e ficam só os números das 4 contas. Serve pra deixar farmando gast
 
 Ranking de todas as espécies do jogo por elemento, nota de 0 a 100.
 
-A nota é calculada contra as hunts reais: o golpe **físico** enfrenta a defesa física de cada hunt, o **especial** enfrenta a defesa especial, e a **vida** do defensor segura o ritmo. Cada espécie é avaliada no nível da própria hunt, então não existe "pico" em hunt inalcançável. A aba **Geral** compara todos os elementos juntos, e nela a nota é o rendimento somado em todas as hunts (quem rende em todo lugar vale mais que quem só brilha numa fraqueza ×4).
+Escolha **seu nível** no topo da tierlist: cada pokémon é avaliado nesse nível e só entram as hunts que você alcança (nada de recomendar um lugar acima do seu nível). O golpe **físico** enfrenta a defesa física de cada hunt, o **especial** a defesa especial, e a **vida** do defensor segura o ritmo. A aba **Geral** compara todos os elementos juntos, e nela a nota é o rendimento somado em todas as hunts (quem rende em todo lugar vale mais que quem só brilha numa fraqueza ×4).
 
 Na linha: **FÍS/ESP** é a categoria do golpe, **folga ×N** é quanto dano sobra além do necessário pra matar de um golpe, e **ORRE | OUT** são as melhores hunts em cada região, cada uma com sua nota.
 

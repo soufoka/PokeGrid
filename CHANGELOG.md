@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.5.17
+
+- **Polimento (caça de bugs da 1.5.17)**: as categorias novas da mochila (Cartas/TMs/Clã) agora dá pra esconder e reordenar na config; trocar o nível da tierlist rápido não trava mais (os cálculos se juntam num só); e limpezas internas sem efeito visível.
+  *Polish from the 1.5.17 bug hunt: the new bag categories are now hideable/reorderable in settings, fast tierlist level changes no longer stutter, plus internal cleanups.*
+- **Tierlist com seletor de nível**: escolha o seu nível no topo da tierlist e ela se adapta, avaliando cada pokémon nesse nível e mostrando só as hunts que você alcança, com o golpe e a região certos. Sem isso, o conteúdo novo de nível 600 (Megas) afogava o ranking de quem ainda não chegou lá. O padrão é o nível da conta em foco.
+  *Tierlist level selector: pick your level and the tierlist adapts, rating each pokemon at that level and showing only reachable hunts with the right move and region.*
+- **Mochila mostra os itens novos do update**: as categorias novas (Cartas shiny, TMs, itens de clã) apareciam todas como "Outros" e, pior, colidiam entre si, então parte delas sumia do painel. Agora cada uma tem seu grupo e cor, e nada é descartado.
+  *Bag shows the new item categories (Shiny Cards, TMs, clan items) as their own groups instead of collapsing into a single Others that silently dropped items.*
+- **Tierlist: a coluna Orre×Outland voltou a funcionar**: as hunts de Mega/endgame de nível 600 estavam sendo marcadas como "Outland" (poluindo todas as linhas e matando a comparação entre regiões). Agora Outland é identificada pela região real, não pelo nível.
+  *Tierlist: the Orre-vs-Outland column works again; lv600 Mega/endgame hunts were being mislabeled Outland.*
+- **Compatível com a grande atualização do jogo**: as novas criaturas (Mega Evoluções e as formas de Outland, tipo "Brave Blastoise") agora aparecem com a sprite certa na tierlist e no painel. Antes ficavam sem imagem porque o jogo passou a numerá-las numa faixa nova.
+  *Compatible with the big game update: the new creatures (Mega Evolutions and the Outland forms) now show the correct sprite in the tierlist and panel.*
+- **Versão do app de volta ao lado do logo**: tinha sumido na 1.5.16 (quando a identificação do app saiu do cabeçalho de rede por segurança). Agora ela é lida direto do app, pequena e discreta ao lado do nome.
+  *App version back next to the logo: it disappeared in 1.5.16 and now reads straight from the app.*
+
 ## 1.5.16
 
 - **O ouro da sessão agora bate com o Hunt Analyzer** (relato do FellipeLuis): o app refazia a conta por fora e errava nas parcelas que só o servidor conhece (qual pokébola foi jogada em cada arremesso, se o pokémon novo veio de captura ou do mercado, se a poção saiu por uso ou por venda, e a foto rara a preço de mercado), ainda por cima com um relógio próprio. Agora ele pede os números ao próprio jogo e mostra os mesmos do Hunt Analyzer; sem resposta do servidor, cai na conta antiga. Efeito colateral bom: trocar a pokébola do auto-catch não reescreve mais o gasto da sessão inteira.

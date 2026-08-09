@@ -240,6 +240,8 @@ app.userAgentFallback = app.userAgentFallback
   .replace(/(Chrome\/\d+)[\d.]+/, '$1.0.0.0');
 
 // Notificacao do SO (alertas de queda e de sem pokebola).
+// versao do app pro badge do topo (sendSync: disponivel no load, mesmo com o preload em sandbox)
+ipcMain.on('app:version', (e) => { e.returnValue = app.getVersion(); });
 ipcMain.handle('notify', (_e, title, body) => {
   try { if (Notification.isSupported()) new Notification({ title, body }).show(); } catch {}
 });
