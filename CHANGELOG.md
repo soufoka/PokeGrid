@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.5.18
+
+- **Botão Zerar (estatísticas) voltou a funcionar**__TMP__: desde a 1.5.16 os números da sessão passaram a vir do servidor do jogo (o mesmo do Hunt Analyzer), e o Zerar não mexia neles, então parecia não fazer nada. Agora o Zerar marca o ponto de partida e o painel passa a mostrar tudo a partir dali (gold, kills, XP, capturas, drops). Trocar de hunt continua zerando sozinho.
+  *The Reset button works again: since 1.5.16 the session numbers come from the game server (same as the Hunt Analyzer) and Reset was not affecting them; now Reset marks the starting point and the panel counts from there.*
+- Robustez do Zerar: o ponto de partida marcado pelo Zerar agora sobrevive a um reload do painel (reciclagem/reconexão), então as estatísticas não voltam ao total antigo depois que o painel recarrega.
+  *Reset robustness: the reset baseline now survives a panel reload, so stats do not revert after a recycle/reconnect.*
+- **Reciclar painéis (opcional)**: pra quem deixa rodando por muitas horas, o app pode recarregar os painéis de tempos em tempos e liberar a memória que o jogo acumula. Recarrega **um de cada vez** (nunca os 4 juntos) e **o farm não para** (é do servidor, e a sessão volta sozinha no reload). Fica na configuração do Simples, com liga/desliga e intervalo em horas ajustável. **Desligado por padrão.**
+  *Optional panel recycling: on long sessions the app can reload the panels every few hours to free the memory the game accumulates, one at a time, without stopping the farm. Configurable (on/off + interval in hours), off by default.*
+- **Menos memória em sessão longa**: os registros internos de captura e de shiny do coletor não incham mais sem limite na página do jogo.
+  *Lower memory on long sessions: the collector no longer lets its capture/shiny logs grow without bound on the game page.*
+
 ## 1.5.17
 
 - **Polimento (caça de bugs da 1.5.17)**: as categorias novas da mochila (Cartas/TMs/Clã) agora dá pra esconder e reordenar na config; trocar o nível da tierlist rápido não trava mais (os cálculos se juntam num só); e limpezas internas sem efeito visível.
