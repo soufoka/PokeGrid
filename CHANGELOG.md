@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.19
+
+- **"Sugerido" corrigido**__T__: o ranking recomendava hunts de nível 600 (Megas/endgame) no topo porque o XP delas é gigante, mesmo quando o seu pokémon mal arranha (você faintaria antes de matar). Agora uma hunt onde o atacante não causa dano suficiente afunda no ranking, e o topo passa a ser uma hunt que você realmente consegue fazer. As hunts fortes voltam a ser recomendadas quando você leva o pokémon certo (o counter de tipo).
+  *"Suggested" fixed: it recommended lv600 hunts at the top because of their huge XP, even when your pokémon barely scratches them (you would faint). Now unviable matchups sink, and a hunt is only suggested when your attacker can actually dent it.*
+- Ajuste do "Sugerido": a barrinha de % ao lado de cada hunt agora respeita o mesmo critério do ranking, então uma hunt que você não consegue fazer não aparece mais com % verde estourado (chegava a passar de 100%).
+  *Suggested tweak: the per-hunt % bar now respects the viability floor too, so an unviable hunt no longer shows an inflated green percentage.*
+- **"Reciclar painéis" removido**: a ideia era recarregar os painéis pra liberar memória sem parar o farm, mas o jogo é um site de página única: ao recarregar, a conta volta pra tela da cidade e não retoma a hunt sozinha, então o farm parava. Como não dá pra re-entrar na hunt com segurança, tirei a opção. O cap de memória (que não recarrega nada) continua. Se você tinha ativado, atualize; enquanto isso, desligue a opção.
+  *"Recycle panels" removed: reloading the SPA drops the account back to the city screen and does not resume the hunt, so farming stopped. Removed until it can re-enter the hunt safely; the memory cap stays.*
+
 ## 1.5.18
 
 - **Botão Zerar (estatísticas) voltou a funcionar**__TMP__: desde a 1.5.16 os números da sessão passaram a vir do servidor do jogo (o mesmo do Hunt Analyzer), e o Zerar não mexia neles, então parecia não fazer nada. Agora o Zerar marca o ponto de partida e o painel passa a mostrar tudo a partir dali (gold, kills, XP, capturas, drops). Trocar de hunt continua zerando sozinho.

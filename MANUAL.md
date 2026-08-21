@@ -49,7 +49,6 @@ Na linha: **FÍS/ESP** é a categoria do golpe, **folga ×N** é quanto dano sob
 - **🛡 Venda protegida**: pede confirmação antes de vender shiny, qualidade Lendária ou acima e itens raros. Na engrenagem do Painel dá pra travar seus próprios itens (**🔒 Cadeado de venda**)
 - **🔔 Alertas**: avisa quando uma conta cai, fica sem pokébola ou para de farmar. Com webhook do Discord configurado, o aviso chega no celular
 - **💾 Exportar/Importar config**: leva suas configurações pra outro PC. O app também salva um backup sozinho toda semana
-- **♻️ Reciclar painéis** (na config do Simples): pra sessões muito longas, recarrega os painéis de tempos em tempos pra liberar memória, um de cada vez e sem parar o farm. Desligado por padrão, com intervalo ajustável
 
 ## Coisas que confundem no começo
 
