@@ -1,8 +1,67 @@
 # Changelog
 
+## 1.5.20
+
+- **Hunts que apareciam vazias**: Nidoran macho, Nidoran fêmea e Farfetchd não casavam com os dados do jogo, então essas hunts ficavam sem tipo, sem XP e sem loot no ranking. Agora todos os 482 pokémon do jogo são reconhecidos.
+  *Hunts that showed up empty: Nidoran male, Nidoran female and Farfetchd now match the game data, so they get type, XP and loot again.*
+- **Botão Testar do webhook agora testa mesmo**: ele dizia OK até com a URL errada ou o webhook apagado. Agora ele espera a resposta do Discord e mostra se chegou ou falhou.
+  *The webhook Test button now waits for Discord's answer and reports success or failure.*
+- **Barra de EXP do time voltou a aparecer** no Simples: ela lia um campo que o jogo não tem.
+  *Team EXP bar shows again in Simple mode.*
+- **Ouro de "Hoje" bate com o painel**: os dois números vinham de contas diferentes e podiam divergir.
+  *"Today" gold now uses the same server number the panel shows.*
+- **Resumo diário do Discord não some mais** se o app estiver fechado na virada da meia-noite: ele fecha o dia pendente ao abrir.
+  *The Discord daily summary is no longer lost when the app is closed at midnight.*
+- **Conta perdida por queda de internet não recarrega mais em loop**: falha de um elemento de terceiro dentro da página parava de derrubar o painel inteiro.
+  *A third-party frame failing inside the page no longer reloads the whole panel in a loop.*
+- **Zerar sessão não apaga mais o nome da hunt**, então a hunt seguinte entra no histórico identificada.
+  *Resetting the session keeps the current hunt name, so the next hunt is logged with its name.*
+- **Alertas continuam acompanhando com o sino desligado**: religar não dispara mais aviso velho nem engole suprimento que baixou nesse meio tempo.
+  *With the bell off the app keeps tracking, so turning it back on no longer fires stale alerts.*
+- **"Melhor hunt" e a estimativa ficaram mais honestas**: o nível exigido agora vem do mapa, e a estimativa de kills por hora deixa de extrapolar quando você escolhe um atacante bem mais fraco que o da medição.
+  *Suggested hunt uses the map's required level, and the kills-per-hour estimate no longer extrapolates from a much weaker attacker.*
+- **Sprites de Outland no time deixam de faltar** no painel Resumo.
+  *Outland Pokémon in your team no longer show up without a sprite.*
+- **Limpar jogo voltou a revelar a conta ao passar o mouse** (o app escondia um elemento que não existe e deixava a conta escondida de vez).
+  *Clean game reveals the account on hover again.*
+- **Backup automático também roda com o app aberto** (de 6 em 6 horas ele confere se já passou a semana), não só ao abrir.
+  *The automatic backup is also checked every 6 hours while the app stays open.*
+- **Aviso de venda protegida sai no idioma do app**, não mais só em português.
+  *The protected-sale confirmation now follows the app language.*
+- **Senhas nunca são gravadas sem criptografia**: em sistema sem cofre, o app recusa e avisa, em vez de salvar em texto puro calado.
+  *Passwords are never written unencrypted: on a system without a keystore the app refuses and says so.*
+- **A página do jogo não abre mais links no seu navegador em sequência**: no máximo 3 a cada 10 segundos.
+  *The game page can no longer open unlimited links in your browser: at most 3 per 10 seconds.*
+- **Abrir com o Windows se conserta sozinho** quando a pasta do app muda de lugar.
+  *Start with Windows repairs its shortcut when the app folder moves.*
+- **Simples não congela mais em silêncio** se um arraste for interrompido no meio.
+  *Simple mode no longer freezes silently when a drag is interrupted.*
+- Textos e documentação: opção do sino descreve os 5 tipos de aviso, botão 🗑 diz que limpa o formulário, manual lista os atalhos E e A, README corrige contagem de contas e cita o espanhol, e o changelog perdeu dois marcadores de edição que tinham vazado.
+  *Text and docs cleanup across the app, manual, README and changelog.*
+- **Conta caída agora avisa de verdade**: com a internet fora, o painel continuava mostrando "online" com a bolinha verde e o aviso de "conta caiu" nunca chegava, nem no Windows nem no Discord. A página de erro do navegador zerava o contador de falhas por dentro. Corrigido, e a reconexão agora vai espaçando as tentativas (6s, 12s... até 1 minuto) em vez de desistir: uma queda longa, como reiniciar o roteador, se recupera sozinha.
+  *Dropped account now actually alerts: with the internet down the panel kept showing "online" and the alert never fired. Fixed, and reconnection now backs off up to 1 minute instead of giving up.*
+- **Salvar senha nunca mais falha calado**: se o antivírus estivesse segurando o arquivo ou o disco estivesse cheio, a janela de treinadores fechava como se tivesse salvo e a senha sumia no próximo boot. Agora o app avisa na hora, não fecha a janela e registra no relatório de erros.
+  *Saving passwords no longer fails silently: the app now warns, keeps the window open and logs the error.*
+- **Config de terceiro não executa mais código**: um arquivo de configuração recebido de outra pessoa podia esconder código no nome do alvo shiny e, ao ser importado, rodar dentro do app com acesso às suas senhas. O nome agora é tratado como texto puro. O mesmo buraco foi fechado na calculadora de IV, que confiava no que a página do jogo devolvia.
+  *Imported configs can no longer run code: the shiny target name is escaped and the IV card sanitizes what the game page returns.*
+- **Depósito volta a contar no inventário**: o inventário do Simples somava só a mochila, porque o pedido do depósito ia sem autenticação e voltava vazio, sem aviso nenhum.
+  *Depot counts in the inventory again: the request was missing its auth token and silently returned nothing.*
+- **Conta que perde a sessão volta a logar sozinha**: quando a sessão caía sem trocar de página (ou você clicava Sair dentro do jogo), o painel ficava parado até alguém clicar em Logar equipe. Agora, depois de 1 minuto sem sessão, ele volta pra tela de login sozinho. Se você estiver resolvendo o captcha, ele não mexe.
+  *Accounts that lose their session log back in on their own, and it never interrupts a captcha you are solving.*
+- **Alerta de suprimento na caixa certa**: "poucas potions" e "poucos revives" estavam presos à opção "Conta caiu". Foram pro lugar certo, e a opção agora se chama "Suprimento baixo (pokébola, potion, revive)".
+  *Low potion and revive alerts moved out of the "account dropped" toggle into the supplies one.*
+- **Nome de treinador com cifrão ($) não embaralha mais o texto** das confirmações.
+  *Trainer names containing "$" no longer garble confirmation dialogs.*
+- **Botão de wiki do jogo não abria nada**: qualquer link que o jogo tenta abrir em aba nova (a wiki, por exemplo) era engolido em silêncio pelo painel. Agora ele abre no seu navegador padrão, fora do PokeGrid, e a conta continua no lugar. Nada abre dentro do app.
+  *In-game wiki button did nothing: links the game opens in a new tab were silently swallowed by the panel. They now open in your default browser, outside PokeGrid; nothing opens inside the app.*
+- **Painel preso num login velho (sem o "confirme que é humano")**: quando o jogo atualiza a tela de login, um painel podia continuar mostrando a versão antiga guardada em cache, sem o captcha, e você não conseguia logar. Agora o **⟳ Atualizar tudo** (e o ⟳ de cada painel) recarrega ignorando o cache, então uma atualização já traz a tela de login nova. O recarregamento automático de conta travada continua rápido como antes.
+  *Panel stuck on a stale cached login (no captcha): the manual reload (⟳) now ignores the cache, so refreshing brings the fresh login page; the automatic watchdog reload stays fast.*
+- **Alertas do Windows por tipo** (pedido do Abel): na configuração do Simples agora dá pra escolher quais avisos tocam na sua máquina, cada um separado: shiny, conta caiu, parou de farmar, sem pokébola e pokémon derrubado. Assim quem tem muito shiny na hunt pode desligar só o alerta de shiny e continuar recebendo o de "parou de farmar", sem precisar desligar tudo. O botão 🔔 no topo continua sendo o liga/desliga geral, e o Discord tem as opções próprias dele.
+  *Windows alerts by type: pick which alerts fire on your machine, each independently (shiny, dropped, stopped farming, out of balls, fainted), so you can mute just shiny and keep the inactivity alert.*
+
 ## 1.5.19
 
-- **"Sugerido" corrigido**__T__: o ranking recomendava hunts de nível 600 (Megas/endgame) no topo porque o XP delas é gigante, mesmo quando o seu pokémon mal arranha (você faintaria antes de matar). Agora uma hunt onde o atacante não causa dano suficiente afunda no ranking, e o topo passa a ser uma hunt que você realmente consegue fazer. As hunts fortes voltam a ser recomendadas quando você leva o pokémon certo (o counter de tipo).
+- **"Sugerido" corrigido**: o ranking recomendava hunts de nível 600 (Megas/endgame) no topo porque o XP delas é gigante, mesmo quando o seu pokémon mal arranha (você faintaria antes de matar). Agora uma hunt onde o atacante não causa dano suficiente afunda no ranking, e o topo passa a ser uma hunt que você realmente consegue fazer. As hunts fortes voltam a ser recomendadas quando você leva o pokémon certo (o counter de tipo).
   *"Suggested" fixed: it recommended lv600 hunts at the top because of their huge XP, even when your pokémon barely scratches them (you would faint). Now unviable matchups sink, and a hunt is only suggested when your attacker can actually dent it.*
 - Ajuste do "Sugerido": a barrinha de % ao lado de cada hunt agora respeita o mesmo critério do ranking, então uma hunt que você não consegue fazer não aparece mais com % verde estourado (chegava a passar de 100%).
   *Suggested tweak: the per-hunt % bar now respects the viability floor too, so an unviable hunt no longer shows an inflated green percentage.*
@@ -11,7 +70,7 @@
 
 ## 1.5.18
 
-- **Botão Zerar (estatísticas) voltou a funcionar**__TMP__: desde a 1.5.16 os números da sessão passaram a vir do servidor do jogo (o mesmo do Hunt Analyzer), e o Zerar não mexia neles, então parecia não fazer nada. Agora o Zerar marca o ponto de partida e o painel passa a mostrar tudo a partir dali (gold, kills, XP, capturas, drops). Trocar de hunt continua zerando sozinho.
+- **Botão Zerar (estatísticas) voltou a funcionar**: desde a 1.5.16 os números da sessão passaram a vir do servidor do jogo (o mesmo do Hunt Analyzer), e o Zerar não mexia neles, então parecia não fazer nada. Agora o Zerar marca o ponto de partida e o painel passa a mostrar tudo a partir dali (gold, kills, XP, capturas, drops). Trocar de hunt continua zerando sozinho.
   *The Reset button works again: since 1.5.16 the session numbers come from the game server (same as the Hunt Analyzer) and Reset was not affecting them; now Reset marks the starting point and the panel counts from there.*
 - Robustez do Zerar: o ponto de partida marcado pelo Zerar agora sobrevive a um reload do painel (reciclagem/reconexão), então as estatísticas não voltam ao total antigo depois que o painel recarrega.
   *Reset robustness: the reset baseline now survives a panel reload, so stats do not revert after a recycle/reconnect.*
