@@ -125,6 +125,27 @@ console.log('\n--- pokebolas infinitas, vinculadas e com validade (lancamento de
   ok(zero.al.hasBalls === true && zero.al.balls === 0, 'sem bola de verdade continua 0 (o alerta de "sem pokebola" segue funcionando)');
 }
 
+console.log('\n--- coletor le o dano real por golpe e a vida do selvagem (mensagem field do jogo) ---');
+{
+  const c0 = s.indexOf("m.type==='field'){") + "m.type==='field'){".length; const trecho = s.slice(c0, s.indexOf('}else if(', c0));
+  const S = {}; const roda = (m) => new Function('m', 'S', trecho)(m, S);
+  roda({ type: 'field', hits: [{ slot: 0, amount: 120, move: 'Psychic' }, { slot: -1, amount: 40 }, { slot: 1, amount: 0 }, { slot: 2, amount: 80 }], mobs: [{ slot: 0, hp: 10, maxHp: 200 }, { slot: 1, hp: 150, maxHp: 150 }] });
+  roda({ type: 'field', hits: [], mobs: [{ slot: 0, hp: 200, maxHp: 200 }] });
+  ok(S.hits === 2, 'conta so golpes do seu pokemon no selvagem (slot >= 0, dano > 0): ' + S.hits + ' golpes');
+  ok(S.pctN === 1 && Math.abs(S.pct - 0.6) < 1e-9 && S.slotHp[0] === 200 && S.slotHp[1] === 150, 'dano em % da vida do alvo ATINGIDO (120 em 200 = 60%); alvo cuja vida nunca chegou fica fora da media, nao do total');
+  roda({ type: 'field', hits: [{ slot: 0, amount: 50, move: 'Omega Clap' }, { slot: 1, amount: 45, move: 'Omega Clap' }, { slot: 0, amount: 100, move: 'Psychic' }], mobs: [{ slot: 0, maxHp: 200 }, { slot: 1, maxHp: 150 }] });
+  ok(S.hits === 3 && S.pctN === 2 && Math.abs(S.pct - 1.1) < 1e-9, 'o TM em area (mesmo golpe em 2 alvos no mesmo tick) nao entra: e um golpe extra a cada 10 s, nao a cadencia');
+  roda({ type: 'field', hits: [{ slot: 0, amount: 150, move: 'Psychic', crit: true }, { slot: 0, amount: 10, move: 'Psychic', blocked: true }], mobs: [{ slot: 0, maxHp: 200 }, { slot: 3, maxHp: 20000 }] });
+  roda({ type: 'field', hits: [{ slot: 3, amount: 70, move: 'Psychic' }], mobs: [{ slot: 0, maxHp: 200 }, { slot: 3, maxHp: 20000 }] }); // premissa do coletor: um tick traz no maximo um golpe normal por alvo; o mesmo golpe em 2 alvos no mesmo tick e salva de area
+  ok(S.hits === 6 && S.pctN === 3 && Math.abs(S.pct - 1.1035) < 1e-9, 'critico e bloqueio contam como golpe mas ficam fora da media de dano; o boss de 20000 de vida so pesa no proprio golpe (0.35%), nao esmaga os outros');
+  const lit = (nome) => { const i = s.indexOf('const ' + nome); const a = s.indexOf('`', i) + 1; return eval('`' + s.slice(a, s.indexOf('`', a)) + '`'); };
+  const RS = lit('READ_STATE');
+  const st = new Function('window', 'return ' + RS)({ __poke: { ws: { balls: { catalog: [], counts: {} }, inventory: { items: [] }, pokes: { list: [] } }, api: { '/api/characters/me': { character: { id: 1, name: 'A', level: 10 } } }, sess: { start: 1, drops: {}, kills: 10, hits: 13, pct: 6.5, pctN: 13 } } });
+  ok(st && st.a && st.a.hpk === 1.3 && st.a.hitHp === 50, 'o painel recebe golpes por kill e dano medio em % da vida (' + (st && st.a && st.a.hpk) + ' golpes/kill, ' + (st && st.a && st.a.hitHp) + '%)');
+  ok(s.includes("hpk: +a.hpk > 0 ? Math.round(((c.hpk || +a.hpk) * (1 - al) + (+a.hpk) * al) * 10) / 10 : (c.hpk || 0)") && s.includes("t('cdHitsKill')") && s.split("cdHitsKill:'").length - 1 === 3, 'a media por hunt guarda golpes/kill e a lista mostra (3 idiomas)');
+  ok(s.includes("kph: pha(sb('kills')), hpk, hitHp,") && s.includes("kph: ph(S.kills), hpk, hitHp,"), 'os dois caminhos do READ_STATE (Hunt Analyzer do servidor e conta local) devolvem golpes/kill e dano/vida');
+}
+
 console.log('\n--- 2FA: o preenchimento automatico nao toca no codigo ---');
 ok(s.includes('if (ok && (!tk || tk.value) && !bb.disabled) { clearInterval(w); window.__loginWatch = false; bb.click(); }'), 'so clica com e-mail E senha preenchidos, e para depois do clique (na tela do codigo nao ha esses campos: nao clica)');
 ok(s.includes("inputs.find(i => i.autocomplete === 'username')") && s.includes("inputs.find(i => i.autocomplete === 'current-password')"), 'acha os campos pelo autocomplete, que o login novo ainda usa');

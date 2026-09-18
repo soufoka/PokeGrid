@@ -52,7 +52,7 @@ const entre = (a, fim, incl) => { const i = b.indexOf(a); if (i < 0) throw new E
   const blocoTier = entre('  function tierCalc(nivel, comTm) {', '  const tlNameId = ', false);
   const api = new Function('window', 'R', 'lista',
     'let basesByName = R.bs, movesByName = R.mv, creaturesById = R.byId, huntsCache = lista, huntsCacheT = 1, tlCache = null;\n'
-    + blocoSug + '\n' + blocoDitto + '\n' + blocoTier + '\nreturn { sugCalc, tierCalc, dittoRegras, dittoAlvo, dittoSweep, dittoHunts, dittoVarre };')({ PokeGridIvMath: M }, R, lista);
+    + blocoSug + '\n' + blocoDitto + '\n' + blocoTier + '\nreturn { sugCalc, tierCalc, dittoRegras, dittoAlvo, dittoSweep, dittoHunts, dittoVarre, ritmoDe };')({ PokeGridIvMath: M }, R, lista);
 
   console.log('\n--- sugCalc: TM so entra pra quem aprendeu o disco ---');
   const czA = { sp: 'charizard', level: 100, q: 1.5, ivt: 120, tlv: 0, mult: 1 };
@@ -153,6 +153,29 @@ const entre = (a, fim, incl) => { const i = b.indexOf(a); if (i < 0) throw new E
   const semMarc = await new Function('fetch', 'return ' + huntsSrc)((u) => (u.indexOf('map-markers') >= 0 ? Promise.reject(new Error('502')) : fetchFalso(u)));
   ok(semMarc && semMarc.h.length === 0 && Object.keys(semMarc.mv).length > 500 && Object.keys(semMarc.dex).length > 100, 'com a rota de hunts em 502, criaturas, golpes e sprites ainda chegam (' + Object.keys(semMarc.mv).length + ' especies)');
 
+  console.log('\n--- modelo de dano: regras do jogo (STAB, matchup amplificado) e chance de matar de 1 golpe ---');
+  const rd = api.ritmoDe;
+  ok(rd(0) === 0 && rd(0.05) > 0.03 && rd(0.05) < 0.1 && rd(0.5) > 0.35 && rd(0.5) < 0.5, 'longe de matar de 1, o ritmo acompanha o dano (0.05 -> ' + rd(0.05).toFixed(3) + ', 0.5 -> ' + rd(0.5).toFixed(2) + ')');
+  ok(rd(0.01) > 0.0105 && rd(0.01) < 0.012 && rd(0.001) > 0.00105 && rd(0.001) < 0.0012, 'com 100 golpes por kill o ritmo e ~1.13 x folga, nao 3x (a cauda da tabela era chutada em 1/30): ' + rd(0.01).toFixed(4));
+  const lo = Math.exp(-4.6); ok(rd(lo * 0.9999) <= rd(lo) && rd(lo) <= rd(lo * 1.0001), 'sem degrau na borda inferior da tabela');
+  ok(rd(1) > 0.65 && rd(1) < 0.8, 'matar de 1 NO LIMITE nao vale 1: com a incerteza do modelo e ~' + rd(1).toFixed(2) + ' (antes: 1, empate com quem sobra 3x)');
+  ok(rd(2) > 0.93 && rd(3) > 0.98 && rd(10) > 0.995 && rd(100) <= 1, 'com folga larga chega perto de 1, nunca passa (2 -> ' + rd(2).toFixed(3) + ', 3 -> ' + rd(3).toFixed(3) + ')');
+  ok([0.1, 0.3, 0.7, 1, 1.4, 1.46, 2, 4].every((m, k, arr) => k === 0 || rd(m) > rd(arr[k - 1])), 'estritamente crescente: folga 1.46 rende mais que 1.40 (o empate em 100 acabou)');
+  const ramp = api.sugCalc({ sp: 'rampardos', level: 150, q: 1, ivt: 96, tlv: 0, mult: 1 }, lista.find((x) => x.name === 'Brave Charizard'));
+  ok(ramp && ramp.eff === 5.5 && ramp.nome === 'Head Smash', 'Rampardos em Brave Charizard: pedra x4 vira x5.5 na hunt, como o guia do jogo diz (' + ramp.nome + ' x' + ramp.eff + ')');
+  const resist = lista.find((x) => x.t1 === 'WATER' && !x.t2 && (+x.level || 0) <= 100);
+  const rampW = resist && api.sugCalc({ sp: 'charizard', level: 100, q: 1, ivt: 96, tlv: 0, mult: 1 }, resist);
+  ok(!rampW || rampW.eff !== 0.5, 'resistencia divide por 1.5 (x0.5 vira x0.33), nunca fica no x0.5 cru' + (rampW ? ' (' + resist.name + ': ' + rampW.nome + ' x' + rampW.eff + ')' : ''));
+  ok(b.includes("const stab = g[2] && (am.t || []).indexOf(g[2]) >= 0 ? 1.5 : 1;") && b.includes("const dano = 0.1 * p * eff * stab * (ofn / dfn);") && R.mv.charizard.t[0] === 'FIRE', 'STAB x1.5 so no golpe com o tipo do proprio pokemon (tipos do catalogo em maiusculas), K=0.1 mantem a escala');
+  ok(b.includes("return e > 1 ? 1 + (e - 1) * 1.5 : e < 1 ? e / 1.5 : e; // mesma amplificacao"), 'a efetividade da linha do Simples (vs lider) usa a mesma escala amplificada do golpe');
+  ok(b.includes("const ritmo = ritmoDe(best.rt);") && !b.includes('fFolga'), 'o ritmo e a chance de matar de 1; o fator de folga a parte saiu (nao pesa duas vezes)');
+  const cem600 = (() => { const rows = api.tierCalc(600, false); const max = rows[0].comp; return rows.filter((r) => Math.round(r.comp / max * 100) >= 100).length; })();
+  ok(cem600 === 1, 'tierlist nv600: uma especie em 100, nao um bloco (' + cem600 + ')');
+  const swN = api.dittoSweep(dShiny, lista); const mxN = swN[0].sc;
+  ok(swN.filter((r) => Math.round(r.sc / mxN * 100) >= 100).length <= 3, 'Shiny Ditto por tipo: no maximo 3 tipos em 100 (eram 13 com o teto fixo)');
+  const melhor = (sp) => { let bb = null; lista.forEach((x) => { if ((+x.level || 0) > 600) return; const g = api.sugCalc({ sp, level: 300, q: 2.0, ivt: 119, tlv: 600, mult: 0.8 }, x); if (g && (!bb || g.xph > bb.xph)) bb = g; }); return bb; };
+  const gv = melhor('gardevoir'), hc = melhor('hitmonchan');
+  ok(gv && hc && gv.xph !== hc.xph && gv.ritmo < 1 && hc.ritmo < 1, 'Gardevoir e Hitmonchan (Shiny Ditto Lv300) nao empatam mais em 100: ' + Math.round(gv.xph) + ' contra ' + Math.round(hc.xph) + ' XP por golpe');
   console.log(fail ? '\nFALHOU' : '\nTODOS PASSARAM');
   process.exit(fail);
 })().catch((e) => { console.log('FAIL excecao no teste: ' + ((e && e.stack) || e)); process.exit(1); });

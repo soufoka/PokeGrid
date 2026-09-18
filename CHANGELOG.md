@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.22
+
+- **Tierlist e Ditto: nota que separa de verdade.** O modelo de dano passou a seguir as regras que o jogo documenta: efetividade amplificada na hunt (×2 vira ×2.5, ×4 vira ×5.5, resistências dividem por 1.5), STAB ×1.5 no golpe do próprio tipo, golpe físico contra a Defesa e especial contra a Defesa Especial do selvagem, e a vida dele dizendo quantos golpes o kill leva. E matar de um golpe no limite deixou de valer o mesmo que matar com folga: a nota usa a chance de matar de um golpe, então dezenas de espécies (e todos os tipos do Shiny Ditto) não empatam mais em 100. Vale pra tierlist, pra sugestão de hunt do Simples e pro painel do Ditto.
+  *Tierlist and Ditto scores now separate: the damage model follows the game's documented rules (amplified matchups in hunts, STAB, physical vs Defense and special vs Sp. Def, the wild's HP deciding hits per kill), and a marginal one-shot no longer scores the same as a comfortable one. Dozens of species (and every Shiny Ditto type) stopped tying at 100.*
+- **O app passa a ler o dano real de cada golpe e a vida do selvagem** (vêm na mensagem de campo do jogo). A lista de hunts mostra os golpes por kill medidos ao lado da sua média; é com isso que o modelo será calibrado.
+  *The app now reads the real damage per hit and the wild's HP from the game's field messages; the hunt list shows measured hits per kill next to your average.*
+
 ## 1.5.21
 
 - **Pokébolas infinitas e com validade** (lançamento de 17/09 à noite): o jogo passou a ter bola de arremessos ilimitados por um prazo, bola vinculada ao personagem e bola com validade. O app contava a infinita como "1 bola" e avisava "poucas pokébolas" o tempo todo, cobrava o preço dela a cada arremesso no saldo da sessão, e contava bola vencida como disponível. Agora: com uma infinita válida a contagem é ilimitada (sem alerta), o arremesso dela custa zero, a vencida não conta e some da mochila, e a infinita aparece com ∞.
