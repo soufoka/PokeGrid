@@ -125,7 +125,7 @@ function baixaUserScript(url, saltos = 0) {
     let u;
     try { u = urlRaw(new URL(String(url))); } catch { resolve({ ok: false, error: 'Link invalido.' }); return; }
     if (u.protocol !== 'https:' || !US_HOSTS.has(u.hostname) || !/\.js$/i.test(u.pathname)) {
-      resolve({ ok: false, error: 'Use um link https do GitHub para um arquivo .js' }); return;
+      resolve({ ok: false, error: saltos ? 'O GitHub redirecionou para um endereco fora da lista (link de release?). Use o link do arquivo .js dentro do repositorio.' : 'Use um link https do GitHub para um arquivo .js' }); return;
     }
     const req = https.get(u, { headers: { 'User-Agent': 'PokeGrid/' + app.getVersion(), Accept: 'text/plain' } }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
@@ -143,7 +143,12 @@ function baixaUserScript(url, saltos = 0) {
         if (tam > 2 * 1024 * 1024) { parou = true; req.destroy(); resolve({ ok: false, error: 'O script passa de 2 MB.' }); }
         else corpo += c;
       });
-      res.on('end', () => { if (!parou) resolve({ ok: true, url: u.toString(), code: corpo }); });
+      res.on('end', () => {
+        if (parou) return;
+        const c0 = corpo.trim(); // pagina de erro/HTML do GitHub nao e script: nenhum .js valido comeca com '<'
+        if (!c0 || c0[0] === '<') { resolve({ ok: false, error: 'Esse link nao devolveu um arquivo .js. Abra o arquivo no GitHub e copie o link dele.' }); return; }
+        resolve({ ok: true, url: u.toString(), code: corpo });
+      });
       res.on('error', () => { if (!parou) { parou = true; resolve({ ok: false, error: 'Falha ao ler o script.' }); } });
     });
     req.setTimeout(12000, () => req.destroy(new Error('timeout')));

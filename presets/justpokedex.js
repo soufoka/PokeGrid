@@ -5588,13 +5588,13 @@
             for (const chave of Object.keys(CONFIG.expoentes)) {
                 ivsFloats[chave] = estimarIVIndividual({
                     atributoAtual: atuais[chave], atributoBase: bases[chave],
-                    nivel, qualidade, expoente: CONFIG.expoentes[chave]
+                    nivel: Number(pk.nivel) > 0 ? Number(pk.nivel) : nivel, qualidade, expoente: CONFIG.expoentes[chave] // IV e estimado no nivel em que os stats foram OBSERVADOS, nao no digitado
                 });
                 ivs[chave] = arredondar(ivsFloats[chave] ?? 0, 1);
             }
             const soma = Object.values(ivsFloats).reduce((t, v) => t + (v || 0), 0);
-            // mesmo criterio do painel: o IV informado pelo jogo tem prioridade se o nivel nao mudou
-            const ivObs = (pk.ivAtual != null && Number(pk.nivel) === nivel) ? Number(pk.ivAtual) : null;
+            // o IV do jogo e inato e nao muda com o nivel: vale em qualquer projecao
+            const ivObs = (pk.ivAtual != null) ? Number(pk.ivAtual) : null;
             const usaObs = Number.isFinite(ivObs) && ivObs > 0;
             const pct = ((usaObs ? ivObs : soma) / CONFIG.maxIVTotal) * 100;
             const ehShiny = /shiny/i.test(String(pk.nome || ""));

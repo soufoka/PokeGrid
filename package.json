@@ -1,13 +1,13 @@
 {
   "name": "pokegrid",
-  "version": "1.5.20",
+  "version": "1.5.21",
   "description": "Rode 4 contas de Poke Idle World ao mesmo tempo, em uma janela so / Run 4 Poke Idle World accounts at once, in a single window",
   "main": "main.js",
   "author": "soufoka",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder",
-    "test": "node test/iv-math.test.js && node test/boot.test.js"
+    "test": "node test/iv-math.test.js && node test/boot.test.js && node test/atualizacao-jogo.test.js && node test/volta-hunt.test.js && node test/cacada-1521.test.js && node test/tierlist-ditto.test.js"
   },
   "keywords": [
     "electron",

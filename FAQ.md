@@ -19,6 +19,9 @@ Electron (Chromium, o motor do Chrome). Cada conta roda numa sessão separada.
 ### Onde vejo a sugestão de hunts?
 **Simples → seção Hunts**: ordene por **Sugerido** e escolha o atacante no **"caçar com"**. Com Ditto no time, aparece a melhor transformação por elemento. As estimativas de kills/h e XP/h surgem depois que o app mede algumas hunts suas.
 
+### Tenho um Shiny Ditto: onde caço e em que viro?
+**☰ Opções → ✨ Ditto** (logo abaixo da Tierlist). Escolha shiny ou comum, o nível do Ditto e o nível da conta (qualidade e IV são fixos no jogo, o app já usa os certos); **Meu Ditto…** preenche com o Ditto do seu time. **Por hunt** lista as hunts da melhor pra pior, cada uma com a forma certa pra ela; **Por tipo** mostra a melhor forma de cada elemento. Só entram formas que o jogo deixa o Ditto copiar (o shiny só vira espécie com forma shiny), sem TM, e com o debuff do jogo na conta.
+
 ### Mudo um filtro e nada acontece / painel demora
 Bug corrigido na **1.5.11**: o painel segurava a atualização enquanto o foco ficava no seletor. Fora isso, o Simples atualiza a cada 10s de propósito, pra pesar menos.
 
@@ -29,13 +32,19 @@ Bug corrigido na **1.5.11**: o painel segurava a atualização enquanto o foco f
 **Opções → Scripts**, desmarque a caixinha. Desde a 1.5.11 isso recarrega as contas e o script para na hora. Antes: desmarque e clique em **⟳ Atualizar tudo**.
 
 ### Como exporto os logs de hunt?
-**Simples → Hoje → "⬇ Hunts (N)"**. Baixa duas planilhas (hunts e drops) que abrem direto no Excel. O app guarda as últimas 150 hunts.
+**Simples → Hoje → "⬇ Hunts (N)"**. Baixa duas planilhas (hunts e drops) que abrem direto no Excel. O app guarda as últimas 150 hunts; as mais antigas ficam em `%APPDATA%\pokegrid\backups\hunts-historico.csv` (e `hunts-historico-drops.csv` pros drops por item).
 
 ### O ouro da sessão não bate com o Hunt Analyzer do jogo
 A partir da 1.5.16 bate: o app passou a usar os números do próprio servidor do jogo, os mesmos que o Hunt Analyzer mostra. Antes ele refazia a conta por fora e errava em coisas que só o servidor sabe (qual pokébola foi usada em cada arremesso, se o pokémon novo veio de captura ou do mercado, se a poção saiu por uso ou por venda). Se ainda houver diferença, lembre que o relógio do Hunt Analyzer zera ao trocar de hunt e no 🗑 dele, e nenhum dos dois mede o ouro real da carteira: os dois mostram o valor do que caiu, a preço de NPC.
 
+### O app recarregou um painel e a conta ficou parada na cidade
+É o jogo: toda vez que a página recarrega, ele coloca a conta em Cerulean. O app recarrega sozinho quando um painel trava ou cai. Em **☰ Opções** existe o **↩ Voltar pra hunt** (experimental, desligado por padrão): ligado, o app manda a conta de volta pra mesma hunt 12 segundos depois do recarregamento (e repete a cada 12 s, até 3 vezes, enquanto não houver kill), desde que ela tenha matado algo nos últimos 10 minutos. A tela do jogo pode continuar mostrando a cidade enquanto a conta farma; os números do Painel e do Simples são os do servidor.
+
 ### E o captcha?
 O app nunca resolve captcha. É sempre você, na janela da conta. Proposital, não vai mudar.
+
+### Ativei o 2FA no jogo, o app funciona?
+Funciona. O app preenche e-mail e senha e para ali. Depois da senha o jogo pede o código do autenticador na janela da conta: você digita, igual ao captcha. O app nunca toca no código.
 
 ### Como funciona a proteção de venda?
 Com o escudo ligado, o app pede confirmação antes de vender shiny, qualidade Lendária ou acima e itens raros. Desde a 1.5.11 dá pra travar seus próprios itens na engrenagem do painel (**🔒 Cadeado de venda**).
