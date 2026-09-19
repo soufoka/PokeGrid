@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.23
+
+- **Painel do Ditto que ficava vazio pra sempre** (só o rodapé "N hunts acima do nível da conta ficaram de fora"). Quando o catálogo de criaturas do jogo demora ou falha na primeira tentativa, o quadro do Simples pedia a varredura do Ditto sem catálogo e o resultado vazio ficava guardado com a mesma chave que o painel usa depois. Em conexão lenta acontecia sempre. Resultado vazio não fica mais no cache, e a chegada do catálogo invalida o que foi calculado sem ele.
+  *Ditto panel stuck empty forever (only the "N hunts above the account level" footer): the Simple view's board requested the sweep before the creature catalog had loaded and the empty result stayed cached under the same key the panel uses. Empty results are no longer cached and the catalog's arrival invalidates them.*
+
 ## 1.5.22
 
 - **Tierlist e Ditto: nota que separa de verdade.** O modelo de dano passou a seguir as regras que o jogo documenta: efetividade amplificada na hunt (×2 vira ×2.5, ×4 vira ×5.5, resistências dividem por 1.5), STAB ×1.5 no golpe do próprio tipo, golpe físico contra a Defesa e especial contra a Defesa Especial do selvagem, e a vida dele dizendo quantos golpes o kill leva. E matar de um golpe no limite deixou de valer o mesmo que matar com folga: a nota usa a chance de matar de um golpe, então dezenas de espécies (e todos os tipos do Shiny Ditto) não empatam mais em 100. Vale pra tierlist, pra sugestão de hunt do Simples e pro painel do Ditto.

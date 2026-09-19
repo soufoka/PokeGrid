@@ -52,7 +52,7 @@ const entre = (a, fim, incl) => { const i = b.indexOf(a); if (i < 0) throw new E
   const blocoTier = entre('  function tierCalc(nivel, comTm) {', '  const tlNameId = ', false);
   const api = new Function('window', 'R', 'lista',
     'let basesByName = R.bs, movesByName = R.mv, creaturesById = R.byId, huntsCache = lista, huntsCacheT = 1, tlCache = null;\n'
-    + blocoSug + '\n' + blocoDitto + '\n' + blocoTier + '\nreturn { sugCalc, tierCalc, dittoRegras, dittoAlvo, dittoSweep, dittoHunts, dittoVarre, ritmoDe };')({ PokeGridIvMath: M }, R, lista);
+    + blocoSug + '\n' + blocoDitto + '\n' + blocoTier + '\nreturn { sugCalc, tierCalc, dittoRegras, dittoAlvo, dittoSweep, dittoHunts, dittoVarre, ritmoDe, setCat: (mv, bs) => { movesByName = mv; basesByName = bs; } };')({ PokeGridIvMath: M }, R, lista);
 
   console.log('\n--- sugCalc: TM so entra pra quem aprendeu o disco ---');
   const czA = { sp: 'charizard', level: 100, q: 1.5, ivt: 120, tlv: 0, mult: 1 };
@@ -176,6 +176,17 @@ const entre = (a, fim, incl) => { const i = b.indexOf(a); if (i < 0) throw new E
   const melhor = (sp) => { let bb = null; lista.forEach((x) => { if ((+x.level || 0) > 600) return; const g = api.sugCalc({ sp, level: 300, q: 2.0, ivt: 119, tlv: 600, mult: 0.8 }, x); if (g && (!bb || g.xph > bb.xph)) bb = g; }); return bb; };
   const gv = melhor('gardevoir'), hc = melhor('hitmonchan');
   ok(gv && hc && gv.xph !== hc.xph && gv.ritmo < 1 && hc.ritmo < 1, 'Gardevoir e Hitmonchan (Shiny Ditto Lv300) nao empatam mais em 100: ' + Math.round(gv.xph) + ' contra ' + Math.round(hc.xph) + ' XP por golpe');
+
+  console.log('\n--- painel do Ditto vazio pra sempre (Chidexxi, 18/09): catalogo atrasado nao envenena o cache ---');
+  const d121 = { sp: 'shiny ditto', level: 121, q: 0, ivt: 0, tlv: 121 };
+  api.setCat({}, {});
+  const antes = api.dittoVarre(d121, lista);
+  api.setCat(R.mv, R.bs);
+  const depois = api.dittoVarre(d121, lista);
+  ok(antes.hunts.length === 0 && antes.rows.length === 0, 'sem catalogo (creatures.json ainda nao chegou) a varredura vem vazia');
+  ok(depois.hunts.length > 200 && depois.rows.length === 18, 'o MESMO pedido depois do catalogo chegar vem cheio: ' + depois.hunts.length + ' hunts, ' + depois.rows.length + ' tipos (antes o vazio ficava no cache e o painel mostrava so o rodape "226 hunts acima do nivel da conta")');
+  ok(api.dittoVarre(d121, lista) === depois, 'e o resultado cheio, esse sim, fica no cache');
+  ok(lista.filter((x) => (+x.level || 0) > 121).length === 226 && depois.hunts.length === 224, 'o caso real: conta Lv121 com Shiny Ditto Lv121 tem 224 hunts alcancaveis e 226 de fora');
   console.log(fail ? '\nFALHOU' : '\nTODOS PASSARAM');
   process.exit(fail);
 })().catch((e) => { console.log('FAIL excecao no teste: ' + ((e && e.stack) || e)); process.exit(1); });

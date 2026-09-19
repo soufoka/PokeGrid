@@ -2821,8 +2821,13 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
   };
   const dittoVarre = (A, lista) => {
     const R = dittoRegras(A);
-    const key = (R.ehShiny ? 's' : 'n') + ':' + A.level + ':' + A.tlv + ':' + R.fix.q + ':' + R.fix.ivt + ':' + huntsCacheT + ':' + lista.map(x => x.name + '@' + x.level).join('|'); // a lista inteira: trocar uma hunt no meio invalida
+    // a chave leva o tamanho do catalogo: o HUNTS_JS entrega as hunts mesmo com o creatures.json (1,6 MB) atrasado ou
+    // fora, o quadro do Simples pedia a varredura nesse meio tempo e o resultado vazio ficava no cache com a mesma chave
+    // que o painel do Ditto usa depois (painel vazio pra sempre, com o rodape das hunts fora do nivel). Vazio nao entra.
+    const nCat = Object.keys(movesByName).length;
+    const key = (R.ehShiny ? 's' : 'n') + ':' + A.level + ':' + A.tlv + ':' + R.fix.q + ':' + R.fix.ivt + ':' + huntsCacheT + ':' + nCat + ':' + lista.map(x => x.name + '@' + x.level).join('|'); // a lista inteira: trocar uma hunt no meio invalida
     const hit = dittoCache.get(key); if (hit) return hit;
+    if (!nCat || !lista.length) return { key, rows: [], hunts: [] };
     const porTipo = {}, porHunt = {};
     // empate no teto: efetividade, depois folga (a mais robusta se a constante de dano estiver otimista)
     const melhor = (c2, cand) => !c2 || cand.sc > c2.sc || (cand.sc === c2.sc && (cand.sg.eff > c2.sg.eff || (cand.sg.eff === c2.sg.eff && (cand.sg.mg || 0) > (c2.sg.mg || 0))));
@@ -2846,8 +2851,7 @@ return {live,hasBalls,hasInv,balls,potions,revives,prevHunt:resumo(P.prev),shiny
     const rows = Object.keys(porTipo).map(ty => Object.assign({ ty }, porTipo[ty])).sort((p, q) => q.sc - p.sc);
     const hunts = Object.keys(porHunt).map(k => porHunt[k]).sort((p, q) => (q.sc - p.sc) || (q.sg.eff - p.sg.eff) || ((q.sg.mg || 0) - (p.sg.mg || 0)));
     const out = { key, rows, hunts };
-    if (dittoCache.size >= 4) dittoCache.delete(dittoCache.keys().next().value);
-    dittoCache.set(key, out);
+    if (rows.length) { if (dittoCache.size >= 4) dittoCache.delete(dittoCache.keys().next().value); dittoCache.set(key, out); } // vazio nao fica no cache
     return out;
   };
   const dittoSweep = (A, lista) => dittoVarre(A, lista).rows;   // por tipo (quadro do Simples)
