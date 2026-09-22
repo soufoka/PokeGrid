@@ -179,14 +179,14 @@ const espera = () => new Promise((r) => setTimeout(r, 20));
   ok(b.includes('const hlAlvo = +alvoX.level || +((movesByName[alvoX.sp] || {}).hl || 0);'), 'Ditto: aviso de nivel usa o nivel do mapa');
   {
     const hkey = new Function(entre(b, '  const hkey = ', '\n', false) + '\nreturn hkey;')();
-    const src = entre(b, '  const kphLog = (pi) => {', '  const calibraK = ', false);
+    const src = entre(b, '  const kphLog = (pi) => {', '  // (calibraK saiu na 1.5.24', false);
     const huntLog = [{ p: 0, hunt: 'Gyarados', kills: 700, start: 0, end: 3600e3 }, { p: 1, hunt: 'Gyarados', kills: 100, start: 0, end: 3600e3 }];
     const kphLog = new Function('huntLog', 'hkey', src + '\nreturn kphLog;')(huntLog, hkey);
     ok(Math.round(kphLog(0).gyarados) === 700, 'calibragem: so as hunts do painel do atacante (' + Math.round(kphLog(0).gyarados) + ' kills/h)');
     ok(Math.round(kphLog(1).gyarados) === 100, 'a outra conta tem a medicao dela (' + Math.round(kphLog(1).gyarados) + ')');
     ok(kphLog(null).gyarados > 0, 'sem atacante definido: usa todas, como antes');
-    ok(b.includes('cid: rSel.cid, pi: rSel.i,') && b.includes('stA[hkey(x.sl || x.name)]'), 'e as medicoes por hunt vem da conta do atacante');
-    ok(b.includes("out.push({sl:String(m2.slug||''),") && b.includes('accStats[hkey(x2.sl || x2.name)]') && b.includes('kLog[hkey(x.sl || x.name)]'), 'medicao casa pelo slug do marcador (nome com pontuacao nao casava)');
+    ok(b.includes('cid: rSel.cid, pi: rSel.i,') && b.includes("danoAmostra(r.cid + '|' + hk,"), 'e a amostra de dano real e por conta e hunt (o lider de uma conta nao calibra a outra)');
+    ok(b.includes("out.push({sl:String(m2.slug||''),") && b.includes('accStats[hkey(x2.sl || x2.name)]') && b.includes('hkey(x2.sl || x2.name) === hk'), 'medicao casa pelo slug do marcador (nome com pontuacao nao casava)');
   }
   ok(b.includes("';window.__pgSellTxt=' + JSON.stringify([t('sgAviso'), t('sgConfirma')])).catch(() => {});"), 'venda protegida: texto traduzido tambem ao recarregar o painel');
   {
@@ -267,9 +267,9 @@ const espera = () => new Promise((r) => setTimeout(r, 20));
   ok(b.includes("const BK_SKIP = ['userScripts', 'scriptsOn', 'webhook', 'curDay']"), 'curDay nao viaja no export/import (importado, mandaria o resumo do dia de outra pessoa pro Discord)');
   ok(b.includes("if (okC || window.confirm(t('bkNoCopy'))) grava();") && s.split("bkNoCopy:'").length - 1 === 3, 'importar sem conseguir a copia de seguranca pergunta antes (3 idiomas)');
   ok(b.includes("lista.map(x => x.name + '@' + x.level).join('|')"), 'cache do Ditto: a lista inteira de hunts entra na chave (trocar uma do meio invalidava nada)');
-  ok(b.includes("const discos = comTm ? [...new Set((movesByName[sp].a || []).map(g => g[6]).filter(Boolean))] : []") && b.includes("if (discos.length) soma = Math.max(...somas);"), 'aba Geral com TM: um disco por vez (o jogo so deixa 1 TM por pokemon), fica a melhor soma');
-  ok(b.includes('(x2.sug.tm ? \' <b style="color:#f2c665;font-size:9px">TM</b>\' : \'\')'), 'linha do Sugerido marca quando o golpe e de TM');
-  ok(s.split('poder 600, Dragão 300').length - 1 === 1 && s.includes('power 600, Dragon 300') && s.includes('poder 600, Dragón 300'), 'texto do TM cita o Dragao com 300');
+  ok(b.includes("const discos = comTm ? tmDiscos(movesByName[sp]) : []") && b.includes("if (discos.length) soma = Math.max(...somas);"), 'aba Geral com TM: um disco por vez (o jogo so deixa 1 TM por pokemon), fica a melhor soma');
+  ok(b.includes('(x2.sug.tm ? \' <b style="color:#f2c665;font-size:9px">TM \' + esc(x2.sug.tm) + \'</b>\' : \'\')'), 'linha do Sugerido marca qual TM entrou (tipo e/ou AOE)');
+  ok(s.split('golpe extra em área a cada 10 s').length - 1 === 1 && s.includes('extra area hit every 10 s') && s.includes('golpe extra en área cada 10 s'), 'texto da caixinha com TM explica as duas classes (elemental em area a cada 10 s e AoE), 3 idiomas');
   ok(b.includes("(wv.getURL() || '').startsWith('https://poke.idleworld.online/play') && /^[a-z0-9_-]{1,60}$/i.test(snv.slug || '')"), 'Voltar pra hunt so arma na pagina do jogo (manutencao/namelock nao recebem enter-hunt)');
   ok(b.includes("name: 'JustPokédex: Calculadora de IV'"), 'preset sem travessao');
   ok(b.includes("podadas.forEach(h => { h.drops = []; }); salvaHuntLog();"), 'drops esvaziados vao pro disco na hora (crash no meio nao reanexa)');

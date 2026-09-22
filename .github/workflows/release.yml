@@ -28,3 +28,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # Evidencia pra quando o Windows/navegador chama o instalador de virus: o Defender do proprio runner
+      # varre os executaveis gerados e o resultado fica no log do build. Nao bloqueia o release.
+      - name: Windows Defender scan (informativo)
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & "$env:ProgramFiles\Windows Defender\MpCmdRun.exe" -SignatureUpdate | Out-Null
+          Get-ChildItem dist -Filter *.exe | ForEach-Object {
+            Write-Host "== $($_.Name) =="
+            & "$env:ProgramFiles\Windows Defender\MpCmdRun.exe" -Scan -ScanType 3 -File $_.FullName -DisableRemediation
+          }

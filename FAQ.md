@@ -11,6 +11,12 @@ Não. Backup = copiar a pasta `%APPDATA%\pokegrid`. Só as senhas não migram pr
 ### O processo abre mas a janela não aparece
 Bug das versões 1.5.5 a 1.5.9, corrigido na **1.5.10**. Baixe a mais recente: https://github.com/soufoka/PokeGrid-source
 
+### O Windows ou o navegador dizem que o app é vírus
+É o aviso padrão para programa **sem assinatura digital**: o instalador não é assinado (o certificado custa, e o projeto é gratuito). O SmartScreen mostra "O Windows protegeu o PC" e o Chrome/Edge podem dizer que o arquivo "não é baixado com frequência". Nenhum dos dois é uma detecção de vírus. O código é aberto e cada versão sai de uma compilação pública no GitHub Actions, com o resultado do Windows Defender no log. Pra instalar: clique em **Mais informações** e depois em **Executar assim mesmo**; no navegador, **Manter**. Se preferir não passar por isso, rode pelo código-fonte: https://github.com/soufoka/PokeGrid-source
+
+### A tierlist, o Sugerido e o painel do Ditto ficam vazios
+Bug das versões 1.5.5 a 1.5.23 do instalador, da portátil e do zip: um arquivo do app ficava fora do pacote e essas telas não tinham como calcular. Corrigido na **1.5.24**. Quem roda pelo código-fonte nunca teve o problema.
+
 ### Qual navegador o app usa?
 Electron (Chromium, o motor do Chrome). Cada conta roda numa sessão separada.
 

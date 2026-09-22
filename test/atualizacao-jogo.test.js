@@ -125,25 +125,26 @@ console.log('\n--- pokebolas infinitas, vinculadas e com validade (lancamento de
   ok(zero.al.hasBalls === true && zero.al.balls === 0, 'sem bola de verdade continua 0 (o alerta de "sem pokebola" segue funcionando)');
 }
 
-console.log('\n--- coletor le o dano real por golpe e a vida do selvagem (mensagem field do jogo) ---');
+console.log('\n--- coletor le cada golpe do jogo: acertos, salvas em area, alvos e dano em % da vida ---');
 {
   const c0 = s.indexOf("m.type==='field'){") + "m.type==='field'){".length; const trecho = s.slice(c0, s.indexOf('}else if(', c0));
   const S = {}; const roda = (m) => new Function('m', 'S', trecho)(m, S);
-  roda({ type: 'field', hits: [{ slot: 0, amount: 120, move: 'Psychic' }, { slot: -1, amount: 40 }, { slot: 1, amount: 0 }, { slot: 2, amount: 80 }], mobs: [{ slot: 0, hp: 10, maxHp: 200 }, { slot: 1, hp: 150, maxHp: 150 }] });
-  roda({ type: 'field', hits: [], mobs: [{ slot: 0, hp: 200, maxHp: 200 }] });
-  ok(S.hits === 2, 'conta so golpes do seu pokemon no selvagem (slot >= 0, dano > 0): ' + S.hits + ' golpes');
-  ok(S.pctN === 1 && Math.abs(S.pct - 0.6) < 1e-9 && S.slotHp[0] === 200 && S.slotHp[1] === 150, 'dano em % da vida do alvo ATINGIDO (120 em 200 = 60%); alvo cuja vida nunca chegou fica fora da media, nao do total');
-  roda({ type: 'field', hits: [{ slot: 0, amount: 50, move: 'Omega Clap' }, { slot: 1, amount: 45, move: 'Omega Clap' }, { slot: 0, amount: 100, move: 'Psychic' }], mobs: [{ slot: 0, maxHp: 200 }, { slot: 1, maxHp: 150 }] });
-  ok(S.hits === 3 && S.pctN === 2 && Math.abs(S.pct - 1.1) < 1e-9, 'o TM em area (mesmo golpe em 2 alvos no mesmo tick) nao entra: e um golpe extra a cada 10 s, nao a cadencia');
-  roda({ type: 'field', hits: [{ slot: 0, amount: 150, move: 'Psychic', crit: true }, { slot: 0, amount: 10, move: 'Psychic', blocked: true }], mobs: [{ slot: 0, maxHp: 200 }, { slot: 3, maxHp: 20000 }] });
-  roda({ type: 'field', hits: [{ slot: 3, amount: 70, move: 'Psychic' }], mobs: [{ slot: 0, maxHp: 200 }, { slot: 3, maxHp: 20000 }] }); // premissa do coletor: um tick traz no maximo um golpe normal por alvo; o mesmo golpe em 2 alvos no mesmo tick e salva de area
-  ok(S.hits === 6 && S.pctN === 3 && Math.abs(S.pct - 1.1035) < 1e-9, 'critico e bloqueio contam como golpe mas ficam fora da media de dano; o boss de 20000 de vida so pesa no proprio golpe (0.35%), nao esmaga os outros');
+  roda({ type: 'field', hits: [{ slot: 0, amount: 120, move: 'Psychic' }, { slot: -1, amount: 40 }, { slot: 1, amount: 0 }, { slot: 2, amount: 80, move: 'Psychic' }], mobs: [{ slot: 0, hp: 10, maxHp: 200 }, { slot: 1, hp: 150, maxHp: 150 }] });
+  ok(S.mv.Psychic.n === 2 && S.mv.Psychic.s === 1 && S.mv.Psychic.a === 2, 'golpe do seu pokemon (slot >= 0, dano > 0) conta por nome; o mesmo golpe em 2 alvos no tick e uma salva de 2 alvos (splash do AoE TM)');
+  ok(S.mv.Psychic.pn === 1 && Math.abs(S.mv.Psychic.p - 0.6) < 1e-9, 'dano em % da vida do alvo ATINGIDO (120 em 200 = 60%); alvo sem vida conhecida fica fora da media');
+  roda({ type: 'field', hits: [{ slot: 0, amount: 50, move: 'Ignition Point' }, { slot: 1, amount: 45, move: 'Ignition Point' }, { slot: 3, amount: 40, move: 'Ignition Point' }, { slot: 0, amount: 100, move: 'Psychic' }], mobs: [{ slot: 0, maxHp: 200 }, { slot: 1, maxHp: 150 }, { slot: 3, maxHp: 100 }] });
+  ok(S.mv['Ignition Point'].s === 1 && S.mv['Ignition Point'].a === 3 && S.mv.Psychic.n === 3, 'a salva do TM elemental fica separada do golpe normal, com os alvos que acertou (3)');
+  roda({ type: 'field', hits: [{ slot: 0, amount: 150, move: 'Psychic', crit: true }, { slot: 0, amount: 10, move: 'Psychic', blocked: true }], mobs: [{ slot: 0, maxHp: 200 }] });
+  ok(S.mv.Psychic.n === 5 && S.mv.Psychic.pn === 2 && Math.abs(S.mv.Psychic.p - 1.1) < 1e-9, 'critico e bloqueio contam como acerto mas ficam fora da media de dano');
+  for (let k = 0; k < 14; k++) roda({ type: 'field', hits: [{ slot: 0, amount: 10, move: 'Golpe' + k }], mobs: [{ slot: 0, maxHp: 200 }] });
+  ok(Object.keys(S.mv).length === 12 && S.mvX && S.mvX.n >= 4 && !S.mv.Psychic && S.mv.Golpe13, 'teto de 12 golpes: despeja o que nao acerta ha mais tempo num residual (nada some da contagem), e o golpe novo entra');
   const lit = (nome) => { const i = s.indexOf('const ' + nome); const a = s.indexOf('`', i) + 1; return eval('`' + s.slice(a, s.indexOf('`', a)) + '`'); };
   const RS = lit('READ_STATE');
-  const st = new Function('window', 'return ' + RS)({ __poke: { ws: { balls: { catalog: [], counts: {} }, inventory: { items: [] }, pokes: { list: [] } }, api: { '/api/characters/me': { character: { id: 1, name: 'A', level: 10 } } }, sess: { start: 1, drops: {}, kills: 10, hits: 13, pct: 6.5, pctN: 13 } } });
-  ok(st && st.a && st.a.hpk === 1.3 && st.a.hitHp === 50, 'o painel recebe golpes por kill e dano medio em % da vida (' + (st && st.a && st.a.hpk) + ' golpes/kill, ' + (st && st.a && st.a.hitHp) + '%)');
-  ok(s.includes("hpk: +a.hpk > 0 ? Math.round(((c.hpk || +a.hpk) * (1 - al) + (+a.hpk) * al) * 10) / 10 : (c.hpk || 0)") && s.includes("t('cdHitsKill')") && s.split("cdHitsKill:'").length - 1 === 3, 'a media por hunt guarda golpes/kill e a lista mostra (3 idiomas)');
-  ok(s.includes("kph: pha(sb('kills')), hpk, hitHp,") && s.includes("kph: ph(S.kills), hpk, hitHp,"), 'os dois caminhos do READ_STATE (Hunt Analyzer do servidor e conta local) devolvem golpes/kill e dano/vida');
+  const st = new Function('window', 'return ' + RS)({ __poke: { ws: { balls: { catalog: [], counts: {} }, inventory: { items: [] }, pokes: { list: [] } }, api: { '/api/characters/me': { character: { id: 1, name: 'A', level: 10 } } }, sess: { start: 1, drops: {}, kills: 10, hits: 13, mv: { Psychic: { n: 10, s: 0, a: 0, p: 5, pn: 10 }, 'Ignition Point': { n: 6, s: 2, a: 6, p: 4.8, pn: 6 } } } } });
+  ok(st && st.a && st.a.hpk === 1.2 && st.a.tma === 3 && st.a.mvs.length === 2 && st.a.mvs[0].m === 'Psychic' && st.a.mvs[0].hp === 50 && st.a.mvs[1].hp === 80, 'o painel recebe ataques por kill (salva = 1 ataque: 10 + 2 = 12 em 10 kills), alvos por salva (3) e o dano de cada golpe (normal 50%, TM 80%)');
+  ok(s.includes("kph: pha(sb('kills')), hpk, tma, mvs,") && s.includes("kph: ph(S.kills), hpk, tma, mvs,"), 'os dois caminhos do READ_STATE (Hunt Analyzer do servidor e conta local) devolvem isso');
+  ok(s.includes("'hpk', 'tma'].forEach(k => a[k] = num(a0[k]));") && s.includes("a.mvs = (Array.isArray(a0.mvs) ? a0.mvs : []).slice(0, 8)"), 'e o push saneado deixa passar (antes o push descartava hpk: so o amostrador de fundo via)');
+  ok(s.includes("hpk: ema('hpk'), tma: ema('tma'), tsh: ema('tsh'), tpa: ema('tpa')") && s.includes("t('cdHitsKill')"), 'a media por hunt guarda alvos por salva, que o modelo usa como densidade da hunt');
 }
 
 console.log('\n--- 2FA: o preenchimento automatico nao toca no codigo ---');

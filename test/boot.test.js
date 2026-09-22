@@ -104,6 +104,21 @@ while ((m = re.exec(index))) { if (m[1].length > maior.length) maior = m[1]; }
 try { new Function(maior); ok(true, 'index.html parseia (' + maior.length + ' chars)'); }
 catch (e) { ok(false, 'index.html nao parseia: ' + e.message.slice(0, 80)); }
 
+console.log('--- tudo que o app carrega vai no pacote (incidente 1.5.5 a 1.5.23: src/ ficou de fora e a tierlist morreu no instalador) ---');
+{
+  const pkg = JSON.parse(fs.readFileSync(path.join(RAIZ, 'package.json'), 'utf8'));
+  const files = pkg.build && Array.isArray(pkg.build.files) ? pkg.build.files : null;
+  const pedidos = [...index.matchAll(/<script src="([^"]+)"/g)].map((m2) => m2[1])
+    .concat([...main.matchAll(/path\.join\(__dirname, '([^']+)'\)/g)].map((m2) => m2[1]));
+  ok(pedidos.length >= 3, 'index.html e main.js pedem arquivos do app: ' + pedidos.join(', '));
+  pedidos.forEach((p) => ok(fs.existsSync(path.join(RAIZ, p)), p + ' existe na pasta'));
+  if (!files) ok(true, 'sem build.files no package.json: roda pelo codigo, nada e empacotado');
+  else {
+    const cobre = (p) => files.some((g) => g === p || (g.endsWith('/**/*') && p.startsWith(g.slice(0, -4))) || (g.endsWith('/**') && p.startsWith(g.slice(0, -2))));
+    pedidos.forEach((p) => ok(cobre(p), p + ' esta em build.files (senao o instalador sobe sem ele e quem depende dele fica vazio)'));
+  }
+}
+
 try { fs.rmSync(path.join(RAIZ, '.teste-tmp'), { recursive: true, force: true }); } catch {}
 console.log(falhas ? '\n' + falhas + ' falha(s)' : '\nInicializacao: tudo certo');
 process.exit(falhas ? 1 : 0);
