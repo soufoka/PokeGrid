@@ -295,11 +295,14 @@ ipcMain.handle('mintray:set', (_e, on) => { minToTray = !!on; return minToTray; 
 const startupDir = () => path.join(app.getPath('appData'), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup');
 const startupLnk = () => path.join(startupDir(), 'PokeGrid.lnk');
 const autoStartOn = () => { try { return process.platform === 'win32' && fs.existsSync(startupLnk()); } catch { return false; } };
+// A portatil se extrai numa pasta temporaria e roda de la: process.execPath e %TEMP%\<id>\PokeGrid.exe,
+// que e apagada ao fechar. O .exe que o usuario abriu vem nesta variavel, que o electron-builder exporta.
+const exeReal = () => process.env.PORTABLE_EXECUTABLE_FILE || process.execPath;
 function setAutoStart(on) {
   if (process.platform !== 'win32') return false;
   try {
     if (on) {
-      const opts = { target: process.execPath, description: 'PokeGrid', appUserModelId: 'online.idleworld.pokegrid' };
+      const opts = { target: exeReal(), description: 'PokeGrid', appUserModelId: 'online.idleworld.pokegrid' };
       if (!app.isPackaged) opts.args = `"${app.getAppPath()}"`; // rodando pelo codigo: electron + a pasta do app
       shell.writeShortcutLink(startupLnk(), 'create', opts);
     } else {
@@ -309,7 +312,8 @@ function setAutoStart(on) {
   return autoStartOn();
 }
 ipcMain.handle('autostart:get', () => ({ on: autoStartOn(), suportado: process.platform === 'win32' }));
-ipcMain.handle('autostart:set', (_e, on) => setAutoStart(!!on));
+let itemAuto = null; // o item "Abrir com o Windows" da bandeja, pra acompanhar o botao da janela
+ipcMain.handle('autostart:set', (_e, on) => { const r = setAutoStart(!!on); if (itemAuto) itemAuto.checked = r; return r; });
 
 // Webhook do Discord (opcional): o usuario cola a URL do proprio servidor. So aceita o dominio
 // oficial de webhooks; o envio sai daqui porque a CSP do renderer bloqueia rede externa.
@@ -370,16 +374,24 @@ app.whenReady().then(() => {
   }
 
   // Atalhos (funcionam mesmo com o jogo focado): Ctrl+1..4 expande painel, Ctrl+M mudo.
-  Menu.setApplicationMenu(Menu.buildFromTemplate([{
-    label: 'Atalhos',
-    submenu: [
-      ...[1, 2, 3, 4].map(n => ({
-        label: `Expandir painel ${n}`, accelerator: `CmdOrCtrl+${n}`,
-        click: () => win.webContents.send('hotkey', 'expand' + (n - 1))
-      })),
-      { label: 'Mudo', accelerator: 'CmdOrCtrl+M', click: () => win.webContents.send('hotkey', 'mute') }
-    ]
-  }]));
+  // O menu Edicao tem que existir: no macOS e ele que faz Cmd+C/V/X/A/Z funcionarem nos campos de
+  // texto (login do jogo, chat, campos do app), e sem ele o Cmd+V nao colava nada. No Windows e no
+  // Linux o Ctrl+V ja funcionava sem menu. No macOS o primeiro menu vira o menu do app (com o nome
+  // PokeGrid), por isso o appMenu (Ocultar, Sair com Cmd+Q) vem antes, senao a Edicao sumia la dentro.
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : []),
+    { role: 'editMenu', label: 'Edição' },
+    {
+      label: 'Atalhos',
+      submenu: [
+        ...[1, 2, 3, 4].map(n => ({
+          label: `Expandir painel ${n}`, accelerator: `CmdOrCtrl+${n}`,
+          click: () => win.webContents.send('hotkey', 'expand' + (n - 1))
+        })),
+        { label: 'Mudo', accelerator: 'CmdOrCtrl+M', click: () => win.webContents.send('hotkey', 'mute') }
+      ]
+    }
+  ]));
 
   // Bandeja: minimizar esconde da barra de tarefas; clique no icone alterna.
   // Ao voltar da bandeja, restaura o mesmo estado de antes: hide()+show() no
@@ -395,12 +407,24 @@ app.whenReady().then(() => {
   const prepararBandeja = () => {
     // versao portatil movida de pasta deixa o atalho da Inicializar apontando pra um exe que nao
     // existe mais, e o botao seguia dizendo "ligado": regrava quando o alvo mudou
-    try { if (autoStartOn() && shell.readShortcutLink(startupLnk()).target !== process.execPath) setAutoStart(true); } catch {}
-    // limpeza do autostart antigo (chave Run, que abria com --hidden): uma unica vez na vida
+    try { if (autoStartOn() && shell.readShortcutLink(startupLnk()).target !== exeReal()) setAutoStart(true); } catch {}
+    // limpeza do autostart antigo (chave Run, que abria com --hidden): uma unica vez na vida.
+    // Apaga pelo nome do valor, sem perguntar antes: o getLoginItemSettings() compara o caminho COM os
+    // argumentos, e o antigo gravava '--hidden', entao a checagem dizia "desligado" e nada era apagado
+    // (da 1.5.5 a 1.5.24 a marca 'runkey-limpo' foi gravada sem limpar nada). Da 1.1.3 a 1.5.4 o valor
+    // tinha o AppUserModelId do app; antes, o nome padrao do Electron, 'electron.app.' + ProductName do
+    // exe: PokeGrid nos builds 1.1.0 a 1.1.2, Electron no zip da 1.0.x e rodando pelo codigo.
     try {
-      const marca = path.join(app.getPath('userData'), 'runkey-limpo');
-      if (!fs.existsSync(marca)) {
-        try { if (app.getLoginItemSettings().openAtLogin) app.setLoginItemSettings({ openAtLogin: false }); } catch (e) { logErro('boot', 'runkey: ' + e.message); }
+      const marca = path.join(app.getPath('userData'), 'runkey-limpo-2');
+      if (process.platform === 'win32' && !fs.existsSync(marca)) {
+        for (const name of ['online.idleworld.pokegrid', 'electron.app.PokeGrid'])
+          try { app.setLoginItemSettings({ openAtLogin: false, name }); } catch (e) { logErro('boot', 'runkey ' + name + ': ' + e.message); }
+        // 'electron.app.Electron' e o nome de qualquer app Electron sem marca: nao da pra apagar as cegas.
+        // Apaga so o que o proprio Electron casa com o NOSSO exe e que abria escondido (--hidden).
+        try {
+          for (const it of (app.getLoginItemSettings({ path: exeReal() }).launchItems || []))
+            if (it && it.scope === 'user' && (it.args || []).includes('--hidden')) app.setLoginItemSettings({ openAtLogin: false, name: it.name });
+        } catch (e) { logErro('boot', 'runkey itens: ' + e.message); }
         try { fs.writeFileSync(marca, '1'); } catch {}
       }
     } catch {}
@@ -409,13 +433,15 @@ app.whenReady().then(() => {
   try {
     tray = new Tray(path.join(__dirname, 'tray.png'));
     tray.setToolTip('PokeGrid');
-    tray.setContextMenu(Menu.buildFromTemplate([
+    const menuBandeja = Menu.buildFromTemplate([
       { label: 'Mostrar', click: mostrar },
       { label: 'Abrir com o Windows', type: 'checkbox',
         checked: autoStartOn(), visible: process.platform === 'win32',
         click: (item) => { const r = setAutoStart(item.checked); item.checked = r; win.webContents.send('autostart', r); } },
       { label: 'Sair', click: () => app.quit() }
-    ]));
+    ]);
+    tray.setContextMenu(menuBandeja);
+    itemAuto = (menuBandeja.items || []).find((it) => it.type === 'checkbox') || null;
     tray.on('click', () => win.isVisible() ? win.hide() : mostrar());
   } catch (e) {
     tray = null;

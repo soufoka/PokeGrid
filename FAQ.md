@@ -12,7 +12,11 @@ Não. Backup = copiar a pasta `%APPDATA%\pokegrid`. Só as senhas não migram pr
 Bug das versões 1.5.5 a 1.5.9, corrigido na **1.5.10**. Baixe a mais recente: https://github.com/soufoka/PokeGrid-source
 
 ### O Windows ou o navegador dizem que o app é vírus
-É o aviso padrão para programa **sem assinatura digital**: o instalador não é assinado (o certificado custa, e o projeto é gratuito). O SmartScreen mostra "O Windows protegeu o PC" e o Chrome/Edge podem dizer que o arquivo "não é baixado com frequência". Nenhum dos dois é uma detecção de vírus. O código é aberto e cada versão sai de uma compilação pública no GitHub Actions, com o resultado do Windows Defender no log. Pra instalar: clique em **Mais informações** e depois em **Executar assim mesmo**; no navegador, **Manter**. Se preferir não passar por isso, rode pelo código-fonte: https://github.com/soufoka/PokeGrid-source
+São dois avisos diferentes, e nenhum é vírus.
+
+**"O Windows protegeu o PC" ou "não é baixado com frequência"**, no instalador: é o aviso padrão para programa **sem assinatura digital** (o certificado custa, e o projeto é gratuito). O código é aberto e cada versão sai de uma compilação pública no GitHub Actions, com o resultado do Windows Defender no log. Pra instalar: clique em **Mais informações** e depois em **Executar assim mesmo**; no navegador, **Manter**.
+
+**"Ameaça bloqueada: Trojan:Script/Wacatac.H!ml"**, no zip do código-fonte, com o download que não termina: é um falso positivo do Windows Defender na hora do download, que começou em 22/09/2026. Os scripts do projeto e o instalador dão zero detecção no VirusTotal, inclusive no antivírus da Microsoft. O suspeito é o antigo lançador `Abrir PokeGrid.vbs`, um VBS que abria o terminal escondido: o mesmo padrão já fez o zip de outros projetos ser barrado. Ele foi trocado na 1.5.25 por um `.bat`. Enquanto a Microsoft não libera, dá pra baixar o **instalador** na página de versões, ou abrir **Segurança do Windows → Proteção contra vírus e ameaças → Histórico de proteção**, clicar no aviso, escolher **Ações → Permitir no dispositivo** e baixar de novo. Faça isso só com o arquivo baixado de **github.com/soufoka**.
 
 ### A tierlist, o Sugerido e o painel do Ditto ficam vazios
 Bug das versões 1.5.5 a 1.5.23 do instalador, da portátil e do zip: um arquivo do app ficava fora do pacote e essas telas não tinham como calcular. Corrigido na **1.5.24**. Quem roda pelo código-fonte nunca teve o problema.
