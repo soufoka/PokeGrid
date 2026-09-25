@@ -6,19 +6,18 @@
 
 **Four Poke Idle World accounts in a single window.**
 
+[![Download](https://img.shields.io/badge/Download-latest%20version-e3350d)](https://github.com/soufoka/PokeGrid/releases/latest)
 ![Platform](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-0078D6)
 ![Electron](https://img.shields.io/badge/Electron-43-47848F)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-[Português](README.md)
+[**Download**](https://github.com/soufoka/PokeGrid/releases/latest) · [Português](README.md)
 
 <img src="docs/modo-simples.png" width="880" alt="Simple mode: dashboard with the numbers of all four accounts">
 
 <sub>Simple mode: hides the game and shows only the numbers. Every section can be moved and resized.</sub>
 
 </div>
-
-> This is the run-from-source version. There is no ready-made executable to download: you grab the code, look at what it does and run it yourself. That way the trust is on you, not on me.
 
 > ### 🔒 Your login data stays only on your computer
 > Login and password are encrypted on your own PC and never leave it. No server, no repository. The whole code is here for you to check.
@@ -27,49 +26,45 @@
 
 Four accounts running at once, each in its own quadrant with a separate session. You save the login once and the app signs in on its own from then on. If a session drops mid farm, it logs back in without you being around. It does not automate the game or touch the captcha, it only organizes the accounts you already have.
 
-## How to run
+## How to install
 
-You need Node.js installed once. After that it is quick.
+On the [latest release](https://github.com/soufoka/PokeGrid/releases/latest), under **Assets**, download the file for your system:
 
-**1. Install Node.js**
-Download the LTS version at [nodejs.org](https://nodejs.org) and install it (just next, next, finish).
+- Windows: `PokeGrid-Setup-….exe` (installer), `PokeGrid-…-portable.exe` (portable, runs without installing) or `PokeGrid-…-win.zip` (extract and run).
+- macOS: `PokeGrid-…-arm64.dmg` (Apple chip Macs, M1 and later) or `PokeGrid-….dmg` (Intel Macs).
+- Linux: `PokeGrid-….AppImage`.
 
-**2. Download this code**
-Click the green **Code** button above, then **Download ZIP**. Extract the folder wherever you want. If you use Git, clone it:
+Open it, log in or create an account in each panel and, under **👤 Treinadores** (Accounts), save the login. Next time it signs in on its own.
 
-```bash
-git clone https://github.com/soufoka/PokeGrid-source.git
-```
+> **Windows says "Windows protected your PC"?** That is the SmartScreen warning for programs without a digital signature: the certificate costs money, and the project is free. Click **More info** and then **Run anyway**. If the browser holds the download, choose **Keep**. Every version comes from a public build on GitHub Actions, with the Windows Defender scan in its log. Only download it from here, github.com/soufoka.
 
-**3. Open the app**
-On Windows, double click the **iniciar.bat** file in the folder. The first time it installs what it needs and opens on its own; after that it opens right away.
+> **On a Mac, it says the app can't be opened?** Open **System Settings > Privacy & Security** and click **Open Anyway**. If it says the app is damaged, run `xattr -cr /Applications/PokeGrid.app` in Terminal and open it again. Same reason as on Windows: the app has no Apple signature.
 
-On macOS or Linux, open a terminal in the folder and run:
+When a new version is out, the app tells you when it opens, and its **Download** button brings you back to the download page. Install over the old one, or swap the portable for the new one: accounts, settings, scripts and history live outside the program and stay where they are.
 
-```bash
-bash iniciar.sh
-```
+On Linux, if the AppImage only opens with `--no-sandbox`, see the [FAQ](FAQ.md) (Portuguese).
 
-That is it. Log in or create an account in each panel and, under "Treinadores" (Accounts), save the login. Next time it signs in on its own.
+> Rather not run an executable? The [no-executable version](https://github.com/soufoka/PokeGrid-source) is the same app running straight from the code: you download it, check what it does and open it with Node.js.
+
+## What it does
+
+- Run 1 to 4 accounts, you choose how many panels to open.
+- Auto login, even when the session expires in the middle of a farm.
+- 🍃 Simple view: hides the games and shows only the accounts' numbers (gold and XP per hour, daily totals, catches, shinies, inventory), using much less of the PC.
+- Tierlist by element and by Pokémon, hunt suggestions and the Ditto panel, which adjust to what your accounts farm.
+- IV calculator and sell guard, which asks before selling a shiny, a Legendary or a rare item.
+- Alerts on shiny, dropped account, stopped farming and low supplies, as a notification and on Discord.
+- Eco mode that keeps CPU use down without hurting progress, and hides the chat and the game icon menu to free up screen.
+- Turn each panel on or off, per panel zoom and expand, and keyboard shortcuts.
+- Tray, start with Windows, and Portuguese, English or Spanish.
 
 ## Documentation
 
 | | |
 |---|---|
 | **[Manual](MANUAL.md)** | What every button and panel section does (Portuguese) |
-| **[FAQ](FAQ.md)** | Common questions: updating without losing anything, the missing pokéball, scripts, spreadsheets |
-| **[Tutorial](TUTORIAL.md)** | Step by step for the no-installer version |
+| **[FAQ](FAQ.md)** | Common questions: updating without losing anything, antivirus warnings, the missing pokéball, scripts, spreadsheets (Portuguese) |
 | **[Changelog](CHANGELOG.md)** | What landed in each version |
-
-## What it does
-
-- Run 2, 3 or 4 accounts, you choose how many panels to open.
-- Auto login, even when the session expires in the middle of a farm.
-- Eco mode that keeps CPU use down without hurting progress.
-- Hides the chat and the game icon menu to free up screen.
-- Notifies you when an account drops or runs out of Pokéballs.
-- Turn each panel on or off, zoom, full screen and keyboard shortcuts.
-- Tray, start with Windows, and Portuguese or English.
 
 ## Security
 
