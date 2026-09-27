@@ -213,9 +213,21 @@ console.log('--- lancadores do Windows sem VBS (22/09/2026: o Defender marcou o 
     ok(!/wscript|cscript|powershell|mshta|WindowStyle/i.test(bat), 'Abrir PokeGrid.bat sem wscript/powershell/janela oculta');
     // Electron 43 nao tem postinstall: o programa so e baixado quando alguem faz require('electron').
     // A 1.5.25 procurava o electron.exe logo depois do npm install e avisava 'nao terminou' pra sempre.
-    const iPede = bat.indexOf('node -e "require(\'electron\')"'), iConfere = bat.lastIndexOf('if not exist "node_modules\\electron\\dist\\electron.exe"');
-    ok(iPede > 0 && iPede < iConfere, 'Abrir PokeGrid.bat pede o download do Electron antes de conferir o electron.exe');
+    const iPede = bat.indexOf('node -e "require(\'electron\')"'), iConfere = bat.indexOf('if exist "node_modules\\electron\\path.txt" if exist "node_modules\\electron\\dist\\electron.exe" goto abre');
+    ok(iPede > 0 && iPede < iConfere, 'Abrir PokeGrid.bat pede o download do Electron antes de conferir o path.txt e o electron.exe');
+    ok(iConfere < bat.indexOf('\r\n:abre\r\n') && bat.indexOf('\r\n:abre\r\n') < bat.indexOf('start "" '), 'Abrir PokeGrid.bat so chega no start pelo goto abre, com path.txt e electron.exe no lugar');
     ok(bat.includes('if not exist "node_modules\\electron\\path.txt" set "PG_FALTA=1"') && bat.includes('if not exist "node_modules\\electron\\dist\\electron.exe" set "PG_FALTA=1"') && bat.includes('if defined PG_FALTA ('), 'Abrir PokeGrid.bat reinstala se faltar o path.txt (extracao pela metade) OU o electron.exe (antivirus levou depois)');
+    ok(!/[^\r]\n/.test(bat), 'Abrir PokeGrid.bat todo em CRLF (com LF o cmd erra goto e blocos)');
+    ok(bat.split('\r\n').filter((l) => /^\s+echo /i.test(l)).every((l) => !/[()]/.test(l)), 'Abrir PokeGrid.bat sem parenteses nos echo dentro de bloco');
+    // 27/09/2026: o motivo real da falha rolava pra fora da janela. A saida vai pra tela e pro instalacao.log, recriado a cada tentativa.
+    ok(/set PG_TEE=node -e "[^"\r\n]*createWriteStream\('instalacao\.log'/.test(bat) && bat.includes('call npm install --no-audit --no-fund 2>&1 | %PG_TEE%') && bat.includes('node -e "require(\'electron\')" 2>&1 | %PG_TEE%') && /" > instalacao\.log\r\n/.test(bat), 'Abrir PokeGrid.bat copia npm install e download do Electron pra tela e pro instalacao.log');
+    const achas = ['Cannot find module', 'fetch failed', 'expected checksum', 'os error 32', 'native binding'].map((p) => bat.lastIndexOf('/c:"' + p + '"'));
+    ok(achas.every((i, k) => i > iConfere && (k === 0 || i > achas[k - 1])), 'Abrir PokeGrid.bat le o motivo no log: dependencia < rede < checksum < arquivo travado < extrator barrado (o ultimo vence)');
+    ok(bat.includes('echo A instalacao nao terminou. %PG_MOTIVO%') && /instalacao\.log no Discord/.test(bat), 'Abrir PokeGrid.bat diz o motivo provavel e pede o instalacao.log no Discord');
+    // Extrator nativo barrado (Controle inteligente de aplicativos, Visual C++ faltando, .node apagado): o zip ja baixou e passou
+    // no checksum, entao o tar do Windows extrai. path.txt sem quebra de linha, senao o Electron procura "electron.exe\r\n".
+    const iNativo = bat.indexOf('findstr /c:"native binding" instalacao.log >nul 2>&1 && (');
+    ok(iNativo > iPede && iNativo < iConfere && bat.includes('"%SystemRoot%\\System32\\tar.exe" -xf ') && bat.includes('&& <nul set /p "=electron.exe" > "node_modules\\electron\\path.txt"'), 'Abrir PokeGrid.bat extrai com o tar do Windows quando o extrator do Electron foi barrado');
   } else ok(true, 'sem lancador .bat neste repo (o instalador abre o app)');
 }
 try { fs.rmSync(path.join(RAIZ, '.teste-tmp'), { recursive: true, force: true }); } catch {}

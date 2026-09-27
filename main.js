@@ -163,6 +163,58 @@ ipcMain.handle('userscript:fetch', (_e, url) => baixaUserScript(url));
 const lockOk = app.requestSingleInstanceLock();
 if (!lockOk) { logErro('boot', 'ja havia um PokeGrid aberto: esta instancia fechou e mostrou aquele'); app.quit(); }
 
+// ===== GPU que nao abre isolada no Windows =====
+// Se o processo da placa de video nao sobe dentro do sandbox, o Chromium tenta 6 vezes e fecha o app antes da janela
+// ("GPU process isn't usable. Goodbye."). O --no-sandbox abria, mas tirava o isolamento das paginas do jogo junto. Aqui
+// sai do sandbox so a GPU (--disable-gpu-sandbox), um nivel so e sem loop: com a flag ligada nada disto age de novo.
+// Medido no Electron 43: se a GPU sobe e cai, o JS recebe 5 child-process-gone antes do fim, e no primeiro o app anota
+// e reabre com a flag. Se ela nem chega a abrir (launch-failed), nenhum evento chega; por isso a abertura grava
+// gpu-boot-pendente, que so o primeiro quadro da janela (ready-to-show) ou uma saida normal apagam. Se sobrou, a abertura
+// anterior morreu antes da janela e esta ja vem com a flag. A marca gpu-sem-sandbox.txt vale so pra esta versao do app e
+// do Electron (atualizou, tenta com sandbox de novo); apagar o arquivo tambem volta ao normal.
+const gpuArq = (n) => path.join(app.getPath('userData'), n);
+const GPU_VERSAO = app.getVersion() + ' / Electron ' + process.versions.electron;
+let gpuSemSandbox = process.argv.includes('--disable-gpu-sandbox'), gpuEsperando = false;
+const gpuLimpa = () => { try { fs.unlinkSync(gpuArq('gpu-boot-pendente')); } catch {} };
+const gpuPronto = () => { gpuEsperando = false; gpuLimpa(); };
+function gpuMarca(motivo) {
+  gpuSemSandbox = true;
+  try {
+    fs.writeFileSync(gpuArq('gpu-sem-sandbox.txt'), GPU_VERSAO + '\n' +
+      'PokeGrid: a placa de video deste PC nao abriu isolada, entao so ela roda fora do sandbox; as paginas do jogo continuam isoladas. Apague este arquivo pra tentar de novo com o sandbox.\n' +
+      'PokeGrid: the graphics process would not start sandboxed on this PC, so only it runs outside the sandbox; game pages stay sandboxed. Delete this file to try the sandbox again.\n' +
+      'PokeGrid: la tarjeta de video de este PC no abrio aislada, asi que solo ella corre fuera del sandbox; las paginas del juego siguen aisladas. Borra este archivo para intentar de nuevo con el sandbox.\n');
+  } catch (e) { logErro('gpu', 'marca nao gravada: ' + e.message); }
+  logErro('gpu', motivo + ': so a placa de video fica fora do sandbox (--disable-gpu-sandbox); as paginas do jogo continuam isoladas');
+}
+if (lockOk && process.platform === 'win32') {
+  gpuEsperando = true;
+  app.on('will-quit', gpuLimpa);
+  app.on('child-process-gone', (_e, d) => {
+    if (!gpuEsperando || gpuSemSandbox || !d || d.type !== 'GPU' || d.reason === 'clean-exit') return;
+    gpuMarca('a placa de video caiu antes da janela aparecer (' + d.reason + (d.exitCode != null ? ', exit ' + d.exitCode : '') + '), reabrindo');
+    gpuLimpa(); // esta abertura sai de proposito: a proxima nao pode ler a pendencia como falha com a flag ligada
+    // Na portatil o process.execPath fica na pasta temporaria que o lancador apaga ao fechar: reabre pelo .exe de fora.
+    // ponytail: a pasta temporaria e fixa por build, entao o lancador velho ainda pode estar apagando enquanto o novo
+    // extrai. No pior caso esta reabertura falha e a proxima abertura ja vem com a marca; pasta unica resolveria.
+    app.relaunch({ execPath: exeReal(), args: process.argv.slice(1).concat('--disable-gpu-sandbox') });
+    app.exit(0);
+  });
+  try {
+    let versao = null;
+    try { versao = fs.readFileSync(gpuArq('gpu-sem-sandbox.txt'), 'utf8').split(/\r?\n/)[0]; } catch {}
+    if (versao === GPU_VERSAO) gpuSemSandbox = true;
+    else if (versao !== null) { try { fs.unlinkSync(gpuArq('gpu-sem-sandbox.txt')); } catch {} logErro('gpu', 'versao nova do app ou do Electron: a placa de video volta a tentar com sandbox'); }
+    const morreu = fs.existsSync(gpuArq('gpu-boot-pendente'));
+    if (morreu && !gpuSemSandbox) gpuMarca('a abertura anterior fechou antes da janela aparecer');
+    else if (morreu) logErro('gpu', 'a abertura anterior fechou antes da janela aparecer mesmo com a placa de video fora do sandbox: veja no FAQ "No Windows o app fecha sozinho"');
+    else if (gpuSemSandbox) logErro('gpu', 'abrindo com --disable-gpu-sandbox (apague gpu-sem-sandbox.txt nesta pasta pra voltar ao sandbox)');
+    if (gpuSemSandbox) app.commandLine.appendSwitch('disable-gpu-sandbox');
+    fs.mkdirSync(app.getPath('userData'), { recursive: true });
+    fs.writeFileSync(gpuArq('gpu-boot-pendente'), String(Date.now()));
+  } catch (e) { logErro('gpu', 'marca de abertura: ' + ((e && e.message) || e)); }
+}
+
 // Paineis presos ao dominio do jogo: nada de popup, e navegar o painel
 // (que carrega a sessao logada) para outro site abre no navegador de fora.
 const GAME = 'https://poke.idleworld.online';
@@ -375,6 +427,7 @@ app.whenReady().then(() => {
   // varios gerenciadores de janela ignoram maximize() em janela ainda nao exibida, e o app
   // subia sem abrir nada. --hidden: nasce na bandeja, farmando.
   logErro('boot', 'janela criada');
+  win.once('ready-to-show', gpuPronto); // a GPU entregou o primeiro quadro (dispara tambem com --hidden, janela escondida)
   if (!process.argv.includes('--hidden')) {
     win.once('ready-to-show', () => { logErro('boot', 'conteudo pronto'); win.show(); win.maximize(); });
     setTimeout(() => { if (!win.isDestroyed() && !win.isVisible()) { logErro('boot', 'rede de seguranca: mostrando a janela'); win.show(); win.maximize(); } }, 8000); // rede de seguranca se o evento nao vier
