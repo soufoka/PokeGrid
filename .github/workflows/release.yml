@@ -15,6 +15,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # o token de escrita nao fica no .git/config pros passos seguintes; o publish usa o GH_TOKEN do passo dele
+          persist-credentials: false
 
       # Node 22 (o Electron 43 pede 22.12+) e npm ci: instala exatamente o package-lock.json e falha se ele nao bater com o package.json
       - uses: actions/setup-node@v4
@@ -23,6 +26,12 @@ jobs:
 
       - name: Install deps
         run: npm ci
+
+      # O electron-builder publica na release v<versao do package.json>, nao na tag empurrada: tag sem o bump do
+      # package.json subia os arquivos na release anterior (ou nao subia nada e o job passava verde)
+      - name: Tag igual a versao do package.json
+        shell: bash
+        run: test "$GITHUB_REF_NAME" = "v$(node -p "require('./package.json').version")"
 
       - name: Build and publish
         run: npx --no-install electron-builder --publish always

@@ -33,5 +33,25 @@ else {
   const r = spawnSync(process.execPath, [path.join(RAIZ, 'tools', 'espelho-check.js')], { encoding: 'utf8' });
   ok(r.status === 0, 'tools/espelho-check.js -> ' + String(r.stdout + r.stderr).trim().split(/\r?\n/).join(' | '));
 }
+console.log('--- instalacao do PokeGrid-source: versoes travadas e nada de script de pacote ---');
+// A versao sem executavel instalava com npm install, Electron com ^ e sem lock: cada instalacao pegava o que estivesse mais
+// novo no npm, inclusive um pacote sequestrado (o worm do npm de 2025 se espalhou por postinstall). E quem extraia o zip
+// novo por cima da pasta antiga ficava com o Electron velho pra sempre.
+const SRC = SOURCE ? path.dirname(SOURCE) : '';
+if (!SRC || !fs.existsSync(path.join(SRC, 'package.json'))) ok(!!SOURCE, 'sem o PokeGrid-source ao lado deste repo: nada a conferir');
+else {
+  const pj = JSON.parse(fs.readFileSync(path.join(SRC, 'package.json'), 'utf8'));
+  let lock = null; try { lock = JSON.parse(fs.readFileSync(path.join(SRC, 'package-lock.json'), 'utf8')); } catch {}
+  const doInstalador = JSON.parse(fs.readFileSync(path.join(RAIZ, 'package-lock.json'), 'utf8')).packages['node_modules/electron'].version;
+  const pin = pj.devDependencies && pj.devDependencies.electron;
+  ok(pin === doInstalador, 'o source pede o Electron exato do instalador (' + pin + ' / ' + doInstalador + ')');
+  const P = (lock && lock.packages) || {};
+  ok(!!lock && P[''] && P[''].devDependencies.electron === pin && (P['node_modules/electron'] || {}).version === pin, 'package-lock.json do source existe e bate com o package.json');
+  const pacotes = Object.keys(P).filter((k) => k);
+  ok(pacotes.length > 5 && pacotes.every((k) => P[k].integrity && /^https:\/\/registry\.npmjs\.org\//.test(P[k].resolved || '') && !P[k].hasInstallScript), 'todo pacote do lock com hash de integridade, do registro oficial do npm e sem script de instalacao (' + pacotes.length + ')');
+  const inst = ['Abrir PokeGrid.bat', 'iniciar.bat', 'iniciar.sh'].map((f) => fs.readFileSync(path.join(SRC, f), 'utf8'));
+  ok(inst.every((t) => /npm ci --ignore-scripts/.test(t) && !/^\s*(call )?npm install/m.test(t)), 'os 3 instaladores usam npm ci --ignore-scripts, nenhum npm install');
+  ok(inst.every((t) => t.includes("require('./node_modules/electron/package.json').version===require('./package.json').devDependencies.electron")), 'os 3 reinstalam quando o Electron da pasta nao e o pedido (zip novo extraido por cima da pasta antiga)');
+}
 console.log(falhas ? '\n' + falhas + ' falha(s)' : '\nEspelho do source: tudo certo');
 process.exit(falhas ? 1 : 0);
