@@ -20,7 +20,12 @@ try {
 } catch (e) { ok(false, 'tools/gera-espelho-source.js: ' + e.message); }
 if (gerado) {
   const canais = (s) => [...s.matchAll(/ipcMain\.(?:handle|on)\(\s*'([^']+)'/g)].map((m) => m[1]);
-  ok(!/checarAtualizacao|dialog\.|api\.github\.com\/repos/.test(gerado), 'sem o aviso de atualizacao, nem a chamada dele na criacao da janela (02/09/2026: ReferenceError e o app nao abria)');
+  ok(!/checarAtualizacao|versaoMaior|api\.github\.com\/repos/.test(gerado), 'sem o aviso de atualizacao, nem a chamada dele na criacao da janela (02/09/2026: ReferenceError e o app nao abria)');
+  ok(/\bdialog\b[^\n]*= require\('electron'\)/.test(gerado) && /dialog\.showMessageBox/.test(gerado), 'o dialog fica no import: a liberacao do webhook tambem usa (13/10/2026)');
+  const g2 = require(path.join(RAIZ, 'tools', 'gera-espelho-source.js'));
+  const comRepo = dev.replace(/\r\n/g, '\n').replace("const whOkFile = () =>", "const repoUa = () => 'PokeGrid/' + REPO;\nconst whOkFile = () =>");
+  let recusou = ''; try { g2.espelho(comRepo); } catch (e) { recusou = e.message; }
+  ok(comRepo !== dev.replace(/\r\n/g, '\n') && /REPO/.test(recusou), 'o dev usando fora do bloco o que so o bloco cortado define (REPO): o gerador recusa (antes o espelho saia e quebrava so no source, ao rodar) -> ' + (recusou || 'gerou'));
   ok(canais(gerado).join() === canais(dev).join() && new Set(canais(gerado)).size === canais(gerado).length, 'os mesmos canais de IPC do dev, nenhum repetido (29/07/2026: canal repetido e a janela nunca nascia) -> ' + canais(gerado).length);
   let erro = null; try { new Function(gerado); } catch (e) { erro = e.message; }
   ok(!erro, 'parseia' + (erro ? ': ' + erro : ''));
